@@ -30,6 +30,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 use work.octagon_types.all;
+use work.octagon_funcs.all;
 
 entity alu2 is
 	Port ( 
@@ -62,50 +63,10 @@ begin
 	if clk='1' and clk'Event then
 		aluout.shift <= aluin.shift;
 		
-		if aluin.shift.amount(3) = '0' then
-			shiftone := aluin.shift_part;
-		else
-			if aluin.shift.right = '0' then
-				shiftone := aluin.shift_part(23 downto 0) & X"00";
-			else
-				shiftone(23 downto 0) := aluin.shift_part(31 downto 8);
-				if aluin.shift.arith = '1' and aluin.shift_part(31) = '1' then
-					shiftone(31 downto 24) := X"FF";
-				else
-					shiftone(31 downto 24) := X"00";
-				end if;
-			end if;
-		end if;
-		
-		if aluin.shift.amount(2) = '0' then
-			shifttwo := shiftone;
-		else
-			if aluin.shift.right = '0' then
-				shifttwo := shiftone(27 downto 0) & X"0";
-			else
-				shifttwo(27 downto 0) := shiftone(31 downto 4);
-				if aluin.shift.arith = '1' and aluin.shift_part(31) = '1' then
-					shifttwo(31 downto 28) := X"F";
-				else
-					shifttwo(31 downto 28) := X"0";
-				end if;
-			end if;
-		end if;
-	
-		if aluin.shift.amount(1) = '0' then
-				shiftthree := shifttwo;
-		else
-			if aluin.shift.right = '0' then
-				shiftthree := shifttwo(29 downto 0) & "00";
-			else
-				shiftthree(29 downto 0) := shifttwo(31 downto 2);
-				if aluin.shift.arith = '1' and aluin.shift_part(31) = '1' then
-					shiftthree(31 downto 30) := "11";
-				else
-					shiftthree(31 downto 30) := "00";
-				end if;
-			end if;
-		end if;
+		shiftone   := shift(16,aluin.shift_part,aluin.shift.op,aluin.shift.amount(4));
+		shifttwo   := shift(8,shiftone,aluin.shift.op,aluin.shift.amount(3));
+		shiftthree := shift(4,shifttwo,aluin.shift.op,aluin.shift.amount(2));
+
 		aluout.shift_part <= shiftthree;
 	end if;
 	

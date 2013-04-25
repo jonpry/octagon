@@ -30,6 +30,7 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 use work.octagon_types.all;
+use work.octagon_funcs.all;
 
 entity ic_mux is
 	Port ( 

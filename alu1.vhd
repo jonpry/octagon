@@ -30,6 +30,7 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 use work.octagon_types.all;
+use work.octagon_funcs.all;
 
 entity alu1 is
 	Port ( 
@@ -55,6 +56,7 @@ end process;
 --First stage barrel shift
 process(clk)
 	variable shamt : std_logic_vector(4 downto 0);
+	variable shiftop : shiftop_type;
 begin
 	if clk='1' and clk'Event then
 		shamt := rout.shift.amount;
@@ -65,20 +67,14 @@ begin
 		aluout.shift <= rout.shift;
 		aluout.shift.amount <= shamt;
 		
-		if shamt(4) = '0' then
-			aluout.shift_part <= rout.r_t;
-		else
-			if rout.shift.right = '0' then
-				aluout.shift_part <= rout.r_t(15 downto 0) & X"0000";
-			else
-				aluout.shift_part(15 downto 0) <= rout.r_t(31 downto 16);
-				if rout.shift.arith = '1' and rout.r_t(31) = '1' then
-					aluout.shift_part(31 downto 16) <= X"FFFF";
-				else
-					aluout.shift_part(31 downto 16) <= X"0000";
-				end if;
-			end if;
+		shiftop := rout.shift.op;
+		if shiftop = shiftop_right and rout.r_t(31) = '1' then
+			shiftop := shiftop_right_neg;
 		end if;
+		
+		aluout.shift.op <= shiftop;
+		
+		aluout.shift_part <= shift(1,rout.r_t,shiftop,shamt(0));
 	end if;
 end process;
 

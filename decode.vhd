@@ -28,7 +28,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- any Xilinx primitives in this code.
 --library UNISIM;
 --use UNISIM.VComponents.all;
+
 use work.octagon_types.all;
+use work.octagon_funcs.all;
 
 entity decode is
 	Port ( 
@@ -47,6 +49,10 @@ variable opcode : std_logic_vector(5 downto 0);
 variable func : std_logic_vector(5 downto 0);
 variable instr : std_logic_vector(31 downto 0);
 variable opzero : std_logic;
+variable link	: std_logic;
+variable shift_right : std_logic;
+variable shift_arith : std_logic;
+variable shift_do : std_logic;
 begin
 	if clk='1' and clk'Event then
 		decout.pc <= muxout.pc;
@@ -59,12 +65,16 @@ begin
 		opzero := to_std_logic(opcode="000000");
 		
 	--Link instructions
-		decout.link <= to_std_logic((opzero='1' and func(5 downto 0)="001001") or
+		link := to_std_logic((opzero='1' and func(5 downto 0)="001001") or
                     (opcode="000001" and instr(20)='1') or
                     (opcode="000011"));
+		decout.link <= link;
 		
+		--TODO: link instructions have r_dest = 31
 	--Type R instructions
-		if opzero = '1' then
+		if link = '1' then
+			decout.r_dest <= "11111";
+		elsif opzero = '1' then
 			decout.r_dest <= muxout.instr(15 downto 11);
 		else
 			decout.r_dest <= muxout.instr(20 downto 16);
@@ -100,9 +110,21 @@ begin
 	--Shift parameters
 		decout.shift.amount <= instr(10 downto 6);
 		decout.shift.reg <= func(2);
-		decout.shift.right <= func(1);
-		decout.shift.arith <= func(0);
-		decout.shift.do <= to_std_logic(opzero='1' and func(5 downto 3) = "000");
+		shift_right := func(1);
+		shift_arith := func(0);
+		shift_do := to_std_logic(opzero='1' and func(5 downto 3) = "000");
+
+		decout.shift.do <= shift_do;
+		
+		if shift_do = '0' then
+			decout.shift.op <= shiftop_none;
+		else
+			if shift_right = '0' then
+				decout.shift.op <= shiftop_left;
+			else
+				decout.shift.op <= shiftop_right;
+			end if;
+		end if;
 		
 	--Jump
 		decout.jump <= to_std_logic((opcode(5 downto 3) = "000" and opcode(2 downto 0) /= "000") or

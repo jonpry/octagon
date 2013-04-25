@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
+-- Company: Pry Mfg Co
+-- Engineer: Jon Pry
 -- 
 -- Create Date:    15:52:50 04/23/2013 
 -- Design Name: 
@@ -31,21 +31,13 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 
 package octagon_types is
-
-    function to_std_logic(L: BOOLEAN) return std_logic is
-    begin
-        if L then
-            return('1');
-        else
-            return('0');
-        end if;
-    end function to_std_logic; 
-
+	 	 	 
 	constant DM_BITS : integer := 26;
 	constant IM_BITS : integer := 26;
 
 	type tag_type is array(0 to 15) of std_logic_vector(IM_BITS-1 downto 10);
 	type iout_type is array(0 to 7) of std_logic_vector(31 downto 0);
+	type shiftop_type is (shiftop_none, shiftop_left, shiftop_right, shiftop_right_neg);
 
 	
 	type pcin_type is record
@@ -95,8 +87,7 @@ package octagon_types is
 		reg		: std_logic;
 		do			: std_logic;
 		amount	: std_logic_vector(4 downto 0);
-		right		: std_logic;
-		arith		: std_logic;
+		op			: shiftop_type;
 	end record;
 	
 	type decout_type is record
