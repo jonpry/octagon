@@ -52,7 +52,6 @@ begin
 		aluout.tid <= aluin.tid;
 		aluout.valid <= aluin.valid;
 		
-		aluout.cond <= aluin.cond;
 	end if;
 end process;
 
@@ -112,14 +111,29 @@ end process;
 
 --Comparisons
 process(clk)
+	variable eq : std_logic;
+	variable lt : std_logic;
+	variable met : std_logic;
 begin
 	if clk='1' and clk'Event then
-		aluout.eq <= to_std_logic(aluin.r_s = aluin.r_t);
+		eq := to_std_logic(aluin.r_s = aluin.r_t);
 		if aluin.comp_unsigned = '1' then
-			aluout.lt <= to_std_logic(unsigned(aluin.r_s) < unsigned(aluin.r_t));				
+			lt := to_std_logic(unsigned(aluin.r_s) < unsigned(aluin.r_t));				
 		else
-			aluout.lt <= to_std_logic(signed(aluin.r_s) < signed(aluin.r_t));
+			lt := to_std_logic(signed(aluin.r_s) < signed(aluin.r_t));
 		end if;
+		
+	--Figure out if condition was met
+		case aluin.cond is
+			when cond_none => met := '1';
+			when cond_eq   => met := eq;
+			when cond_lt   => met := lt;
+			when cond_gt   => met := to_std_logic(lt = '0' and eq = '0');
+			when cond_lte  => met := to_std_logic(lt = '1' or eq = '1');
+			when cond_gte  => met := to_std_logic(lt = '0' or eq = '1');
+			when cond_neq  => met := to_std_logic(eq = '0');
+		end case;
+		aluout.met <= met;
 	end if;
 end process;
 

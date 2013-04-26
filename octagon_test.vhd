@@ -141,7 +141,7 @@ BEGIN
 			vec := std_logic_vector(to_unsigned(I,vec'length));
 			tagidx <= vec(6 downto 4);
 			tagadr <= vec(3 downto 0);
-			tagval <= X"00" & vec(7 downto 0);
+			tagval <= X"00" & vec(11 downto 4);
 			wait for clk_period;
 			I := I + 1;
 		end loop;

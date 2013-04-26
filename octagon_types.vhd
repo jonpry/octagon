@@ -166,9 +166,7 @@ package octagon_types is
 		shift				: shift_type;
 		mux				: std_logic_vector(31 downto 0);
 		arith_ovf		: std_logic;
-		eq					: std_logic;
-		lt					: std_logic;
-		cond				: cond_type;
+		met				: std_logic;
 	end record;
 	
 	type jumpout_type is record
