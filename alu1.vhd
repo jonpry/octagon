@@ -63,13 +63,17 @@ begin
 		aluout.cond <= rout.cond;
 		aluout.specmux <= rout.specmux;
 		aluout.jmux <= rout.jmux;
-		aluout.smux <= rout.smux;
+		aluout.lmux <= rout.lmux;
 		aluout.r_dest <= rout.r_dest;
 		aluout.reg_store <= rout.reg_store;
 		aluout.store_cond <= rout.store_cond;
 		aluout.pcmux <= rout.pcmux;
 		aluout.immediate <= rout.immediate;
 		aluout.do_jump <= rout.do_jump;
+		aluout.load <= rout.load;
+		aluout.memsize <= rout.memsize;
+		aluout.load_unsigned <= rout.load_unsigned;
+		aluout.store <= rout.store;
 		
 		if rout.use_immediate = '1' then
 			aluout.r_t <= rout.immediate;

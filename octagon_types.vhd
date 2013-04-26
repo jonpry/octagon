@@ -36,6 +36,7 @@ package octagon_types is
 	constant IM_BITS : integer := 26;
 
 	type tag_type is array(0 to 15) of std_logic_vector(IM_BITS-1 downto 10);
+	type dtag_type is array(0 to 31) of std_logic_vector(IM_BITS-1 downto 11);
 	type iout_type is array(0 to 7) of std_logic_vector(31 downto 0);
 	type shiftop_type is (shiftop_none, shiftop_left, shiftop_right, shiftop_right_neg);
 	type logicop_type is (logicop_and, logicop_or, logicop_xor, logicop_nor);
@@ -43,7 +44,7 @@ package octagon_types is
 	type cond_type is (cond_none, cond_eq, cond_lt, cond_gt, cond_lte, cond_gte, cond_neq);
 	type specmux_type is (specmux_pc, specmux_spec);
 	type jmux_type is (jmux_arith, jmux_spec);
-	type smux_type is (smux_shift, smux_slt, smux_jmux, smux_load);
+	type lmux_type is (lmux_shift, lmux_slt, lmux_jmux);
 	type pcmux_type is (pcmux_reg, pcmux_imm26, pcmux_imm16);
 	
 	type pcin_type is record
@@ -75,13 +76,18 @@ package octagon_types is
 	type dcfetchin_type is record
 		adr				: std_logic_vector(DM_BITS-1 downto 0);
 		tagidx			: std_logic_vector(2 downto 0);
-		tagadr			: std_logic_vector(3 downto 0);
-		tagval			: std_logic_vector(IM_BITS-1 downto 10);
+		tagadr			: std_logic_vector(4 downto 0);
+		tagval			: std_logic_vector(IM_BITS-1 downto 11);
 		tagwe				: std_logic;
 		dmemidx			: std_logic_vector(2 downto 0);
-		dmemadr			: std_logic_vector(7 downto 0);
+		dmemadr			: std_logic_vector(8 downto 0);
 		dmemval			: std_logic_vector(31 downto 0);
 		dmemwe			: std_logic;
+		owns				: std_logic_vector(7 downto 0);
+		data				: std_logic_vector(31 downto 0);
+		be					: std_logic_vector(3 downto 0);
+		wren				: std_logic;
+		wradr				: std_logic_vector(9 downto 0);
 	end record;
 	
 	type icfetchout_type is record
@@ -148,11 +154,15 @@ package octagon_types is
 		cond				: cond_type;
 		specmux			: specmux_type;
 		jmux				: jmux_type;
-		smux				: smux_type;
+		lmux				: lmux_type;
 		reg_store		: std_logic;
 		store_cond		: std_logic;
 		pcmux				: pcmux_type;
 		do_jump			: std_logic;
+		load				: std_logic;
+		memsize			: std_logic_vector(1 downto 0);
+		load_unsigned	: std_logic;
+		store				: std_logic;
 	end record;
 	
 	type alu1out_type is record
@@ -172,12 +182,16 @@ package octagon_types is
 		cond				: cond_type;
 		specmux			: specmux_type;
 		jmux				: jmux_type;
-		smux				: smux_type;
+		lmux				: lmux_type;
 		reg_store		: std_logic;
 		store_cond		: std_logic;
 		pcmux				: pcmux_type;
 		pcadd				: std_logic_vector(IM_BITS-1 downto 0);
 		do_jump			: std_logic;
+		load				: std_logic;
+		memsize			: std_logic_vector(1 downto 0);
+		load_unsigned	: std_logic;
+		store				: std_logic;
 	end record;
 	
 	type alu2out_type is record
@@ -193,10 +207,18 @@ package octagon_types is
 		arith_ovf		: std_logic;
 		met				: std_logic;
 		jmux				: jmux_type;
-		smux				: smux_type;
+		lmux				: lmux_type;
 		reg_store		: std_logic;
 		store_cond		: std_logic;
 		do_jump			: std_logic;
+		load				: std_logic;
+		memadr			: std_logic_vector(1 downto 0);
+		memsize			: std_logic_vector(1 downto 0);
+		load_unsigned	: std_logic;
+		store_data		: std_logic_vector(31 downto 0);
+		be					: std_logic_vector(3 downto 0);
+		dcwren			: std_logic;
+		dcwradr			: std_logic_vector(9 downto 0);
 	end record;
 	
 	type jumpout_type is record
@@ -209,10 +231,14 @@ package octagon_types is
 		mux				: std_logic_vector(31 downto 0);
 		shiftout			: std_logic_vector(31 downto 0);
 		slt				: std_logic_vector(31 downto 0);
-		smux				: smux_type;
+		lmux				: lmux_type;
 		r_dest			: std_logic_vector(4 downto 0);
 		reg_store		: std_logic;
 		store_cond		: std_logic;
+		load				: std_logic;
+		memadr			: std_logic_vector(1 downto 0);
+		memsize			: std_logic_vector(1 downto 0);
+		load_unsigned	: std_logic;
 	end record;
 	
 	type rstoreout_type is record
@@ -220,6 +246,15 @@ package octagon_types is
 		valid				: std_logic;
 		r_dest			: std_logic_vector(4 downto 0);
 		smux				: std_logic_vector(31 downto 0);
+	end record;
+	
+	type lmuxout_type is record
+		tid				: std_logic_vector(2 downto 0);
+		valid				: std_logic;
+		r_dest			: std_logic_vector(4 downto 0);
+		lmux				: std_logic_vector(31 downto 0);
+		loadv				: std_logic_vector(31 downto 0);
+		load				: std_logic;
 	end record;
 	
 end package;

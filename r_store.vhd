@@ -35,8 +35,7 @@ use work.octagon_funcs.all;
 entity r_store is
 	Port ( 
 		clk : in  std_logic;
-		jumpout : in jumpout_type;
-		muxout : in dcmuxout_type;
+		lmuxout : in lmuxout_type;
 		rout : out rstoreout_type
 	);
 end r_store;
@@ -49,15 +48,9 @@ begin
 process(clk)
 begin
 	if clk='1' and clk'Event then
-		rout.tid <= jumpout.tid;
-		rout.r_dest <= jumpout.r_dest;
-
-		--TODO: need control signal
-		if jumpout.reg_store = '1' or (jumpout.store_cond = '1' and jumpout.met = '1') then
-			rout.valid <= to_std_logic(jumpout.valid='1' and jumpout.r_dest /= "00000");
-		else
-			rout.valid <= '0';
-		end if;
+		rout.tid <= lmuxout.tid;
+		rout.r_dest <= lmuxout.r_dest;
+		rout.valid <= lmuxout.valid;
 	end if;
 end process;
 
@@ -65,12 +58,11 @@ end process;
 process(clk)
 begin
 	if clk='1' and clk'Event then
-		case jumpout.smux is
-			when smux_shift	=> rout.smux <= jumpout.shiftout;
-			when smux_jmux		=> rout.smux <= jumpout.mux;
-			when smux_slt		=> rout.smux <= jumpout.slt;
-			when smux_load		=> rout.smux <= muxout.data;
-		end case;
+		if lmuxout.load = '1' then
+			rout.smux <= lmuxout.loadv;
+		else
+			rout.smux <= lmuxout.lmux;
+		end if;
 	end if;
 end process;
 

@@ -52,11 +52,15 @@ begin
 		jumpout.tid <= aluin.tid;
 		jumpout.valid <= aluin.valid;
 		jumpout.pc <= aluin.pc;
-		jumpout.smux <= aluin.smux;
+		jumpout.lmux <= aluin.lmux;
 		jumpout.r_dest <= aluin.r_dest;
 		jumpout.reg_store <= aluin.reg_store;
 		jumpout.store_cond <= aluin.store_cond;
 		jumpout.met <= aluin.met;
+		jumpout.load <= aluin.load;
+		jumpout.memadr <= aluin.memadr;
+		jumpout.memsize <= aluin.memsize;
+		jumpout.load_unsigned <= aluin.load_unsigned;
 	end if;
 end process;
 

@@ -120,12 +120,13 @@ begin
 
 	--Load instructions
 		load := to_std_logic(instr(31 downto 29)="100");
+		rout.load <= load;
 		
 	-- Decode store operations
---		rout.store <= to_std_logic(instr(31 downto 29)="101");
+		rout.store <= to_std_logic(instr(31 downto 29)="101");
 
---		rout.memsize <= instr(27 downto 26);
---		rout.load_unsigned <= instr(28);    -- sign extend vs. zero extend
+		rout.memsize <= instr(27 downto 26);
+		rout.load_unsigned <= instr(28);    -- sign extend vs. zero extend
 
 	--Add,Sub
 		add := to_std_logic(opcode(5 downto 1) = "00100" or
@@ -219,18 +220,14 @@ begin
 			end case;
 		end if;
 		
-	--Priority encoder for smux
+	--Priority encoder for lmux
 		if slt = '1' then
-			rout.smux <= smux_slt;
+			rout.lmux <= lmux_slt;
 		else
 			if shift_do = '1' then
-				rout.smux <= smux_shift;
+				rout.lmux <= lmux_shift;
 			else
-				if load = '1' then
-					rout.smux <= smux_load;
-				else
-					rout.smux <= smux_jmux;
-				end if;
+				rout.lmux <= lmux_jmux;
 			end if;
 		end if;
 		

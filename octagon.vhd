@@ -39,7 +39,7 @@ entity octagon is
 		notrim_o 		: out std_logic_vector(20 downto 0);
 		rstoreoutq		: out rstoreout_type;
 		tagidx			: in std_logic_vector(2 downto 0);
-		tagadr			: in std_logic_vector(3 downto 0);
+		tagadr			: in std_logic_vector(4 downto 0);
 		tagval			: in std_logic_vector(IM_BITS-1 downto 10);
 		itagwe			: in std_logic;
 		imemidx			: in std_logic_vector(2 downto 0);
@@ -48,7 +48,7 @@ entity octagon is
 		imemwe			: in std_logic;
 		dtagwe			: in std_logic;
 		dmemidx			: in std_logic_vector(2 downto 0);
-		dmemadr			: in std_logic_vector(7 downto 0);
+		dmemadr			: in std_logic_vector(8 downto 0);
 		dmemval			: in std_logic_vector(31 downto 0);
 		dmemwe			: in std_logic
 	);
@@ -68,6 +68,7 @@ signal dcin : dcfetchin_type;
 signal dcout : dcfetchout_type;
 signal imuxout : icmuxout_type;
 signal dmuxout : dcmuxout_type;
+signal lmuxout : lmuxout_type;
 signal decout : decout_type;
 signal rin : rfetchin_type;
 signal rout : rfetchout_type;
@@ -99,7 +100,7 @@ pcin.valid <= jumpout.valid;
 
 icin.pcout <= pcout;
 icin.tagval <= tagval;
-icin.tagadr <= tagadr;
+icin.tagadr <= tagadr(3 downto 0);
 icin.tagidx <= tagidx;
 icin.tagwe <= itagwe;
 icin.imemval <= imemval;
@@ -108,7 +109,7 @@ icin.imemidx <= imemidx;
 icin.imemwe <= imemwe;
 
 dcin.adr <= alu1out.memadr;
-dcin.tagval <= tagval;
+dcin.tagval <= tagval(IM_BITS-1 downto 11);
 dcin.tagadr <= tagadr;
 dcin.tagidx <= tagidx;
 dcin.tagwe <= dtagwe;
@@ -116,6 +117,13 @@ dcin.dmemval <= dmemval;
 dcin.dmemadr <= dmemadr;
 dcin.dmemidx <= dmemidx;
 dcin.dmemwe <= dmemwe;
+
+--Store stuff
+dcin.be <= alu2out.be;
+dcin.owns <= dcout.owns;
+dcin.wren <= alu2out.dcwren;
+dcin.data <= alu2out.store_data;
+dcin.wradr <= alu2out.dcwradr;
 
 rin.decout <= decout;
 rin.reg_val <= rstoreout.smux;
@@ -140,7 +148,9 @@ dc_fetch : entity work.dc_fetch port map(clk,dcin,dcout);
 jump : entity work.jump port map(clk,alu2out,jumpout);		--8
 dc_mux : entity work.dc_mux port map(clk,dcout,dmuxout);
 
-r_store : entity work.r_store port map(clk,jumpout,dmuxout,rstoreout); --8+1
+l_mux : entity work.l_mux port map(clk,jumpout,dmuxout,lmuxout); --8+1
+
+r_store : entity work.r_store port map(clk,lmuxout,rstoreout); --8+2
 
 process(clk)
 variable notrim : std_logic_vector(20 downto 0);

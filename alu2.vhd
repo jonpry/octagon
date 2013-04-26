@@ -52,11 +52,15 @@ begin
 		aluout.tid <= aluin.tid;
 		aluout.valid <= aluin.valid;
 		aluout.jmux <= aluin.jmux;
-		aluout.smux <= aluin.smux;
+		aluout.lmux <= aluin.lmux;
 		aluout.r_dest <= aluin.r_dest;
 		aluout.reg_store <= aluin.reg_store;
 		aluout.store_cond <= aluin.store_cond;
 		aluout.do_jump <= aluin.do_jump;
+		aluout.load <= aluin.load;
+		aluout.memadr <= aluin.memadr(1 downto 0);
+		aluout.memsize <= aluin.memsize;
+		aluout.load_unsigned <= aluin.load_unsigned;
 	end if;
 end process;
 
@@ -69,6 +73,7 @@ process(clk)
 	variable logic   : std_logic_vector(31 downto 0);
 	variable sum_ovf : std_logic;
 	variable diff_ovf: std_logic;
+	variable	be		  : std_logic_vector(3 downto 0);
 begin
 	if clk='1' and clk'Event then
 	
@@ -117,6 +122,46 @@ begin
 				--TODO: this is not compatible with changing IM_BITS
 				when pcmux_imm26	=> aluout.pcjump <= aluin.immediate(23 downto 0) & "00";
 		end case;
+		
+	--shifter for stores goes in this stage
+		aluout.store_data(7 downto 0) <= aluin.r_t(7 downto 0);
+		if aluin.memadr(1 downto 0) = "01" then
+			aluout.store_data(15 downto 8) <= aluin.r_t(7 downto 0);
+		else
+			aluout.store_data(15 downto 8) <= aluin.r_t(15 downto 8);
+		end if;
+	
+		if aluin.memadr(1 downto 0) = "10" then
+			aluout.store_data(23 downto 16) <= aluin.r_t(7 downto 0);
+		else
+			aluout.store_data(23 downto 16) <= aluin.r_t(23 downto 16);
+		end if;
+	
+		if aluin.memadr(1 downto 0) = "11" then
+			aluout.store_data(31 downto 24) <= aluin.r_t(7 downto 0);
+		else
+			if aluin.memadr(1 downto 0) = "10" then
+				aluout.store_data(31 downto 24) <= aluin.r_t(15 downto 8);
+			else
+				aluout.store_data(31 downto 24) <= aluin.r_t(31 downto 24);
+			end if;
+		end if;
+	--generate the byte enables	
+		case aluin.memsize is
+			when "00"	=> be := "0001";	
+			when "01"	=> be := "0011";
+			when others => be := "1111";
+		end case;
+		
+		case aluin.memadr(1 downto 0) is
+			when "00"	=> aluout.be <= be;
+			when "01"	=> aluout.be <= be(2 downto 0) & "0";
+			when "10"	=> aluout.be <= be(1 downto 0) & "00";
+			when others => aluout.be <= be(0) & "000";
+		end case;
+		
+		aluout.dcwren <= aluin.valid and aluin.store;
+		
 	end if;
 end process;
 
