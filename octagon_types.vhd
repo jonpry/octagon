@@ -63,13 +63,11 @@ package octagon_types is
 		imemidx			: std_logic_vector(2 downto 0);
 		imemadr			: std_logic_vector(7 downto 0);
 		imemval			: std_logic_vector(31 downto 0);
-		ipresent			: std_logic;
 		imemwe			: std_logic;
 	end record;
 	
 	type icfetchout_type is record
 		owns				: std_logic_vector(7 downto 0);
-		present			: std_logic_vector(7 downto 0);
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		tid				: std_logic_vector(2 downto 0);
 		valid				: std_logic;
@@ -109,6 +107,7 @@ package octagon_types is
 		shift				: shift_type;
 		jump				: std_logic;
 		math_unsigned	: std_logic;
+		immediate		: std_logic_vector(31 downto 0);
 	end record;
 	
 	type rfetchin_type is record
@@ -147,6 +146,9 @@ package octagon_types is
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		tid				: std_logic_vector(2 downto 0);
 		valid				: std_logic;	
+		
+		--Just for notrim
+		shiftout			: std_logic_vector(31 downto 0);
 	end record;
 	
 end package;

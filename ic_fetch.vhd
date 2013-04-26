@@ -55,14 +55,14 @@ tag_fetch5 : entity work.tag_fetch port map(clk,icin,"101",icout.owns(5));
 tag_fetch6 : entity work.tag_fetch port map(clk,icin,"110",icout.owns(6));
 tag_fetch7 : entity work.tag_fetch port map(clk,icin,"111",icout.owns(7));
 
-i_fetch0 : entity work.i_fetch port map(clk,icin,icout.instr(0),"000",icout.present(0));
-i_fetch1 : entity work.i_fetch port map(clk,icin,icout.instr(1),"001",icout.present(1));
-i_fetch2 : entity work.i_fetch port map(clk,icin,icout.instr(2),"010",icout.present(2));
-i_fetch3 : entity work.i_fetch port map(clk,icin,icout.instr(3),"011",icout.present(3));
-i_fetch4 : entity work.i_fetch port map(clk,icin,icout.instr(4),"100",icout.present(4));
-i_fetch5 : entity work.i_fetch port map(clk,icin,icout.instr(5),"101",icout.present(5));
-i_fetch6 : entity work.i_fetch port map(clk,icin,icout.instr(6),"110",icout.present(6));
-i_fetch7 : entity work.i_fetch port map(clk,icin,icout.instr(7),"111",icout.present(7));
+i_fetch0 : entity work.i_fetch port map(clk,icin,icout.instr(0),"000");
+i_fetch1 : entity work.i_fetch port map(clk,icin,icout.instr(1),"001");
+i_fetch2 : entity work.i_fetch port map(clk,icin,icout.instr(2),"010");
+i_fetch3 : entity work.i_fetch port map(clk,icin,icout.instr(3),"011");
+i_fetch4 : entity work.i_fetch port map(clk,icin,icout.instr(4),"100");
+i_fetch5 : entity work.i_fetch port map(clk,icin,icout.instr(5),"101");
+i_fetch6 : entity work.i_fetch port map(clk,icin,icout.instr(6),"110");
+i_fetch7 : entity work.i_fetch port map(clk,icin,icout.instr(7),"111");
 
 process(clk)
 begin

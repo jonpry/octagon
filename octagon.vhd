@@ -33,14 +33,13 @@ use work.octagon_types.all;
 
 entity octagon is
 	Port ( 
-		clk : in  std_logic;
+		clk 				: in  std_logic;
 		jump_target 	: in std_logic_vector(IM_BITS-1 downto 0);
 		running 			: in std_logic_vector(7 downto 0);
 		int 				: in std_logic_vector(7 downto 0);
-		do_jump				: in std_logic;
-		notrim_o : out std_logic_vector(20 downto 0);
-		routq		: out rfetchout_type;
-		alu2outq : out alu2out_type;
+		do_jump			: in std_logic;
+		notrim_o 		: out std_logic_vector(20 downto 0);
+		jumpoutq 		: out jumpout_type;
 		tagidx			: in std_logic_vector(2 downto 0);
 		tagadr			: in std_logic_vector(3 downto 0);
 		tagval			: in std_logic_vector(IM_BITS-1 downto 10);
@@ -48,13 +47,14 @@ entity octagon is
 		imemidx			: in std_logic_vector(2 downto 0);
 		imemadr			: in std_logic_vector(7 downto 0);
 		imemval			: in std_logic_vector(31 downto 0);
-		ipresent			: in std_logic;
 		imemwe			: in std_logic;
 		reg_we			: in std_logic
 	);
 end octagon;
 
 architecture Behavioral of octagon is
+
+signal rsave : std_logic_vector(31 downto 0);
 
 signal pcin : pcin_type;
 signal pcout : pcout_type;
@@ -70,8 +70,7 @@ signal jumpout : jumpout_type;
 
 begin
 
-routq <= rout;
-alu2outq <= alu2out;
+jumpoutq <= jumpout;
 
 --1 PC
 --2 Tag
@@ -99,7 +98,6 @@ icin.imemval <= imemval;
 icin.imemadr <= imemadr;
 icin.imemidx <= imemidx;
 icin.imemwe <= imemwe;
-icin.ipresent <= ipresent;
 
 rin.decout <= decout;
 rin.reg_val <= imemval;
@@ -119,7 +117,12 @@ process(clk)
 variable notrim : std_logic_vector(20 downto 0);
 begin
 	if clk='1' and clk'Event then
+		rsave <= rout.r_s;
+		
 		notrim := (others => '0');
+		notrim (15 downto 0) := rsave(15 downto 0) or decout.immediate(15 downto 0);
+		notrim (15 downto 0) := notrim(15 downto 0) or rsave(31 downto 16) or decout.immediate(31 downto 16);
+		
 		notrim(4 downto 0) := notrim(4 downto 0) or decout.r_dest;
 		notrim(11 downto 10) := notrim(11 downto 10) or decout.memsize;
 		notrim(15) := notrim(15) or decout.link;

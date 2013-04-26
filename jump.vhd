@@ -30,6 +30,7 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 use work.octagon_types.all;
+use work.octagon_funcs.all;
 
 entity jump is
 	Port ( 
@@ -41,6 +42,8 @@ end jump;
 
 architecture Behavioral of jump is
 
+signal shiftout : std_logic_vector(31 downto 0);
+
 begin
 
 process(clk)
@@ -49,8 +52,14 @@ begin
 		jumpout.tid <= aluin.tid;
 		jumpout.valid <= aluin.valid;
 		jumpout.pc <= aluin.pc;
+		
+		--Just temporary
+		jumpout.shiftout <= shiftout;
 	end if;
 end process;
+
+--final barrel shift
+shiftout <= shift(2,aluin.shift_part,aluin.shift.op,aluin.shift.amount(1));
 
 end Behavioral;
 

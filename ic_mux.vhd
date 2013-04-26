@@ -45,7 +45,6 @@ architecture Behavioral of ic_mux is
 begin
 
 process(clk)
-	variable present : std_logic;
 	variable sel : std_logic_vector(2 downto 0);
 	variable selin : std_logic_vector(7 downto 0);
 begin
@@ -87,13 +86,11 @@ begin
 		sel(1) := to_std_logic(selin(2)='1' or selin(3)='1' or selin(6)='1' or selin(7)='1');
 		sel(2) := to_std_logic(selin(4)='1' or selin(5)='1' or selin(6)='1' or selin(7)='1');
 		
-		present := fetchout.present(to_integer(unsigned(sel)));
 		muxout.instr <= fetchout.instr(to_integer(unsigned(sel)));
 	
 	
 		--TODO: this is a miss, need to handle it
-		--Really need to generate seperate signals for tag miss and line miss
-		if fetchout.owns = "00000000" or present = '0' then
+		if fetchout.owns = "00000000" then
 			muxout.valid <= '0';
 		else
 			muxout.valid <= fetchout.valid;

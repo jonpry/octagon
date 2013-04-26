@@ -70,10 +70,10 @@ begin
                     (opcode="000011"));
 		decout.link <= link;
 		
-		--TODO: link instructions have r_dest = 31
-	--Type R instructions
+	--link instructions have r_dest = 31
 		if link = '1' then
 			decout.r_dest <= "11111";
+	--Type R instructions
 		elsif opzero = '1' then
 			decout.r_dest <= muxout.instr(15 downto 11);
 		else
@@ -83,7 +83,7 @@ begin
 		decout.r_s <= muxout.instr(25 downto 21);
 		decout.r_t <= muxout.instr(20 downto 16);
 		
-	-- Decode RFE instruction (see @note3)
+	-- Decode RFE instruction 
 		decout.rfe <= to_std_logic(instr(31 downto 21)="01000010000" and func ="010000");
 
 	--Load instructions
@@ -95,7 +95,7 @@ begin
 		decout.memsize <= instr(27 downto 26);
 		decout.load_unsigned <= instr(28);    -- sign extend vs. zero extend
 
-	--Add,Sub,Slt
+	--Add,Sub
 		decout.arith <= to_std_logic(opcode(5 downto 1)="00100" or 
              (opzero='1' and func(5 downto 2)="1000"));
 				  
@@ -132,6 +132,15 @@ begin
 		
 	--This is for slt, add, sub. mul/div 
 		decout.math_unsigned <= to_std_logic(func(0)='1' or opcode(0)='1');
+		
+	--Immediate handling	
+	--TODO: handle pc rel 26
+		decout.immediate(15 downto 0) <= instr(15 downto 0);
+		if opcode(5 downto 2) = "0011" and instr(15)='1' then
+			decout.immediate(31 downto 16) <= X"FFFF";
+		else
+			decout.immediate(31 downto 16) <= X"0000";
+		end if;
 	end if;
 end process;
 
