@@ -52,6 +52,8 @@ begin
 		jumpout.tid <= aluin.tid;
 		jumpout.valid <= aluin.valid;
 		jumpout.pc <= aluin.pc;
+		jumpout.smux <= aluin.smux;
+		jumpout.r_dest <= aluin.r_dest;
 	end if;
 end process;
 

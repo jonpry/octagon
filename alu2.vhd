@@ -52,6 +52,8 @@ begin
 		aluout.tid <= aluin.tid;
 		aluout.valid <= aluin.valid;
 		aluout.jmux <= aluin.jmux;
+		aluout.smux <= aluin.smux;
+		aluout.r_dest <= aluin.r_dest;
 	end if;
 end process;
 

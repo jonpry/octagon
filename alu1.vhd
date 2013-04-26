@@ -63,6 +63,8 @@ begin
 		aluout.cond <= rout.cond;
 		aluout.specmux <= rout.specmux;
 		aluout.jmux <= rout.jmux;
+		aluout.smux <= rout.smux;
+		aluout.r_dest <= rout.r_dest;
 		
 		if rout.use_immediate = '1' then
 			aluout.r_t <= rout.immediate;

@@ -39,7 +39,7 @@ entity octagon is
 		int 				: in std_logic_vector(7 downto 0);
 		do_jump			: in std_logic;
 		notrim_o 		: out std_logic_vector(20 downto 0);
-		jumpoutq 		: out jumpout_type;
+		rstoreoutq		 : out rstoreout_type;
 		tagidx			: in std_logic_vector(2 downto 0);
 		tagadr			: in std_logic_vector(3 downto 0);
 		tagval			: in std_logic_vector(IM_BITS-1 downto 10);
@@ -47,8 +47,7 @@ entity octagon is
 		imemidx			: in std_logic_vector(2 downto 0);
 		imemadr			: in std_logic_vector(7 downto 0);
 		imemval			: in std_logic_vector(31 downto 0);
-		imemwe			: in std_logic;
-		reg_we			: in std_logic
+		imemwe			: in std_logic
 	);
 end octagon;
 
@@ -69,10 +68,11 @@ signal rout : rfetchout_type;
 signal alu1out : alu1out_type;
 signal alu2out : alu2out_type;
 signal jumpout : jumpout_type;
+signal rstoreout : rstoreout_type;
 
 begin
 
-jumpoutq <= jumpout;
+rstoreoutq <= rstoreout;
 
 --1 PC
 --2 Tag
@@ -102,9 +102,9 @@ icin.imemidx <= imemidx;
 icin.imemwe <= imemwe;
 
 rin.decout <= decout;
-rin.reg_val <= imemval;
-rin.reg_adr <= imemadr;
-rin.reg_we <= reg_we;
+rin.reg_val <= rstoreout.smux;
+rin.reg_adr <= rstoreout.tid & rstoreout.r_dest;
+rin.reg_we <= rstoreout.valid;
 
 pc_module: entity work.pc_module port map(clk,pcin,pcout);  --1
 ic_fetch : entity work.ic_fetch port map(clk,icin,icout);	--2
@@ -114,7 +114,7 @@ r_fetch : entity work.r_fetch port map(clk,rin,rout);			--5
 alu1 : entity work.alu1 port map(clk,rout,alu1out);			--6
 alu2 : entity work.alu2 port map(clk,alu1out,alu2out);		--7
 jump : entity work.jump port map(clk,alu2out,jumpout);		--8
-
+r_store : entity work.r_store port map(clk,jumpout,rstoreout); --8+1
 process(clk)
 variable notrim : std_logic_vector(20 downto 0);
 begin
@@ -122,24 +122,24 @@ begin
 
 		
 		notrim := (others => '0');
-		notrim (15 downto 0) := rsave(15 downto 0) or decout.long_target(15 downto 0);
-		notrim (9 downto 0) := notrim(9 downto 0) or decout.long_target(25 downto 16);
+--		notrim (15 downto 0) := rsave(15 downto 0) or decout.long_target(15 downto 0);
+--		notrim (9 downto 0) := notrim(9 downto 0) or decout.long_target(25 downto 16);
 		
-		notrim(4 downto 0) := notrim(4 downto 0) or decout.r_dest;
-		notrim(11 downto 10) := notrim(11 downto 10) or decout.memsize;
-		notrim(15) := notrim(16) or decout.link;
-		notrim(16) := notrim(16) or decout.rfe;
-		notrim(16) := notrim(16) or decout.load;
-		notrim(17) := notrim(17) or decout.store;
-		notrim(17) := notrim(17) or decout.load_unsigned;
-		notrim(17) := notrim(17) or decout.long_jump;
+--		notrim(4 downto 0) := notrim(4 downto 0) or decout.r_dest;
+--		notrim(11 downto 10) := notrim(11 downto 10) or decout.memsize;
+--		notrim(15) := notrim(16) or decout.link;
+--		notrim(16) := notrim(16) or decout.rfe;
+--		notrim(16) := notrim(16) or decout.load;
+--		notrim(17) := notrim(17) or decout.store;
+--		notrim(17) := notrim(17) or decout.load_unsigned;
+--		notrim(17) := notrim(17) or decout.long_jump;
 		notrim(18) := notrim(18) or jumpout.met;
-		notrim(18) := notrim(18) or decout.slt;
+--		notrim(18) := notrim(18) or decout.slt;
 		notrim(19) := notrim(19) or alu2out.arith_ovf;
 	--	notrim(19) := notrim(19) or decout.logic;
 	--	notrim(19) := notrim(19) or alu2out.ltu;
-		notrim(20) := notrim(20) or decout.jump;
-		notrim(20) := notrim(20) or decout.math_unsigned;
+--		notrim(20) := notrim(20) or decout.jump;
+--		notrim(20) := notrim(20) or decout.math_unsigned;
 	--	notrim(20) := notrim(20) or alu2out.lt;
 
 		rsave2 <= notrim;
@@ -147,7 +147,7 @@ begin
 		
 	--	notrim(15 downto 0) := notrim(15 downto 0) or alu2out.arith(15 downto 0) or alu2out.arith(31 downto 16);
 	--	notrim(15 downto 0) := notrim(15 downto 0) or alu2out.diff(15 downto 0) or alu2out.diff(31 downto 16);
-		
+	 	
 		rsave3 <= notrim;
 		notrim := rsave3;
 		

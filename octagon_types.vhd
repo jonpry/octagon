@@ -43,6 +43,7 @@ package octagon_types is
 	type cond_type is (cond_none, cond_eq, cond_lt, cond_gt, cond_lte, cond_gte, cond_neq);
 	type specmux_type is (specmux_pc, specmux_spec);
 	type jmux_type is (jmux_arith, jmux_spec);
+	type smux_type is (smux_shift, smux_slt, smux_jmux);
 	
 	type pcin_type is record
 		jump_target 	: std_logic_vector(IM_BITS-1 downto 0);
@@ -96,31 +97,9 @@ package octagon_types is
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		tid				: std_logic_vector(2 downto 0);
 		valid				: std_logic;
-		r_dest			: std_logic_vector(4 downto 0);
 		r_s				: std_logic_vector(4 downto 0);
 		r_t				: std_logic_vector(4 downto 0);
-		link				: std_logic;
-		rfe 				: std_logic;
-		load				: std_logic;
-		store				: std_logic;
-		memsize			: std_logic_vector(1 downto 0);
-		load_unsigned 	: std_logic;
-		slt				: std_logic;
-		logic				: std_logic;
-		shift				: shift_type;
-		jump				: std_logic;
-		math_unsigned	: std_logic;
-		immediate		: std_logic_vector(31 downto 0);
-		long_jump		: std_logic;
-		long_target		: std_logic_vector(25 downto 0);
-		use_immediate	: std_logic;
-		logicop			: logicop_type;
-		add				: std_logic;
-		arithmux			: arithmux_type;
-		comp_unsigned  : std_logic;
-		cond				: cond_type;
-		specmux			: specmux_type;
-		jmux				: jmux_type;
+		instr				: std_logic_vector(31 downto 0);
 	end record;
 	
 	type rfetchin_type is record
@@ -137,6 +116,7 @@ package octagon_types is
 		r_s				: std_logic_vector(31 downto 0);
 		r_t				: std_logic_vector(31 downto 0);
 		immediate		: std_logic_vector(31 downto 0);
+		r_dest			: std_logic_vector(4 downto 0);
 		use_immediate	: std_logic;
 		shift				: shift_type;
 		logicop			: logicop_type;
@@ -146,6 +126,7 @@ package octagon_types is
 		cond				: cond_type;
 		specmux			: specmux_type;
 		jmux				: jmux_type;
+		smux				: smux_type;
 	end record;
 	
 	type alu1out_type is record
@@ -156,6 +137,7 @@ package octagon_types is
 		shift				: shift_type;
 		r_s				: std_logic_vector(31 downto 0);
 		r_t				: std_logic_vector(31 downto 0);
+		r_dest			: std_logic_vector(4 downto 0);
 		logicop			: logicop_type;
 		add				: std_logic;
 		arithmux			: arithmux_type;
@@ -163,6 +145,7 @@ package octagon_types is
 		cond				: cond_type;
 		specmux			: specmux_type;
 		jmux				: jmux_type;
+		smux				: smux_type;
 	end record;
 	
 	type alu2out_type is record
@@ -173,9 +156,11 @@ package octagon_types is
 		shift				: shift_type;
 		arith				: std_logic_vector(31 downto 0);
 		spec				: std_logic_vector(31 downto 0);
+		r_dest			: std_logic_vector(4 downto 0);
 		arith_ovf		: std_logic;
 		met				: std_logic;
 		jmux				: jmux_type;
+		smux				: smux_type;
 	end record;
 	
 	type jumpout_type is record
@@ -186,6 +171,15 @@ package octagon_types is
 		mux				: std_logic_vector(31 downto 0);
 		shiftout			: std_logic_vector(31 downto 0);
 		slt				: std_logic_vector(31 downto 0);
+		smux				: smux_type;
+		r_dest			: std_logic_vector(4 downto 0);
+	end record;
+	
+	type rstoreout_type is record
+		tid				: std_logic_vector(2 downto 0);
+		valid				: std_logic;
+		r_dest			: std_logic_vector(4 downto 0);
+		smux				: std_logic_vector(31 downto 0);
 	end record;
 	
 end package;
