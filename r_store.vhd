@@ -52,7 +52,11 @@ begin
 		rout.r_dest <= jumpout.r_dest;
 
 		--TODO: need control signal
-		rout.valid <= to_std_logic(jumpout.valid='1' and jumpout.r_dest /= "00000");
+		if jumpout.reg_store = '1' or (jumpout.store_cond = '1' and jumpout.met = '1') then
+			rout.valid <= to_std_logic(jumpout.valid='1' and jumpout.r_dest /= "00000");
+		else
+			rout.valid <= '0';
+		end if;
 	end if;
 end process;
 

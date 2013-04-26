@@ -44,6 +44,7 @@ package octagon_types is
 	type specmux_type is (specmux_pc, specmux_spec);
 	type jmux_type is (jmux_arith, jmux_spec);
 	type smux_type is (smux_shift, smux_slt, smux_jmux);
+	type pcmux_type is (pcmux_reg, pcmux_imm26, pcmux_imm16);
 	
 	type pcin_type is record
 		jump_target 	: std_logic_vector(IM_BITS-1 downto 0);
@@ -127,6 +128,10 @@ package octagon_types is
 		specmux			: specmux_type;
 		jmux				: jmux_type;
 		smux				: smux_type;
+		reg_store		: std_logic;
+		store_cond		: std_logic;
+		pcmux				: pcmux_type;
+		do_jump			: std_logic;
 	end record;
 	
 	type alu1out_type is record
@@ -137,6 +142,7 @@ package octagon_types is
 		shift				: shift_type;
 		r_s				: std_logic_vector(31 downto 0);
 		r_t				: std_logic_vector(31 downto 0);
+		immediate		: std_logic_vector(31 downto 0);
 		r_dest			: std_logic_vector(4 downto 0);
 		logicop			: logicop_type;
 		add				: std_logic;
@@ -146,10 +152,16 @@ package octagon_types is
 		specmux			: specmux_type;
 		jmux				: jmux_type;
 		smux				: smux_type;
+		reg_store		: std_logic;
+		store_cond		: std_logic;
+		pcmux				: pcmux_type;
+		pcadd				: std_logic_vector(IM_BITS-1 downto 0);
+		do_jump			: std_logic;
 	end record;
 	
 	type alu2out_type is record
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
+		pcjump			: std_logic_vector(IM_BITS-1 downto 0);
 		tid				: std_logic_vector(2 downto 0);
 		valid				: std_logic;	
 		shift_part		: std_logic_vector(31 downto 0);
@@ -161,10 +173,15 @@ package octagon_types is
 		met				: std_logic;
 		jmux				: jmux_type;
 		smux				: smux_type;
+		reg_store		: std_logic;
+		store_cond		: std_logic;
+		do_jump			: std_logic;
 	end record;
 	
 	type jumpout_type is record
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
+		jump_target		: std_logic_vector(IM_BITS-1 downto 0);
+		do_jump			: std_logic;
 		tid				: std_logic_vector(2 downto 0);
 		valid				: std_logic;	
 		met				: std_logic;
@@ -173,6 +190,8 @@ package octagon_types is
 		slt				: std_logic_vector(31 downto 0);
 		smux				: smux_type;
 		r_dest			: std_logic_vector(4 downto 0);
+		reg_store		: std_logic;
+		store_cond		: std_logic;
 	end record;
 	
 	type rstoreout_type is record

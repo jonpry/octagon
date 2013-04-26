@@ -54,6 +54,22 @@ begin
 		jumpout.pc <= aluin.pc;
 		jumpout.smux <= aluin.smux;
 		jumpout.r_dest <= aluin.r_dest;
+		jumpout.reg_store <= aluin.reg_store;
+		jumpout.store_cond <= aluin.store_cond;
+		jumpout.met <= aluin.met;
+	end if;
+end process;
+
+--Jump processing
+process(clk)
+begin
+	if clk='1' and clk'Event then
+		jumpout.jump_target <= aluin.pcjump;
+		if aluin.met = '1' and aluin.do_jump='1' then
+			jumpout.do_jump <= '1';
+		else
+			jumpout.do_jump <= '0';
+		end if;
 	end if;
 end process;
 
@@ -62,8 +78,6 @@ process(clk)
 	variable jmux : jmux_type;
 begin
 	if clk='1' and clk'Event then
-		jumpout.met <= aluin.met;
-		
 		if aluin.met = '1' then
 			jumpout.slt <= (31 downto 1 => '0') & "1";
 		else

@@ -88,6 +88,8 @@ variable slt: std_logic;
 variable cond1 : cond_type;
 variable cond2 : cond_type;
 variable arith : std_logic;
+variable reg_store : std_logic;
+variable load : std_logic;
 begin
 	if clk='1' and clk'Event then
 		opcode := rin.decout.instr(31 downto 26);
@@ -117,7 +119,7 @@ begin
 --		rout.rfe <= to_std_logic(instr(31 downto 21)="01000010000" and func ="010000");
 
 	--Load instructions
---		rout.load <= to_std_logic(instr(31 downto 29)="100");
+		load := to_std_logic(instr(31 downto 29)="100");
 		
 	-- Decode store operations
 --		rout.store <= to_std_logic(instr(31 downto 29)="101");
@@ -171,7 +173,7 @@ begin
 		
 	--Jump
 		jumpi := to_std_logic(opcode(5 downto 3) = "000" and opcode(2 downto 0) /= "000");
---		rout.jump <= to_std_logic(jumpi = '1' or (opzero = '1' and func(5 downto 1) = "00100"));
+		rout.do_jump <= to_std_logic(jumpi = '1' or (opzero = '1' and func(5 downto 1) = "00100"));
 		
 	--Long jumps
 --		rout.long_target <= instr(25 downto 0);
@@ -179,6 +181,13 @@ begin
 		
 	--This is for slt, add, sub. mul/div 
 --		rout.math_unsigned <= to_std_logic((opzero = '1' and func(0)='1') or opcode(0)='1');
+
+		reg_store := to_std_logic(load='1' or arith='1' or
+					opcode(5 downto 0) = "000011" or --jal
+					(opzero='1' and func(5 downto 0) = "001001")); --or jalr
+		rout.reg_store <= reg_store;
+		rout.store_cond <= to_std_logic(slt = '1' or 
+					(link='1' and reg_store='0'));
 		
 	--Immediate handling	
 		rout.immediate(15 downto 0) <= instr(15 downto 0);
@@ -268,10 +277,14 @@ begin
 		if slt = '1' then
 			rout.cond <= cond_lt;
 		else
-			if opcode = "000001" then
-				rout.cond <= cond2;
+			if opzero = '1' and func(5 downto 1) = "00100" then
+				rout.cond <= cond_none;
 			else
-				rout.cond <= cond1;
+				if opcode = "000001" then
+					rout.cond <= cond2;
+				else
+					rout.cond <= cond1;
+				end if;
 			end if;
 		end if;
 		

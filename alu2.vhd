@@ -54,6 +54,9 @@ begin
 		aluout.jmux <= aluin.jmux;
 		aluout.smux <= aluin.smux;
 		aluout.r_dest <= aluin.r_dest;
+		aluout.reg_store <= aluin.reg_store;
+		aluout.store_cond <= aluin.store_cond;
+		aluout.do_jump <= aluin.do_jump;
 	end if;
 end process;
 
@@ -106,6 +109,13 @@ begin
 				when specmux_spec => aluout.spec <= (31 downto 0 => '0');
 		end case;
 		
+	--PC Mux
+		case aluin.pcmux is
+				when pcmux_imm16	=> aluout.pcjump <= aluin.pcadd;
+				when pcmux_reg		=> aluout.pcjump <= aluin.r_s(IM_BITS-1 downto 0);
+				--TODO: this is not compatible with changing IM_BITS
+				when pcmux_imm26	=> aluout.pcjump <= aluin.immediate(23 downto 0) & "00";
+		end case;
 	end if;
 end process;
 

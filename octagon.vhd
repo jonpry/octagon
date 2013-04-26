@@ -34,10 +34,8 @@ use work.octagon_types.all;
 entity octagon is
 	Port ( 
 		clk 				: in  std_logic;
-		jump_target 	: in std_logic_vector(IM_BITS-1 downto 0);
 		running 			: in std_logic_vector(7 downto 0);
 		int 				: in std_logic_vector(7 downto 0);
-		do_jump			: in std_logic;
 		notrim_o 		: out std_logic_vector(20 downto 0);
 		rstoreoutq		 : out rstoreout_type;
 		tagidx			: in std_logic_vector(2 downto 0);
@@ -85,10 +83,10 @@ rstoreoutq <= rstoreout;
 --9 alu
 --11 store
 
-pcin.jump_target <= jump_target;
+pcin.jump_target <= jumpout.jump_target;
 pcin.running <= running;
 pcin.int <= int;
-pcin.jump <= do_jump;
+pcin.jump <= jumpout.do_jump;
 pcin.valid <= jumpout.valid;
 
 icin.pcout <= pcout;

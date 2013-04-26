@@ -65,12 +65,19 @@ begin
 		aluout.jmux <= rout.jmux;
 		aluout.smux <= rout.smux;
 		aluout.r_dest <= rout.r_dest;
+		aluout.reg_store <= rout.reg_store;
+		aluout.store_cond <= rout.store_cond;
+		aluout.pcmux <= rout.pcmux;
+		aluout.immediate <= rout.immediate;
+		aluout.do_jump <= rout.do_jump;
 		
 		if rout.use_immediate = '1' then
 			aluout.r_t <= rout.immediate;
 		else
 			aluout.r_t <= rout.r_t;
 		end if;
+		
+		aluout.pcadd <= std_logic_vector(unsigned(rout.pc) + unsigned(rout.immediate(IM_BITS-1 downto 0)));
 	end if;
 end process;
 

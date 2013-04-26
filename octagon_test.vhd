@@ -44,12 +44,10 @@ ARCHITECTURE behavior OF octagon_test IS
     COMPONENT octagon
     PORT(
 		clk 				: in  std_logic;
-		jump_target 	: in std_logic_vector(IM_BITS-1 downto 0);
 		running 			: in std_logic_vector(7 downto 0);
 		int 				: in std_logic_vector(7 downto 0);
-		do_jump			: in std_logic;
 		notrim_o 		: out std_logic_vector(20 downto 0);
-		jumpoutq 		: out jumpout_type;
+		rstoreoutq		 : out rstoreout_type;
 		tagidx			: in std_logic_vector(2 downto 0);
 		tagadr			: in std_logic_vector(3 downto 0);
 		tagval			: in std_logic_vector(IM_BITS-1 downto 10);
@@ -57,18 +55,15 @@ ARCHITECTURE behavior OF octagon_test IS
 		imemidx			: in std_logic_vector(2 downto 0);
 		imemadr			: in std_logic_vector(7 downto 0);
 		imemval			: in std_logic_vector(31 downto 0);
-		imemwe			: in std_logic;
-		reg_we			: in std_logic
+		imemwe			: in std_logic
         );
     END COMPONENT;
     
 
    --Inputs
    signal clk : std_logic := '0';
-   signal jump_target : std_logic_vector(IM_BITS-1 downto 0) := (others => '0');
 	signal running : std_logic_vector(7 downto 0) := (others => '0');
 	signal int	: std_logic_vector(7 downto 0) := (others => '0');
-	signal do_jump : std_logic := '0';
    signal tagidx : std_logic_vector(2 downto 0) := (others => '0');
    signal tagadr : std_logic_vector(3 downto 0) := (others => '0');
    signal tagval : std_logic_vector(25 downto 10) := (others => '0');
@@ -77,10 +72,9 @@ ARCHITECTURE behavior OF octagon_test IS
    signal imemadr : std_logic_vector(7 downto 0) := (others => '0');
    signal imemval : std_logic_vector(31 downto 0) := (others => '0');
    signal imemwe : std_logic := '0';
-	signal reg_we : std_logic := '0';
  	--Outputs
 	signal notrim_o : std_logic_vector(20 downto 0);
-	signal jumpout : jumpout_type;
+	signal rstoreout : rstoreout_type;
    -- Clock period definitions
    constant clk_period : time := 10 ns;
 	
@@ -93,10 +87,8 @@ BEGIN
 	-- Instantiate the Unit Under Test (UUT)
    uut: octagon PORT MAP (
           clk => clk,
-          jump_target => jump_target,
 			 running => running,
 			 int => int,
-			 do_jump => do_jump,
           notrim_o => notrim_o,
           tagidx => tagidx,
           tagadr => tagadr,
@@ -106,8 +98,7 @@ BEGIN
           imemadr => imemadr,
           imemval => imemval,
           imemwe => imemwe,
-			 reg_we => reg_we,
-			 jumpoutq => jumpout
+			 rstoreoutq => rstoreout
         );
 
    -- Clock process definitions
@@ -130,7 +121,6 @@ BEGIN
       wait for 100 ns;	
 		
 		running <= (others => '0');
-		do_jump <= '0';
 		tagwe <= '0';
 
       wait for clk_period*10;
