@@ -35,7 +35,8 @@ use work.octagon_funcs.all;
 entity dc_mux is
 	Port ( 
 		clk : in  std_logic;
-		fetchout : in dcfetchout_type;
+		jumpout : in jumpout_type;
+		memout : in dcmemout_type;
 		muxout : out dcmuxout_type
 	);
 end dc_mux;
@@ -49,21 +50,21 @@ process(clk)
 	variable selin : std_logic_vector(7 downto 0);
 begin
 	if clk='1' and clk'Event then
-
-		selin := fetchout.owns;
-		sel(0) := to_std_logic(selin(1)='1' or selin(3)='1' or selin(5)='1' or selin(7)='1');
-		sel(1) := to_std_logic(selin(2)='1' or selin(3)='1' or selin(6)='1' or selin(7)='1');
-		sel(2) := to_std_logic(selin(4)='1' or selin(5)='1' or selin(6)='1' or selin(7)='1');
-		
-		muxout.data <= fetchout.data(to_integer(unsigned(sel)));
-	
-	
-		--TODO: this is a miss, need to handle it, dc stall is handled by jump module
-		--if fetchout.owns = "00000000" then
-		--	muxout.valid <= '0';
-		--else
-		--	muxout.valid <= fetchout.valid;
-		--end if;
+		muxout.tid <= jumpout.tid;
+		muxout.r_dest <= jumpout.r_dest;
+		muxout.reg_store <= jumpout.reg_store;
+		muxout.store_cond <= jumpout.store_cond;
+		muxout.met <= jumpout.met;
+		muxout.valid <= jumpout.valid;
+		muxout.lmux <= jumpout.lmux;
+		muxout.slt <= jumpout.slt;
+		muxout.mux <= jumpout.mux;
+		muxout.shiftout <= jumpout.shiftout;
+		muxout.data <= memout.data(to_integer(unsigned(memout.sel)));
+		muxout.memsize <= jumpout.memsize;
+		muxout.memadr <= jumpout.memadr;
+		muxout.load <= jumpout.load;
+		muxout.load_unsigned <= jumpout.load_unsigned;
 	end if;
 end process;
 

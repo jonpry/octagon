@@ -34,10 +34,11 @@ use work.octagon_types.all;
 entity d_fetch is
 	Port ( 
 		clk : in  std_logic;
-		dcin : in dcfetchin_type;
+		dcin : in dcmemin_type;
 		dout : out std_logic_vector(31 downto 0);
-		idx : in std_logic_vector(2 downto 0);
-		idxint : in Integer
+		idx : in std_logic_vector(1 downto 0);
+		idxi : in std_logic_vector(1 downto 0);
+		way : in std_logic
 	);
 end d_fetch;
 
@@ -52,8 +53,13 @@ begin
 process(clk)
 begin
 	if clk='1' and clk'Event then
-		dout <= dram(to_integer(unsigned(dcin.adr(10 downto 2))));
-		if dcin.dmemwe = '1' and dcin.dmemidx = idx then
+		dout <= dram(to_integer(unsigned(way & dcin.alu2out.dcwradr(9 downto 2))));
+		
+		if dcin.alu2out.dcwren = '1' and dcin.dcout.owns(to_integer(unsigned(idx & way))) = '1' then
+			dram(to_integer(unsigned(way & dcin.alu2out.dcwradr(9 downto 2)))) <= dcin.alu2out.store_data;
+		end if;
+		
+		if dcin.dmemwe = '1' and idxi = idx then
 			dram(to_integer(unsigned(dcin.dmemadr))) <= dcin.dmemval;
 		end if;
 	--TODO: this is all wrong. access to dcache ways must

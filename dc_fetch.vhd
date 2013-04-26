@@ -55,14 +55,5 @@ tag_fetch5 : entity work.dtag_fetch port map(clk,dcin,"101",dcout.owns(5));
 tag_fetch6 : entity work.dtag_fetch port map(clk,dcin,"110",dcout.owns(6));
 tag_fetch7 : entity work.dtag_fetch port map(clk,dcin,"111",dcout.owns(7));
 
-d_fetch0 : entity work.d_fetch port map(clk,dcin,dcout.data(0),"000",0);
-d_fetch1 : entity work.d_fetch port map(clk,dcin,dcout.data(1),"001",1);
-d_fetch2 : entity work.d_fetch port map(clk,dcin,dcout.data(2),"010",2);
-d_fetch3 : entity work.d_fetch port map(clk,dcin,dcout.data(3),"011",3);
-d_fetch4 : entity work.d_fetch port map(clk,dcin,dcout.data(4),"100",4);
-d_fetch5 : entity work.d_fetch port map(clk,dcin,dcout.data(5),"101",5);
-d_fetch6 : entity work.d_fetch port map(clk,dcin,dcout.data(6),"110",6);
-d_fetch7 : entity work.d_fetch port map(clk,dcin,dcout.data(7),"111",7);
-
 end Behavioral;
 

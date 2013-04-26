@@ -59,6 +59,7 @@ begin
 		aluout.do_jump <= aluin.do_jump;
 		aluout.load <= aluin.load;
 		aluout.memadr <= aluin.memadr(1 downto 0);
+		aluout.dcwradr <= aluin.memadr(9 downto 0);
 		aluout.memsize <= aluin.memsize;
 		aluout.load_unsigned <= aluin.load_unsigned;
 	end if;

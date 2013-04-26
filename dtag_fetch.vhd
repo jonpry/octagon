@@ -43,19 +43,19 @@ end dtag_fetch;
 architecture Behavioral of dtag_fetch is
 
 --Ram to store Tags
-signal tagram : dtag_type := (others => (others => '0'));
-signal tagadr : std_logic_vector(4 downto 0);
+signal tagram : tag_type := (others => (others => '0'));
+signal tagadr : std_logic_vector(3 downto 0);
 
 begin
 
-tagadr <= dcin.adr(10 downto 6);
+tagadr <= dcin.adr(9 downto 6);
 
 process(clk)
-	variable this_tag : std_logic_vector(IM_BITS-1 downto 11);
+	variable this_tag : std_logic_vector(IM_BITS-1 downto 10);
 begin
 	if clk='1' and clk'Event then
 		this_tag := tagram(to_integer(unsigned(tagadr)));
-		if this_tag = dcin.adr(IM_BITS-1 downto 11) then
+		if this_tag = dcin.adr(IM_BITS-1 downto 10) then
 			own <= '1';
 		else
 			own <= '0';
