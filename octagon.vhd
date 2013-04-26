@@ -145,7 +145,7 @@ begin
 		rsave2 <= notrim;
 		notrim := rsave2;
 		
-		notrim(15 downto 0) := notrim(15 downto 0) or alu2out.mux(15 downto 0) or alu2out.mux(31 downto 16);
+	--	notrim(15 downto 0) := notrim(15 downto 0) or alu2out.arith(15 downto 0) or alu2out.arith(31 downto 16);
 	--	notrim(15 downto 0) := notrim(15 downto 0) or alu2out.diff(15 downto 0) or alu2out.diff(31 downto 16);
 		
 		rsave3 <= notrim;

@@ -61,6 +61,7 @@ variable jumpi : std_logic;
 variable slt: std_logic;
 variable cond1 : cond_type;
 variable cond2 : cond_type;
+variable arith : std_logic;
 begin
 	if clk='1' and clk'Event then
 		decout.pc <= muxout.pc;
@@ -118,6 +119,9 @@ begin
 
 		decout.add <= add;
 		
+	--Arith
+		arith := to_std_logic(opcode(5 downto 3) = "001" or 
+				(opzero='1' and func(5 downto 3) = "100"));
 				  
 	--Subtraction conditional stuff
 		slt := to_std_logic( (opzero = '1' and func(5 downto 1)="10101") or
@@ -194,17 +198,31 @@ begin
 			end case;
 		end if;
 		
+	--Priority encoder for jmux
+		if arith = '1' then
+			decout.jmux <= jmux_arith;
+		else
+			decout.jmux <= jmux_spec;
+		end if;
+		
+	--Priority encoder for special mux
+		if link = '1' then
+			decout.specmux <= specmux_pc;
+		else
+			decout.specmux <= specmux_spec; --TODO: need to access EXC, HI, LO, EXC VECTOR maybe
+		end if;
+		
 	--Priority encoder for alu2mux
 		if add = '1' then
-			decout.alu2mux <= alu2mux_add;
+			decout.arithmux <= arithmux_add;
 		else
 			if add = '1' then
-				decout.alu2mux <= alu2mux_sub;
+				decout.arithmux <= arithmux_sub;
 			else 
 				if lui = '1' then
-					decout.alu2mux <= alu2mux_lui;
+					decout.arithmux <= arithmux_lui;
 				else
-					decout.alu2mux <= alu2mux_logic;
+					decout.arithmux <= arithmux_logic;
 				end if;
 			end if;
 		end if;

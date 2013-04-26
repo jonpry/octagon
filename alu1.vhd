@@ -57,10 +57,12 @@ begin
 
 		aluout.logicop <= rout.logicop;
 		aluout.add <= rout.add;
-		aluout.alu2mux <= rout.alu2mux;
+		aluout.arithmux <= rout.arithmux;
 		aluout.comp_unsigned <= rout.comp_unsigned;
 		aluout.r_s <= rout.r_s;
 		aluout.cond <= rout.cond;
+		aluout.specmux <= rout.specmux;
+		aluout.jmux <= rout.jmux;
 		
 		if rout.use_immediate = '1' then
 			aluout.r_t <= rout.immediate;

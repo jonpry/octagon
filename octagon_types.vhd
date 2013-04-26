@@ -39,9 +39,10 @@ package octagon_types is
 	type iout_type is array(0 to 7) of std_logic_vector(31 downto 0);
 	type shiftop_type is (shiftop_none, shiftop_left, shiftop_right, shiftop_right_neg);
 	type logicop_type is (logicop_and, logicop_or, logicop_xor, logicop_nor);
-	type alu2mux_type is (alu2mux_add, alu2mux_sub, alu2mux_lui, alu2mux_logic);
+	type arithmux_type is (arithmux_add, arithmux_sub, arithmux_lui, arithmux_logic);
 	type cond_type is (cond_none, cond_eq, cond_lt, cond_gt, cond_lte, cond_gte, cond_neq);
-
+	type specmux_type is (specmux_pc, specmux_spec);
+	type jmux_type is (jmux_arith, jmux_spec);
 	
 	type pcin_type is record
 		jump_target 	: std_logic_vector(IM_BITS-1 downto 0);
@@ -115,9 +116,11 @@ package octagon_types is
 		use_immediate	: std_logic;
 		logicop			: logicop_type;
 		add				: std_logic;
-		alu2mux			: alu2mux_type;
+		arithmux			: arithmux_type;
 		comp_unsigned  : std_logic;
 		cond				: cond_type;
+		specmux			: specmux_type;
+		jmux				: jmux_type;
 	end record;
 	
 	type rfetchin_type is record
@@ -138,9 +141,11 @@ package octagon_types is
 		shift				: shift_type;
 		logicop			: logicop_type;
 		add				: std_logic;
-		alu2mux			: alu2mux_type;
+		arithmux			: arithmux_type;
 		comp_unsigned  : std_logic;
 		cond				: cond_type;
+		specmux			: specmux_type;
+		jmux				: jmux_type;
 	end record;
 	
 	type alu1out_type is record
@@ -153,9 +158,11 @@ package octagon_types is
 		r_t				: std_logic_vector(31 downto 0);
 		logicop			: logicop_type;
 		add				: std_logic;
-		alu2mux			: alu2mux_type;
+		arithmux			: arithmux_type;
 		comp_unsigned	: std_logic;
 		cond				: cond_type;
+		specmux			: specmux_type;
+		jmux				: jmux_type;
 	end record;
 	
 	type alu2out_type is record
@@ -164,9 +171,11 @@ package octagon_types is
 		valid				: std_logic;	
 		shift_part		: std_logic_vector(31 downto 0);
 		shift				: shift_type;
-		mux				: std_logic_vector(31 downto 0);
+		arith				: std_logic_vector(31 downto 0);
+		spec				: std_logic_vector(31 downto 0);
 		arith_ovf		: std_logic;
 		met				: std_logic;
+		jmux				: jmux_type;
 	end record;
 	
 	type jumpout_type is record
@@ -174,8 +183,9 @@ package octagon_types is
 		tid				: std_logic_vector(2 downto 0);
 		valid				: std_logic;	
 		met				: std_logic;
-		--Just for notrim
+		mux				: std_logic_vector(31 downto 0);
 		shiftout			: std_logic_vector(31 downto 0);
+		slt				: std_logic_vector(31 downto 0);
 	end record;
 	
 end package;

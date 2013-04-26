@@ -51,7 +51,7 @@ begin
 		aluout.pc <= aluin.pc;
 		aluout.tid <= aluin.tid;
 		aluout.valid <= aluin.valid;
-		
+		aluout.jmux <= aluin.jmux;
 	end if;
 end process;
 
@@ -91,21 +91,19 @@ begin
 				aluout.arith_ovf <= diff_ovf;		
 		end if;
 		
-		case aluin.alu2mux is
-				when alu2mux_add   => aluout.mux <= sum(31 downto 0);
-				when alu2mux_sub   => aluout.mux <= diff(31 downto 0);
-				when alu2mux_lui   => aluout.mux <= aluin.r_t(15 downto 0) & X"0000";
-				when alu2mux_logic => aluout.mux <= logic;
+		case aluin.arithmux is
+				when arithmux_add   => aluout.arith <= sum(31 downto 0);
+				when arithmux_sub   => aluout.arith <= diff(31 downto 0);
+				when arithmux_lui   => aluout.arith <= aluin.r_t(15 downto 0) & X"0000";
+				when arithmux_logic => aluout.arith <= logic;
 		end case;
 		
-		--Mux cases
-		--add
-		--subtract
-		--pc (link)
-		--logic
-		--lui
-		--special regs
-		--slt
+	--Mux for special registers	
+		case aluin.specmux is
+				when specmux_pc	=> aluout.spec <= (31 downto IM_BITS => '0') & aluin.pc;
+				when specmux_spec => aluout.spec <= (31 downto 0 => '0');
+		end case;
+		
 	end if;
 end process;
 
