@@ -52,7 +52,6 @@ begin
 		jumpout.tid <= aluin.tid;
 		jumpout.valid <= aluin.valid;
 		jumpout.pc <= aluin.pc;
-		jumpout.shiftout <= shiftout;
 	end if;
 end process;
 
@@ -66,7 +65,7 @@ begin
 		if aluin.met = '1' then
 			jumpout.slt <= (31 downto 1 => '0') & "1";
 		else
-			jumpout.mux <= (31 downto 0 => '0');
+			jumpout.slt <= (31 downto 0 => '0');
 		end if;
 
 	-- Potentially add load to this mux
