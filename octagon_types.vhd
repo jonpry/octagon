@@ -43,7 +43,7 @@ package octagon_types is
 	type cond_type is (cond_none, cond_eq, cond_lt, cond_gt, cond_lte, cond_gte, cond_neq);
 	type specmux_type is (specmux_pc, specmux_spec);
 	type jmux_type is (jmux_arith, jmux_spec);
-	type smux_type is (smux_shift, smux_slt, smux_jmux);
+	type smux_type is (smux_shift, smux_slt, smux_jmux, smux_load);
 	type pcmux_type is (pcmux_reg, pcmux_imm26, pcmux_imm16);
 	
 	type pcin_type is record
@@ -72,6 +72,18 @@ package octagon_types is
 		imemwe			: std_logic;
 	end record;
 	
+	type dcfetchin_type is record
+		adr				: std_logic_vector(DM_BITS-1 downto 0);
+		tagidx			: std_logic_vector(2 downto 0);
+		tagadr			: std_logic_vector(3 downto 0);
+		tagval			: std_logic_vector(IM_BITS-1 downto 10);
+		tagwe				: std_logic;
+		dmemidx			: std_logic_vector(2 downto 0);
+		dmemadr			: std_logic_vector(7 downto 0);
+		dmemval			: std_logic_vector(31 downto 0);
+		dmemwe			: std_logic;
+	end record;
+	
 	type icfetchout_type is record
 		owns				: std_logic_vector(7 downto 0);
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
@@ -80,11 +92,20 @@ package octagon_types is
 		instr				: iout_type;
 	end record;
 	
+	type dcfetchout_type is record
+		owns				: std_logic_vector(7 downto 0);
+		data				: iout_type;
+	end record;
+	
 	type icmuxout_type is record
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		tid				: std_logic_vector(2 downto 0);
 		valid				: std_logic;
 		instr				: std_logic_vector(31 downto 0);
+	end record;
+	
+	type dcmuxout_type is record
+		data				: std_logic_vector(31 downto 0);
 	end record;
 	
 	type shift_type is record
@@ -138,11 +159,11 @@ package octagon_types is
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		tid				: std_logic_vector(2 downto 0);
 		valid				: std_logic;	
-		shift_part		: std_logic_vector(31 downto 0);
 		shift				: shift_type;
 		r_s				: std_logic_vector(31 downto 0);
 		r_t				: std_logic_vector(31 downto 0);
 		immediate		: std_logic_vector(31 downto 0);
+		memadr			: std_logic_vector(DM_BITS-1 downto 0);
 		r_dest			: std_logic_vector(4 downto 0);
 		logicop			: logicop_type;
 		add				: std_logic;

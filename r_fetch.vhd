@@ -226,7 +226,11 @@ begin
 			if shift_do = '1' then
 				rout.smux <= smux_shift;
 			else
-				rout.smux <= smux_jmux;
+				if load = '1' then
+					rout.smux <= smux_load;
+				else
+					rout.smux <= smux_jmux;
+				end if;
 			end if;
 		end if;
 		

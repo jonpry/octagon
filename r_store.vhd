@@ -36,6 +36,7 @@ entity r_store is
 	Port ( 
 		clk : in  std_logic;
 		jumpout : in jumpout_type;
+		muxout : in dcmuxout_type;
 		rout : out rstoreout_type
 	);
 end r_store;
@@ -68,6 +69,7 @@ begin
 			when smux_shift	=> rout.smux <= jumpout.shiftout;
 			when smux_jmux		=> rout.smux <= jumpout.mux;
 			when smux_slt		=> rout.smux <= jumpout.slt;
+			when smux_load		=> rout.smux <= muxout.data;
 		end case;
 	end if;
 end process;

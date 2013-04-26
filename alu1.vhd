@@ -78,6 +78,7 @@ begin
 		end if;
 		
 		aluout.pcadd <= std_logic_vector(unsigned(rout.pc) + unsigned(rout.immediate(IM_BITS-1 downto 0)));
+		aluout.memadr <= std_logic_vector(unsigned(rout.r_s(DM_BITS-1 downto 0)) + unsigned(rout.immediate(DM_BITS-1 downto 0)));
 	end if;
 end process;
 
@@ -101,8 +102,6 @@ begin
 		end if;
 		
 		aluout.shift.op <= shiftop;
-		
-		aluout.shift_part <= shift(1,rout.r_t,shiftop,shamt(0));
 	end if;
 end process;
 

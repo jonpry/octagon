@@ -71,6 +71,7 @@ process(clk)
 	variable diff_ovf: std_logic;
 begin
 	if clk='1' and clk'Event then
+	
 		r_s_ext := aluin.r_s(31) & aluin.r_s;
 		r_t_ext := aluin.r_t(31) & aluin.r_t;
 		
@@ -155,8 +156,8 @@ process(clk)
 begin
 	if clk='1' and clk'Event then
 		aluout.shift <= aluin.shift;
-		
-		shiftone   := shift(16,aluin.shift_part,aluin.shift.op,aluin.shift.amount(4));
+				
+		shiftone   := shift(16,aluin.r_t,aluin.shift.op,aluin.shift.amount(4));
 		shifttwo   := shift(8,shiftone,aluin.shift.op,aluin.shift.amount(3));
 		shiftthree := shift(4,shifttwo,aluin.shift.op,aluin.shift.amount(2));
 

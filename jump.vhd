@@ -76,6 +76,7 @@ end process;
 --ALU operations running in this stage
 process(clk)
 	variable jmux : jmux_type;
+	variable shift_part : std_logic_vector(31 downto 0);
 begin
 	if clk='1' and clk'Event then
 		if aluin.met = '1' then
@@ -91,7 +92,8 @@ begin
 		end case;
 	
 	-- Final barrel shift stage
-		jumpout.shiftout <= shift(2,aluin.shift_part,aluin.shift.op,aluin.shift.amount(1));
+		shift_part := shift(1,aluin.shift_part,aluin.shift.op,aluin.shift.amount(0));
+		jumpout.shiftout <= shift(2,shift_part,aluin.shift.op,aluin.shift.amount(1));
 	end if;
 end process;
 
