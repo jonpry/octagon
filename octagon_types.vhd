@@ -38,6 +38,9 @@ package octagon_types is
 	type tag_type is array(0 to 15) of std_logic_vector(IM_BITS-1 downto 10);
 	type iout_type is array(0 to 7) of std_logic_vector(31 downto 0);
 	type shiftop_type is (shiftop_none, shiftop_left, shiftop_right, shiftop_right_neg);
+	type logicop_type is (logicop_and, logicop_or, logicop_xor, logicop_nor);
+	type alu2mux_type is (alu2mux_add, alu2mux_sub, alu2mux_lui, alu2mux_logic);
+	type cond_type is (cond_none, cond_eq, cond_lt, cond_gt, cond_lte, cond_gte, cond_neq);
 
 	
 	type pcin_type is record
@@ -101,13 +104,20 @@ package octagon_types is
 		store				: std_logic;
 		memsize			: std_logic_vector(1 downto 0);
 		load_unsigned 	: std_logic;
-		arith				: std_logic;
 		slt				: std_logic;
 		logic				: std_logic;
 		shift				: shift_type;
 		jump				: std_logic;
 		math_unsigned	: std_logic;
 		immediate		: std_logic_vector(31 downto 0);
+		long_jump		: std_logic;
+		long_target		: std_logic_vector(25 downto 0);
+		use_immediate	: std_logic;
+		logicop			: logicop_type;
+		add				: std_logic;
+		alu2mux			: alu2mux_type;
+		comp_unsigned  : std_logic;
+		cond				: cond_type;
 	end record;
 	
 	type rfetchin_type is record
@@ -123,7 +133,14 @@ package octagon_types is
 		valid				: std_logic;
 		r_s				: std_logic_vector(31 downto 0);
 		r_t				: std_logic_vector(31 downto 0);
+		immediate		: std_logic_vector(31 downto 0);
+		use_immediate	: std_logic;
 		shift				: shift_type;
+		logicop			: logicop_type;
+		add				: std_logic;
+		alu2mux			: alu2mux_type;
+		comp_unsigned  : std_logic;
+		cond				: cond_type;
 	end record;
 	
 	type alu1out_type is record
@@ -132,6 +149,13 @@ package octagon_types is
 		valid				: std_logic;	
 		shift_part		: std_logic_vector(31 downto 0);
 		shift				: shift_type;
+		r_s				: std_logic_vector(31 downto 0);
+		r_t				: std_logic_vector(31 downto 0);
+		logicop			: logicop_type;
+		add				: std_logic;
+		alu2mux			: alu2mux_type;
+		comp_unsigned	: std_logic;
+		cond				: cond_type;
 	end record;
 	
 	type alu2out_type is record
@@ -140,13 +164,18 @@ package octagon_types is
 		valid				: std_logic;	
 		shift_part		: std_logic_vector(31 downto 0);
 		shift				: shift_type;
+		mux				: std_logic_vector(31 downto 0);
+		arith_ovf		: std_logic;
+		eq					: std_logic;
+		lt					: std_logic;
+		cond				: cond_type;
 	end record;
 	
 	type jumpout_type is record
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		tid				: std_logic_vector(2 downto 0);
 		valid				: std_logic;	
-		
+		met				: std_logic;
 		--Just for notrim
 		shiftout			: std_logic_vector(31 downto 0);
 	end record;

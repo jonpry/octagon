@@ -55,6 +55,8 @@ end octagon;
 architecture Behavioral of octagon is
 
 signal rsave : std_logic_vector(31 downto 0);
+signal rsave2 : std_logic_vector(20 downto 0);
+signal rsave3 : std_logic_vector(20 downto 0);
 
 signal pcin : pcin_type;
 signal pcout : pcout_type;
@@ -120,22 +122,37 @@ begin
 		rsave <= rout.r_s;
 		
 		notrim := (others => '0');
-		notrim (15 downto 0) := rsave(15 downto 0) or decout.immediate(15 downto 0);
-		notrim (15 downto 0) := notrim(15 downto 0) or rsave(31 downto 16) or decout.immediate(31 downto 16);
+		notrim (15 downto 0) := rsave(15 downto 0) or decout.immediate(15 downto 0) or decout.long_target(15 downto 0);
+		notrim (15 downto 0) := notrim(15 downto 0) or rsave(31 downto 16) or decout.immediate(31 downto 16) or (decout.long_target(25 downto 16) & "00000");
 		
 		notrim(4 downto 0) := notrim(4 downto 0) or decout.r_dest;
 		notrim(11 downto 10) := notrim(11 downto 10) or decout.memsize;
-		notrim(15) := notrim(15) or decout.link;
+		notrim(15) := notrim(16) or decout.link;
 		notrim(16) := notrim(16) or decout.rfe;
 		notrim(16) := notrim(16) or decout.load;
 		notrim(17) := notrim(17) or decout.store;
 		notrim(17) := notrim(17) or decout.load_unsigned;
-		notrim(18) := notrim(18) or decout.arith;
+		notrim(17) := notrim(17) or decout.long_jump;
+		notrim(18) := notrim(18) or alu2out.eq;
 		notrim(18) := notrim(18) or decout.slt;
+		notrim(19) := notrim(19) or alu2out.arith_ovf;
 		notrim(19) := notrim(19) or decout.logic;
+	--	notrim(19) := notrim(19) or alu2out.ltu;
 		notrim(20) := notrim(20) or decout.jump;
 		notrim(20) := notrim(20) or decout.math_unsigned;
+		notrim(20) := notrim(20) or alu2out.lt;
 
+		rsave2 <= notrim;
+		notrim := rsave2;
+		
+		notrim(15 downto 0) := notrim(15 downto 0) or alu2out.mux(15 downto 0) or alu2out.mux(31 downto 16);
+	--	notrim(15 downto 0) := notrim(15 downto 0) or alu2out.diff(15 downto 0) or alu2out.diff(31 downto 16);
+		
+		rsave3 <= notrim;
+		notrim := rsave3;
+		
+	--	notrim(15 downto 0) := notrim(15 downto 0) or alu2out.logic(15 downto 0) or alu2out.logic(31 downto 16);
+		
 		notrim_o <= notrim;
 
 

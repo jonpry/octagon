@@ -22,7 +22,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -51,6 +51,75 @@ begin
 		aluout.pc <= aluin.pc;
 		aluout.tid <= aluin.tid;
 		aluout.valid <= aluin.valid;
+		
+		aluout.cond <= aluin.cond;
+	end if;
+end process;
+
+--Some alu funcs
+process(clk)
+	variable r_s_ext : std_logic_vector(32 downto 0);
+	variable r_t_ext : std_logic_vector(32 downto 0);
+	variable sum 	  : std_logic_vector(32 downto 0);
+	variable diff 	  : std_logic_vector(32 downto 0);
+	variable logic   : std_logic_vector(31 downto 0);
+	variable sum_ovf : std_logic;
+	variable diff_ovf: std_logic;
+begin
+	if clk='1' and clk'Event then
+		r_s_ext := aluin.r_s(31) & aluin.r_s;
+		r_t_ext := aluin.r_t(31) & aluin.r_t;
+		
+		--Adder
+		sum := std_logic_vector(unsigned(r_s_ext) + unsigned(r_t_ext));
+		sum_ovf := to_std_logic(sum(32) /= sum(31));
+		
+		--Subtractor
+		diff := std_logic_vector(unsigned(r_s_ext) - unsigned(r_t_ext));
+		diff_ovf := to_std_logic(diff(32) /= diff(31));
+		
+		--Logic
+		case aluin.logicop is
+				when logicop_and =>  logic := aluin.r_s and aluin.r_t;
+				when logicop_or  =>  logic := aluin.r_s or aluin.r_t;
+				when logicop_xor =>  logic := aluin.r_s xor aluin.r_t;
+				when logicop_nor =>  logic := aluin.r_s nor aluin.r_t;
+		end case;
+		
+		if aluin.add = '1' then
+				aluout.arith_ovf <= sum_ovf;
+		else
+				aluout.arith_ovf <= diff_ovf;		
+		end if;
+		
+		case aluin.alu2mux is
+				when alu2mux_add   => aluout.mux <= sum(31 downto 0);
+				when alu2mux_sub   => aluout.mux <= diff(31 downto 0);
+				when alu2mux_lui   => aluout.mux <= aluin.r_t(15 downto 0) & X"0000";
+				when alu2mux_logic => aluout.mux <= logic;
+		end case;
+		
+		--Mux cases
+		--add
+		--subtract
+		--pc (link)
+		--logic
+		--lui
+		--special regs
+		--slt
+	end if;
+end process;
+
+--Comparisons
+process(clk)
+begin
+	if clk='1' and clk'Event then
+		aluout.eq <= to_std_logic(aluin.r_s = aluin.r_t);
+		if aluin.comp_unsigned = '1' then
+			aluout.lt <= to_std_logic(unsigned(aluin.r_s) < unsigned(aluin.r_t));				
+		else
+			aluout.lt <= to_std_logic(signed(aluin.r_s) < signed(aluin.r_t));
+		end if;
 	end if;
 end process;
 

@@ -43,6 +43,10 @@ end alu1;
 architecture Behavioral of alu1 is
 
 begin
+
+--It is very difficult to get anything done in this stage because of 
+--poor timing with blockram output registers
+
 --Control signals
 process(clk)
 begin
@@ -50,6 +54,19 @@ begin
 		aluout.pc <= rout.pc;
 		aluout.tid <= rout.tid;
 		aluout.valid <= rout.valid;
+
+		aluout.logicop <= rout.logicop;
+		aluout.add <= rout.add;
+		aluout.alu2mux <= rout.alu2mux;
+		aluout.comp_unsigned <= rout.comp_unsigned;
+		aluout.r_s <= rout.r_s;
+		aluout.cond <= rout.cond;
+		
+		if rout.use_immediate = '1' then
+			aluout.r_t <= rout.immediate;
+		else
+			aluout.r_t <= rout.r_t;
+		end if;
 	end if;
 end process;
 

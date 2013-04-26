@@ -58,6 +58,24 @@ begin
 	end if;
 end process;
 
+process(clk)
+variable met : std_logic;
+begin
+	if clk='1' and clk'Event then
+	--Figure out if condition was met
+		case aluin.cond is
+			when cond_none => met := '1';
+			when cond_eq   => met := aluin.eq;
+			when cond_lt   => met := aluin.lt;
+			when cond_gt   => met := to_std_logic(aluin.lt = '0' and aluin.eq = '0');
+			when cond_lte  => met := to_std_logic(aluin.lt = '1' or aluin.eq = '1');
+			when cond_gte  => met := to_std_logic(aluin.lt = '0' or aluin.eq = '1');
+			when cond_neq  => met := to_std_logic(aluin.eq = '0');
+		end case;
+		jumpout.met <= met;
+	end if;
+end process;
+
 --final barrel shift
 shiftout <= shift(2,aluin.shift_part,aluin.shift.op,aluin.shift.amount(1));
 

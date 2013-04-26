@@ -55,7 +55,15 @@ begin
 		rout.pc <= rin.decout.pc;
 		rout.tid <= rin.decout.tid;
 		rout.valid <= rin.decout.valid;
+		
 		rout.shift <= rin.decout.shift;
+		rout.immediate <= rin.decout.immediate;
+		rout.use_immediate <= rin.decout.use_immediate;
+		rout.logicop <= rin.decout.logicop;
+		rout.add <= rin.decout.add;
+		rout.alu2mux <= rin.decout.alu2mux;
+		rout.comp_unsigned <= rin.decout.comp_unsigned;
+		rout.cond <= rin.decout.cond;
 		
 		adr := rin.decout.tid & rin.decout.r_s;
 		adr2 := rin.decout.tid & rin.decout.r_t;
