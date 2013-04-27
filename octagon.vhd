@@ -38,6 +38,9 @@ entity octagon is
 		int 				: in std_logic_vector(7 downto 0);
 		notrim_o 		: out std_logic_vector(20 downto 0);
 		wbmout			: out wbmout_type;
+		cop0				: in cop0_type;
+		cop0_wr			: in std_logic;
+		cop0_tid			: in std_logic_vector(2 downto 0);
 		tagidx			: in std_logic_vector(2 downto 0);
 		tagadr			: in std_logic_vector(3 downto 0);
 		tagval			: in std_logic_vector(IM_BITS-1 downto 10);
@@ -72,6 +75,7 @@ signal lmuxout : lmuxout_type;
 signal decout : decout_type;
 signal rin : rfetchin_type;
 signal rout : rfetchout_type;
+signal alu1in	: alu1in_type;
 signal alu1out : alu1out_type;
 signal alu2out : alu2out_type;
 signal jumpout : jumpout_type;
@@ -126,6 +130,11 @@ rin.reg_val <= rstoreout.smux;
 rin.reg_adr <= rstoreout.tid & rstoreout.r_dest;
 rin.reg_we <= rstoreout.valid;
 
+alu1in.rfetch <= rout;
+alu1in.cop0 <= cop0;
+alu1in.cop0_wr <= cop0_wr;
+alu1in.cop0_tid <= cop0_tid;
+
 pc_module: entity work.pc_module port map(clk,pcin,pcout);  --1
 
 ic_fetch : entity work.ic_fetch port map(clk,icin,icout);	--2
@@ -136,7 +145,7 @@ decode : entity work.decode port map(clk,imuxout,decout);	--4
 
 r_fetch : entity work.r_fetch port map(clk,rin,rout);			--5
 
-alu1 : entity work.alu1 port map(clk,rout,alu1out);			--6
+alu1 : entity work.alu1 port map(clk,alu1in,alu1out);			--6
 
 alu2 : entity work.alu2 port map(clk,alu1out,alu2out);		--7
 dc_fetch : entity work.dc_fetch port map(clk,dcin,dcout);

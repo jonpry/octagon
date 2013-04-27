@@ -41,7 +41,7 @@ package octagon_types is
 	type logicop_type is (logicop_and, logicop_or, logicop_xor, logicop_nor);
 	type arithmux_type is (arithmux_add, arithmux_sub, arithmux_lui, arithmux_logic);
 	type cond_type is (cond_none, cond_eq, cond_lt, cond_gt, cond_lte, cond_gte, cond_neq);
-	type specmux_type is (specmux_pc, specmux_spec);
+	type specmux_type is (specmux_pc, specmux_epc, specmux_cause, specmux_status);
 	type jmux_type is (jmux_arith, jmux_spec);
 	type lmux_type is (lmux_shift, lmux_slt, lmux_jmux);
 	type pcmux_type is (pcmux_reg, pcmux_imm26, pcmux_imm16);
@@ -176,6 +176,22 @@ package octagon_types is
 		store				: std_logic;
 	end record;
 	
+	type cop0_type is record
+		epc				: std_logic_vector(31 downto 0);
+		imask				: std_logic_vector(7 downto 0);
+		ipend				: std_logic_vector(7 downto 0);
+		exc				: std_logic;
+		int				: std_logic;
+		ecode				: std_logic_vector(3 downto 0);
+	end record;
+	
+	type alu1in_type is record
+		cop0				: cop0_type;
+		rfetch			: rfetchout_type;
+		cop0_wr			: std_logic;
+		cop0_tid			: std_logic_vector(2 downto 0);
+	end record;
+	
 	type alu1out_type is record
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		tid				: std_logic_vector(2 downto 0);
@@ -203,6 +219,7 @@ package octagon_types is
 		memsize			: std_logic_vector(1 downto 0);
 		load_unsigned	: std_logic;
 		store				: std_logic;
+		cop0				: cop0_type;
 	end record;
 	
 	type alu2out_type is record

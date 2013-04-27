@@ -48,6 +48,9 @@ ARCHITECTURE behavior OF octagon_test IS
 		int 				: in std_logic_vector(7 downto 0);
 		notrim_o 		: out std_logic_vector(20 downto 0);
 		wbmout			: out wbmout_type;
+		cop0				: in cop0_type;
+		cop0_wr			: in std_logic;
+		cop0_tid			: in std_logic_vector(2 downto 0);
 		tagidx			: in std_logic_vector(2 downto 0);
 		tagadr			: in std_logic_vector(3 downto 0);
 		tagval			: in std_logic_vector(IM_BITS-1 downto 10);
@@ -82,6 +85,9 @@ ARCHITECTURE behavior OF octagon_test IS
    signal dmemadr : std_logic_vector(7 downto 0) := (others => '0');
    signal dmemval : std_logic_vector(31 downto 0) := (others => '0');
    signal dmemwe : std_logic := '0';
+	signal cop0_wr : std_logic := '0';
+	signal cop0_tid : std_logic_vector(2 downto 0) := (others => '0');
+	signal cop0 : cop0_type;-- := (others => (others => '0'));
 
  	--Outputs
 	signal notrim_o : std_logic_vector(20 downto 0);
@@ -114,7 +120,10 @@ BEGIN
           dmemadr => imemadr,
           dmemval => imemval,
           dmemwe => imemwe,
-			 wbmout => wbmout
+			 wbmout => wbmout,
+			 cop0_wr => cop0_wr,
+			 cop0_tid => cop0_tid,
+			 cop0 => cop0
         );
 
    -- Clock process definitions
@@ -141,6 +150,21 @@ BEGIN
 		dtagwe <= '0';
 
       wait for clk_period*10;
+		
+		cop0.exc <= '1';
+		cop0.int <= '1';
+		cop0.ecode <= "0101";
+		cop0.epc <= X"01ABCD02";
+		cop0.imask <= X"FF";
+		cop0.ipend <= X"00";
+		
+		cop0_wr <= '1';
+		
+		wait for clk_period;
+		
+		cop0_wr <= '0';
+		
+		wait for clk_period;
 		
 		I := 0;
 		while I < 128 loop

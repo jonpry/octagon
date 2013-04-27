@@ -76,26 +76,28 @@ end process;
 
 
 process(clk)
-variable opcode : std_logic_vector(5 downto 0);
-variable func : std_logic_vector(5 downto 0);
-variable instr : std_logic_vector(31 downto 0);
-variable opzero : std_logic;
-variable link	: std_logic;
-variable shift_right : std_logic;
-variable shift_arith : std_logic;
-variable shift_do : std_logic;
-variable add : std_logic;
-variable sub : std_logic;
-variable lui : std_logic;
-variable logic : std_logic;
-variable jumpi : std_logic;
-variable slt: std_logic;
-variable cond1 : cond_type;
-variable cond2 : cond_type;
-variable arith : std_logic;
-variable reg_store : std_logic;
-variable load : std_logic;
-variable store : std_logic;
+	variable opcode : std_logic_vector(5 downto 0);
+	variable func : std_logic_vector(5 downto 0);
+	variable instr : std_logic_vector(31 downto 0);
+	variable opzero : std_logic;
+	variable link	: std_logic;
+	variable shift_right : std_logic;
+	variable shift_arith : std_logic;
+	variable shift_do : std_logic;
+	variable add : std_logic;
+	variable sub : std_logic;
+	variable lui : std_logic;
+	variable logic : std_logic;
+	variable jumpi : std_logic;
+	variable slt: std_logic;
+	variable cond1 : cond_type;
+	variable cond2 : cond_type;
+	variable arith : std_logic;
+	variable reg_store : std_logic;
+	variable load : std_logic;
+	variable store : std_logic;
+	variable cop0 : std_logic;
+	variable copreg : std_logic_vector(4 downto 0);
 begin
 	if clk='1' and clk'Event then
 		opcode := rin.decout.instr(31 downto 26);
@@ -107,9 +109,10 @@ begin
 		link := to_std_logic((opzero='1' and func(5 downto 0)="001001") or
                     (opcode="000001" and instr(20)='1') or
                     (opcode="000011"));
---		rout.link <= link;
 		
-		
+	-- Coprocessor stuff
+		cop0 := to_std_logic(opcode = "010000");
+		copreg := instr(15 downto 11);
 		
 	--link instructions have r_dest = 31
 		if link = '1' then
@@ -192,7 +195,8 @@ begin
 
 		reg_store := to_std_logic(load='1' or arith='1' or shift_do='1' or
 					opcode(5 downto 0) = "000011" or --jal
-					(opzero='1' and func(5 downto 0) = "001001")); --or jalr
+					(opzero='1' and func(5 downto 0) = "001001") or --jalr
+					(cop0='1' and instr(25 downto 21) = "00000")); --mfc0 
 		rout.reg_store <= reg_store;
 		rout.store_cond <= to_std_logic(slt = '1' or 
 					(link='1' and reg_store='0'));
@@ -261,7 +265,15 @@ begin
 		if link = '1' then
 			rout.specmux <= specmux_pc;
 		else
-			rout.specmux <= specmux_spec; --TODO: need to access EXC, HI, LO, EXC VECTOR maybe
+			if copreg = "01100" then
+				rout.specmux <= specmux_status;
+			else
+				if copreg = "01101" then
+					rout.specmux <= specmux_cause;
+				else
+					rout.specmux <= specmux_epc;
+				end if;
+			end if;
 		end if;
 		
 	--Priority encoder for alu2mux

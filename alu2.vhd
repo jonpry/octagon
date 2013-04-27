@@ -112,8 +112,10 @@ begin
 		
 	--Mux for special registers	
 		case aluin.specmux is
-				when specmux_pc	=> aluout.spec <= (31 downto IM_BITS => '0') & std_logic_vector(unsigned(aluin.pc)+4);
-				when specmux_spec => aluout.spec <= (31 downto 0 => '0');
+				when specmux_pc		=> aluout.spec <= (31 downto IM_BITS => '0') & std_logic_vector(unsigned(aluin.pc)+4);
+				when specmux_epc 		=> aluout.spec <= aluin.cop0.epc;
+				when specmux_status	=> aluout.spec <= (31 downto 16 => '0') & aluin.cop0.imask & "000000" & aluin.cop0.exc & aluin.cop0.int;
+				when specmux_cause	=> aluout.spec <= (31 downto 16 => '0') & aluin.cop0.ipend & "00" & aluin.cop0.ecode & "00";
 		end case;
 		
 	--PC Mux
