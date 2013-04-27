@@ -112,7 +112,7 @@ begin
 		
 	--Mux for special registers	
 		case aluin.specmux is
-				when specmux_pc	=> aluout.spec <= (31 downto IM_BITS => '0') & aluin.pc;
+				when specmux_pc	=> aluout.spec <= (31 downto IM_BITS => '0') & std_logic_vector(unsigned(aluin.pc)+4);
 				when specmux_spec => aluout.spec <= (31 downto 0 => '0');
 		end case;
 		

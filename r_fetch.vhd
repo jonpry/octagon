@@ -220,6 +220,17 @@ begin
 			end case;
 		end if;
 		
+	--Priority encoder for pcmux
+		if opcode(5 downto 1) = "00001" then
+			rout.pcmux <= pcmux_imm26;
+		else
+			if jumpi = '1' then
+				rout.pcmux <= pcmux_imm16;
+			else
+				rout.pcmux <= pcmux_reg;
+			end if;
+		end if;
+		
 	--Priority encoder for lmux
 		if slt = '1' then
 			rout.lmux <= lmux_slt;
