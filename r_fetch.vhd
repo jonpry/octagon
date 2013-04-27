@@ -90,6 +90,7 @@ variable cond2 : cond_type;
 variable arith : std_logic;
 variable reg_store : std_logic;
 variable load : std_logic;
+variable store : std_logic;
 begin
 	if clk='1' and clk'Event then
 		opcode := rin.decout.instr(31 downto 26);
@@ -123,8 +124,9 @@ begin
 		rout.load <= load;
 		
 	-- Decode store operations
-		rout.store <= to_std_logic(instr(31 downto 29)="101");
-
+		store := to_std_logic(instr(31 downto 29)="101");
+		rout.store <= store;
+		
 		rout.memsize <= instr(27 downto 26);
 		rout.load_unsigned <= instr(28);    -- sign extend vs. zero extend
 
@@ -200,7 +202,8 @@ begin
 
 	--Branch instructions do comparison on the 2 registers, so we prevent the mux into the alu
 	--from operating. jump pc is calculate elseware anyways
-		rout.use_immediate <= to_std_logic(opzero = '0' and jumpi = '0');
+	--Stores use r_t for data in spite of having immediates
+		rout.use_immediate <= to_std_logic(opzero = '0' and jumpi = '0' and store = '0');
 		
 		if opzero = '1' then
 			case func(1 downto 0) is
