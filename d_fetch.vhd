@@ -55,8 +55,17 @@ begin
 	if clk='1' and clk'Event then
 		dout <= dram(to_integer(unsigned(way & dcin.alu2out.dcwradr(9 downto 2))));
 		
-		if dcin.alu2out.dcwren = '1' and dcin.dcout.owns(to_integer(unsigned(idx & way))) = '1' then
-			dram(to_integer(unsigned(way & dcin.alu2out.dcwradr(9 downto 2)))) <= dcin.alu2out.store_data;
+		if dcin.alu2out.dcwren = '1' and dcin.dcout.owns(to_integer(unsigned(idx & way))) = '1' and dcin.alu2out.be(0) = '1' then
+			dram(to_integer(unsigned(way & dcin.alu2out.dcwradr(9 downto 2))))(7 downto 0) <= dcin.alu2out.store_data(7 downto 0);
+		end if;
+		if dcin.alu2out.dcwren = '1' and dcin.dcout.owns(to_integer(unsigned(idx & way))) = '1' and dcin.alu2out.be(0) = '1' then
+			dram(to_integer(unsigned(way & dcin.alu2out.dcwradr(9 downto 2))))(15 downto 8) <= dcin.alu2out.store_data(15 downto 8);
+		end if;
+		if dcin.alu2out.dcwren = '1' and dcin.dcout.owns(to_integer(unsigned(idx & way))) = '1' and dcin.alu2out.be(0) = '1' then
+			dram(to_integer(unsigned(way & dcin.alu2out.dcwradr(9 downto 2))))(23 downto 16) <= dcin.alu2out.store_data(23 downto 16);
+		end if;
+		if dcin.alu2out.dcwren = '1' and dcin.dcout.owns(to_integer(unsigned(idx & way))) = '1' and dcin.alu2out.be(0) = '1' then
+			dram(to_integer(unsigned(way & dcin.alu2out.dcwradr(9 downto 2))))(31 downto 24) <= dcin.alu2out.store_data(31 downto 24);
 		end if;
 		
 		if dcin.dmemwe = '1' and idxi = idx then

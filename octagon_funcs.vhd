@@ -50,7 +50,7 @@ package octagon_funcs is
 			variable O : std_logic_vector(31 downto 0);
 			variable shiftop : shiftop_type;
     begin
-			if do = '1' then
+			if do = '0' then
 				shiftop := shiftop_none;
 			else
 				shiftop := shiftopi;

@@ -47,15 +47,20 @@ ARCHITECTURE behavior OF octagon_test IS
 		running 			: in std_logic_vector(7 downto 0);
 		int 				: in std_logic_vector(7 downto 0);
 		notrim_o 		: out std_logic_vector(20 downto 0);
-		rstoreoutq		 : out rstoreout_type;
+		rstoreoutq		: out rstoreout_type;
 		tagidx			: in std_logic_vector(2 downto 0);
 		tagadr			: in std_logic_vector(3 downto 0);
 		tagval			: in std_logic_vector(IM_BITS-1 downto 10);
-		tagwe				: in std_logic;
+		itagwe			: in std_logic;
 		imemidx			: in std_logic_vector(2 downto 0);
 		imemadr			: in std_logic_vector(7 downto 0);
 		imemval			: in std_logic_vector(31 downto 0);
-		imemwe			: in std_logic
+		imemwe			: in std_logic;
+		dtagwe			: in std_logic;
+		dmemidx			: in std_logic_vector(2 downto 0);
+		dmemadr			: in std_logic_vector(7 downto 0);
+		dmemval			: in std_logic_vector(31 downto 0);
+		dmemwe			: in std_logic
         );
     END COMPONENT;
     
@@ -67,11 +72,17 @@ ARCHITECTURE behavior OF octagon_test IS
    signal tagidx : std_logic_vector(2 downto 0) := (others => '0');
    signal tagadr : std_logic_vector(3 downto 0) := (others => '0');
    signal tagval : std_logic_vector(25 downto 10) := (others => '0');
-   signal tagwe : std_logic := '0';
+   signal itagwe : std_logic := '0';
+   signal dtagwe : std_logic := '0';
    signal imemidx : std_logic_vector(2 downto 0) := (others => '0');
    signal imemadr : std_logic_vector(7 downto 0) := (others => '0');
    signal imemval : std_logic_vector(31 downto 0) := (others => '0');
    signal imemwe : std_logic := '0';
+   signal dmemidx : std_logic_vector(2 downto 0) := (others => '0');
+   signal dmemadr : std_logic_vector(7 downto 0) := (others => '0');
+   signal dmemval : std_logic_vector(31 downto 0) := (others => '0');
+   signal dmemwe : std_logic := '0';
+
  	--Outputs
 	signal notrim_o : std_logic_vector(20 downto 0);
 	signal rstoreout : rstoreout_type;
@@ -93,11 +104,16 @@ BEGIN
           tagidx => tagidx,
           tagadr => tagadr,
           tagval => tagval,
-          tagwe => tagwe,
+          itagwe => itagwe,
+          dtagwe => dtagwe,
           imemidx => imemidx,
           imemadr => imemadr,
           imemval => imemval,
           imemwe => imemwe,
+          dmemidx => imemidx,
+          dmemadr => imemadr,
+          dmemval => imemval,
+          dmemwe => imemwe,
 			 rstoreoutq => rstoreout
         );
 
@@ -121,22 +137,26 @@ BEGIN
       wait for 100 ns;	
 		
 		running <= (others => '0');
-		tagwe <= '0';
+		itagwe <= '0';
+		dtagwe <= '0';
 
       wait for clk_period*10;
 		
 		I := 0;
 		while I < 128 loop
-			tagwe <= '1';
+			itagwe <= '1';
 			vec := std_logic_vector(to_unsigned(I,vec'length));
 			tagidx <= vec(6 downto 4);
 			tagadr <= vec(3 downto 0);
 			tagval <= X"00" & vec(11 downto 4);
+
+			dtagwe <= '1';			
 			wait for clk_period;
 			I := I + 1;
 		end loop;
   
-		tagwe <= '0';
+		itagwe <= '0';
+		dtagwe <= '0';
 
 		wait for clk_period;
 
