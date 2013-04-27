@@ -44,13 +44,14 @@ architecture Behavioral of i_fetch is
 
 type itype is array(0 to 255) of std_logic_vector(31 downto 0);
 signal iram : itype := (others => (others => '0'));
-
+signal ioutd : std_logic_vector(31 downto 0);
 begin
 
 process(clk)
 begin
 	if clk='1' and clk'Event then
-		iout <= iram(to_integer(unsigned(icin.pcout.pc(9 downto 2))));
+		ioutd <= iram(to_integer(unsigned(icin.pcout.pc_next(9 downto 2))));
+		iout <= ioutd;
 		if icin.imemwe = '1' and icin.imemidx = idx then
 			iram(to_integer(unsigned(icin.imemadr))) <= icin.imemval;
 		end if;

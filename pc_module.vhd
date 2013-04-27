@@ -51,16 +51,17 @@ signal countq : unsigned(2 downto 0) := "000";
 signal count2 : unsigned(2 downto 0) := "000";
 signal running_q : std_logic_vector(7 downto 0) := "00000000";
 
-signal pcout_d : std_logic_vector(IM_BITS-1 downto 0);
-signal last_pc : std_logic_vector(IM_BITS-1 downto 0);
+signal pc_add : std_logic_vector(IM_BITS-1 downto 0);
+signal pc_jump : std_logic_vector(IM_BITS-1 downto 0);
+signal pc_next : std_logic_vector(IM_BITS-1 downto 0);
 signal running_edge : std_logic := '0';
 signal enabled : std_logic := '0';
 signal go_to_reset : std_logic;
+signal valid : std_logic;
 
 signal gndv : std_logic_vector(31 downto 0) := X"00000000";
 begin
 
-pcout.pc <= pcout_d;
 pcout.tid <= std_logic_vector(countq);
 
 --toDO: modify jump target for interrupt 
@@ -79,51 +80,22 @@ begin
 			running_edge <= '0';
 		end if;
 		enabled <= pcin.running(to_integer(count2));
-		last_pc <= pc(to_integer(count2));
 	end if;
 end process;
 
+valid <= '1' when (running_edge = '1' or pcin.valid = '1') and enabled = '1' else '0';
+pc_next <= pcin.jump_target when (pcin.jump = '1' and enabled = '1') else (others => '0');
+
+pcout.pc_next <= pc_next;
+
 --Main Stage, calculate new PC
 process(clk)
-variable this_pc : std_logic_vector(25 downto 0);
-variable valid : std_logic;
 begin
 	if clk='1' and clk'Event then
 		countq <= count;
 
-		if enabled = '0' then
-			valid := '0';
-		else
-			if running_edge = '1' then
-				valid := '1';
-			else
-				valid := pcin.valid;
-			end if;
-		end if;
-		pcout.valid <= valid;
-
 		count <= count2;
-		this_pc := last_pc;
-		if (pcin.jump = '1' and valid = '1') or go_to_reset = '1' then
-			if go_to_reset = '1' then
-				this_pc := (others => '0');
-			else
-				this_pc := pcin.jump_target;
-			end if;
-		else
-			if valid = '1' then
-				this_pc := std_logic_vector(unsigned(this_pc)+4);
-			end if;
-		end if;
-		pcout_d <= this_pc;
-	end if;
-end process;
-
---Post stage, store PC in ram at T+1
-process(clk)
-begin
-	if clk = '1' and clk'Event then
-			pc(to_integer(countq)) <= pcout_d;
+		pcout.valid <= valid;
 	end if;
 end process;
 

@@ -56,6 +56,7 @@ package octagon_types is
 	
 	type pcout_type is record
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
+		pc_next			: std_logic_vector(IM_BITS-1 downto 0);
 		valid				: std_logic;
 		tid				: std_logic_vector(2 downto 0);
 	end record;
@@ -132,6 +133,7 @@ package octagon_types is
 	type decout_type is record
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		tid				: std_logic_vector(2 downto 0);
+		ftid				: std_logic_vector(2 downto 0);
 		valid				: std_logic;
 		r_s				: std_logic_vector(4 downto 0);
 		r_t				: std_logic_vector(4 downto 0);

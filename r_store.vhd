@@ -45,26 +45,12 @@ architecture Behavioral of r_store is
 begin
 
 --Control signals
-process(clk)
-begin
-	if clk='1' and clk'Event then
-		rout.tid <= lmuxout.tid;
-		rout.r_dest <= lmuxout.r_dest;
-		rout.valid <= lmuxout.valid;
-	end if;
-end process;
+rout.tid <= lmuxout.tid;
+rout.r_dest <= lmuxout.r_dest;
+rout.valid <= lmuxout.valid;
 
 --Smux
-process(clk)
-begin
-	if clk='1' and clk'Event then
-		if lmuxout.load = '1' then
-			rout.smux <= lmuxout.loadv;
-		else
-			rout.smux <= lmuxout.lmux;
-		end if;
-	end if;
-end process;
+rout.smux <= lmuxout.loadv when lmuxout.load = '1' else lmuxout.lmux;
 
 end Behavioral;
 

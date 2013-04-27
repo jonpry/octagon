@@ -46,6 +46,9 @@ type regtype is array(0 to 255) of std_logic_vector(31 downto 0);
 signal regram1 : regtype := (others => (others => '0'));
 signal regram2 : regtype := (others => (others => '0'));
 
+signal r_t : std_logic_vector(31 downto 0);
+signal r_s : std_logic_vector(31 downto 0);
+
 begin
 
 process(clk)
@@ -57,10 +60,12 @@ begin
 		rout.tid <= rin.decout.tid;
 		rout.valid <= rin.decout.valid;
 		
-		adr := rin.decout.tid & rin.decout.r_s;
-		adr2 := rin.decout.tid & rin.decout.r_t;
-		rout.r_s <= regram1(to_integer(unsigned(adr)));
-		rout.r_t <= regram2(to_integer(unsigned(adr2)));
+		adr := rin.decout.ftid & rin.decout.r_s;
+		adr2 := rin.decout.ftid & rin.decout.r_t;
+		r_s <= regram1(to_integer(unsigned(adr)));
+		r_t <= regram2(to_integer(unsigned(adr2)));
+		rout.r_s <= r_s;
+		rout.r_t <= r_t;
 		
 		if rin.reg_we = '1' then
 			regram1(to_integer(unsigned(rin.reg_adr))) <= rin.reg_val;

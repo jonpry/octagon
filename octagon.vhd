@@ -150,7 +150,7 @@ dc_mux : entity work.dc_mux port map(clk,jumpout,dcmemout,dmuxout); --8+1
 
 l_mux : entity work.l_mux port map(clk,dmuxout,lmuxout); --8+2
 
-r_store : entity work.r_store port map(clk,lmuxout,rstoreout); --8+3
+r_store : entity work.r_store port map(clk,lmuxout,rstoreout); --8+2.5 -- async on output of l_mux
 
 process(clk)
 variable notrim : std_logic_vector(20 downto 0);
@@ -170,7 +170,7 @@ begin
 --		notrim(17) := notrim(17) or decout.store;
 --		notrim(17) := notrim(17) or decout.load_unsigned;
 --		notrim(17) := notrim(17) or decout.long_jump;
-		notrim(18) := notrim(18) or jumpout.met;
+--		notrim(18) := notrim(18) or jumpout.met;
 --		notrim(18) := notrim(18) or decout.slt;
 		notrim(19) := notrim(19) or alu2out.arith_ovf;
 	--	notrim(19) := notrim(19) or decout.logic;

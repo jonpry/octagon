@@ -68,11 +68,11 @@ end process;
 process(clk)
 begin
 	if clk='1' and clk'Event then
-		jumpout.jump_target <= aluin.pcjump;
+		jumpout.do_jump <= '1';	
 		if aluin.met = '1' and aluin.do_jump='1' then
-			jumpout.do_jump <= '1';
+			jumpout.jump_target <= aluin.pcjump;
 		else
-			jumpout.do_jump <= '0';
+			jumpout.jump_target <= std_logic_vector(unsigned(aluin.pc) + 4);
 		end if;
 	end if;
 end process;
