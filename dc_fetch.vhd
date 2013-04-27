@@ -30,6 +30,7 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 use work.octagon_types.all;
+use work.octagon_funcs.all;
 
 entity dc_fetch is
 	Port ( 
@@ -54,6 +55,14 @@ tag_fetch4 : entity work.dtag_fetch port map(clk,dcin,"100",dcout.owns(4));
 tag_fetch5 : entity work.dtag_fetch port map(clk,dcin,"101",dcout.owns(5));
 tag_fetch6 : entity work.dtag_fetch port map(clk,dcin,"110",dcout.owns(6));
 tag_fetch7 : entity work.dtag_fetch port map(clk,dcin,"111",dcout.owns(7));
+
+--Catch accesses to non cached memory
+process(clk)
+begin
+	if clk='1' and clk'Event then
+		dcout.nc <= to_std_logic(dcin.adr(DM_BITS+1 downto DM_BITS) /= "00");
+	end if;
+end process;
 
 end Behavioral;
 

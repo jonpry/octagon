@@ -37,7 +37,7 @@ entity octagon is
 		running 			: in std_logic_vector(7 downto 0);
 		int 				: in std_logic_vector(7 downto 0);
 		notrim_o 		: out std_logic_vector(20 downto 0);
-		rstoreoutq		: out rstoreout_type;
+		wbmout			: out wbmout_type;
 		tagidx			: in std_logic_vector(2 downto 0);
 		tagadr			: in std_logic_vector(3 downto 0);
 		tagval			: in std_logic_vector(IM_BITS-1 downto 10);
@@ -80,8 +80,6 @@ signal dcmemin : dcmemin_type;
 signal dcmemout : dcmemout_type;
 
 begin
-
-rstoreoutq <= rstoreout;
 
 --1 PC
 --2 Tag
@@ -145,6 +143,7 @@ dc_fetch : entity work.dc_fetch port map(clk,dcin,dcout);
 
 jump : entity work.jump port map(clk,alu2out,jumpout);		--8
 dc_mem : entity work.dc_mem port map(clk,dcmemin,dcmemout);
+wb_master : entity work.wb_master port map(clk,dcmemin,wbmout);
 
 dc_mux : entity work.dc_mux port map(clk,jumpout,dcmemout,dmuxout); --8+1
 

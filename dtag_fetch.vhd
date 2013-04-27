@@ -51,11 +51,11 @@ begin
 tagadr <= dcin.adr(9 downto 6);
 
 process(clk)
-	variable this_tag : std_logic_vector(IM_BITS-1 downto 10);
+	variable this_tag : std_logic_vector(DM_BITS-1 downto 10);
 begin
 	if clk='1' and clk'Event then
 		this_tag := tagram(to_integer(unsigned(tagadr)));
-		if this_tag = dcin.adr(IM_BITS-1 downto 10) then
+		if this_tag = dcin.adr(DM_BITS-1 downto 10) then
 			own <= '1';
 		else
 			own <= '0';

@@ -84,7 +84,7 @@ begin
 end process;
 
 valid <= '1' when (running_edge = '1' or pcin.valid = '1') and enabled = '1' else '0';
-pc_next <= pcin.jump_target when (pcin.jump = '1' and enabled = '1') else (others => '0');
+pc_next <= (others => '0') when enabled = '0' or running_edge = '1' else pcin.jump_target;
 
 pcout.pc_next <= pc_next;
 
@@ -96,6 +96,7 @@ begin
 
 		count <= count2;
 		pcout.valid <= valid;
+		pcout.pc <= pc_next;
 	end if;
 end process;
 

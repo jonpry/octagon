@@ -47,7 +47,7 @@ ARCHITECTURE behavior OF octagon_test IS
 		running 			: in std_logic_vector(7 downto 0);
 		int 				: in std_logic_vector(7 downto 0);
 		notrim_o 		: out std_logic_vector(20 downto 0);
-		rstoreoutq		: out rstoreout_type;
+		wbmout			: out wbmout_type;
 		tagidx			: in std_logic_vector(2 downto 0);
 		tagadr			: in std_logic_vector(3 downto 0);
 		tagval			: in std_logic_vector(IM_BITS-1 downto 10);
@@ -85,7 +85,7 @@ ARCHITECTURE behavior OF octagon_test IS
 
  	--Outputs
 	signal notrim_o : std_logic_vector(20 downto 0);
-	signal rstoreout : rstoreout_type;
+	signal wbmout : wbmout_type;
    -- Clock period definitions
    constant clk_period : time := 10 ns;
 	
@@ -114,7 +114,7 @@ BEGIN
           dmemadr => imemadr,
           dmemval => imemval,
           dmemwe => imemwe,
-			 rstoreoutq => rstoreout
+			 wbmout => wbmout
         );
 
    -- Clock process definitions

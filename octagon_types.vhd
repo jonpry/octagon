@@ -74,7 +74,7 @@ package octagon_types is
 	end record;
 	
 	type dcfetchin_type is record
-		adr				: std_logic_vector(DM_BITS-1 downto 0);
+		adr				: std_logic_vector(DM_BITS+1 downto 0);
 		tagidx			: std_logic_vector(2 downto 0);
 		tagadr			: std_logic_vector(3 downto 0);
 		tagval			: std_logic_vector(IM_BITS-1 downto 10);
@@ -91,6 +91,7 @@ package octagon_types is
 	
 	type dcfetchout_type is record
 		owns				: std_logic_vector(7 downto 0);
+		nc					: std_logic;
 	end record;
 	
 	type dcmemout_type is record
@@ -183,7 +184,7 @@ package octagon_types is
 		r_s				: std_logic_vector(31 downto 0);
 		r_t				: std_logic_vector(31 downto 0);
 		immediate		: std_logic_vector(31 downto 0);
-		memadr			: std_logic_vector(DM_BITS-1 downto 0);
+		memadr			: std_logic_vector(DM_BITS+1 downto 0);
 		r_dest			: std_logic_vector(4 downto 0);
 		logicop			: logicop_type;
 		add				: std_logic;
@@ -229,6 +230,12 @@ package octagon_types is
 		be					: std_logic_vector(3 downto 0);
 		dcwren			: std_logic;
 		dcwradr			: std_logic_vector(9 downto 0);
+	end record;
+	
+	type wbmout_type is record
+		req				: std_logic;
+		adr				: std_logic_vector(9 downto 0);
+		data				: std_logic_vector(31 downto 0);
 	end record;
 	
 	type jumpout_type is record
