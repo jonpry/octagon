@@ -91,6 +91,7 @@ package octagon_types is
 	
 	type dcfetchout_type is record
 		owns				: std_logic_vector(7 downto 0);
+		sel				: std_logic_vector(2 downto 0);
 		nc					: std_logic;
 	end record;
 	
@@ -220,6 +221,10 @@ package octagon_types is
 		load_unsigned	: std_logic;
 		store				: std_logic;
 		cop0				: cop0_type;
+		sum				: std_logic_vector(31 downto 0);
+		diff				: std_logic_vector(31 downto 0);
+		sum_ovf			: std_logic;
+		diff_ovf			: std_logic;
 	end record;
 	
 	type alu2out_type is record

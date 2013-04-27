@@ -67,27 +67,10 @@ end process;
 
 --Some alu funcs
 process(clk)
-	variable r_s_ext : std_logic_vector(32 downto 0);
-	variable r_t_ext : std_logic_vector(32 downto 0);
-	variable sum 	  : std_logic_vector(32 downto 0);
-	variable diff 	  : std_logic_vector(32 downto 0);
 	variable logic   : std_logic_vector(31 downto 0);
-	variable sum_ovf : std_logic;
-	variable diff_ovf: std_logic;
 	variable	be		  : std_logic_vector(3 downto 0);
 begin
 	if clk='1' and clk'Event then
-	
-		r_s_ext := aluin.r_s(31) & aluin.r_s;
-		r_t_ext := aluin.r_t(31) & aluin.r_t;
-		
-		--Adder
-		sum := std_logic_vector(unsigned(r_s_ext) + unsigned(r_t_ext));
-		sum_ovf := to_std_logic(sum(32) /= sum(31));
-		
-		--Subtractor
-		diff := std_logic_vector(unsigned(r_s_ext) - unsigned(r_t_ext));
-		diff_ovf := to_std_logic(diff(32) /= diff(31));
 		
 		--Logic
 		case aluin.logicop is
@@ -98,14 +81,14 @@ begin
 		end case;
 		
 		if aluin.add = '1' then
-				aluout.arith_ovf <= sum_ovf;
+				aluout.arith_ovf <= aluin.sum_ovf;
 		else
-				aluout.arith_ovf <= diff_ovf;		
+				aluout.arith_ovf <= aluin.diff_ovf;		
 		end if;
 		
 		case aluin.arithmux is
-				when arithmux_add   => aluout.arith <= sum(31 downto 0);
-				when arithmux_sub   => aluout.arith <= diff(31 downto 0);
+				when arithmux_add   => aluout.arith <= aluin.sum;
+				when arithmux_sub   => aluout.arith <= aluin.diff;
 				when arithmux_lui   => aluout.arith <= aluin.r_t(15 downto 0) & X"0000";
 				when arithmux_logic => aluout.arith <= logic;
 		end case;

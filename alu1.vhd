@@ -57,11 +57,15 @@ signal int : std_logic_vector(7 downto 0) := (others => '0');
 
 begin
 
---It is very difficult to get anything done in this stage because of 
+--It *was* very difficult to get anything done in this stage because of 
 --poor timing with blockram output registers
 
 --Control signals
 process(clk)
+	variable r_s_ext : std_logic_vector(32 downto 0);
+	variable r_t_ext : std_logic_vector(32 downto 0);
+	variable sum 	  : std_logic_vector(32 downto 0);
+	variable diff 	  : std_logic_vector(32 downto 0);
 begin
 	if clk='1' and clk'Event then
 		aluout.pc <= aluin.rfetch.pc;
@@ -96,6 +100,20 @@ begin
 		
 		aluout.pcadd <= std_logic_vector(unsigned(aluin.rfetch.pc(IM_BITS-1 downto 2)) + unsigned(aluin.rfetch.immediate(IM_BITS-3 downto 0))) & "00";
 		aluout.memadr <= std_logic_vector(unsigned(aluin.rfetch.r_s(DM_BITS+1 downto 0)) + unsigned(aluin.rfetch.immediate(DM_BITS+1 downto 0)));
+
+		r_s_ext := aluin.rfetch.r_s(31) & aluin.rfetch.r_s;
+		r_t_ext := aluin.rfetch.r_t(31) & aluin.rfetch.r_t;
+		
+		--Adder
+		sum := std_logic_vector(unsigned(r_s_ext) + unsigned(r_t_ext));
+		aluout.sum_ovf <= to_std_logic(sum(32) /= sum(31));
+		aluout.sum <= sum(31 downto 0);
+		
+		--Subtractor
+		diff := std_logic_vector(unsigned(r_s_ext) - unsigned(r_t_ext));
+		aluout.diff_ovf <= to_std_logic(diff(32) /= diff(31));
+		aluout.diff <= diff(31 downto 0);
+
 	end if;
 end process;
 

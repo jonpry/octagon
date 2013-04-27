@@ -48,8 +48,18 @@ signal regram2 : regtype := (others => (others => '0'));
 
 signal r_t : std_logic_vector(31 downto 0);
 signal r_s : std_logic_vector(31 downto 0);
+signal r_tq : std_logic_vector(31 downto 0);
+signal r_sq : std_logic_vector(31 downto 0);
+
+--Prevent absorbtion of output register stage
+attribute keep : string;  
+attribute keep of r_tq: signal is "true";  
+attribute keep of r_sq: signal is "true";  
 
 begin
+
+rout.r_s <= r_sq;
+rout.r_t <= r_tq;
 
 process(clk)
 	variable adr  : std_logic_vector(7 downto 0);
@@ -64,8 +74,8 @@ begin
 		adr2 := rin.decout.ftid & rin.decout.r_t;
 		r_s <= regram1(to_integer(unsigned(adr)));
 		r_t <= regram2(to_integer(unsigned(adr2)));
-		rout.r_s <= r_s;
-		rout.r_t <= r_t;
+		r_sq <= r_s;
+		r_tq <= r_t;
 		
 		if rin.reg_we = '1' then
 			regram1(to_integer(unsigned(rin.reg_adr))) <= rin.reg_val;
