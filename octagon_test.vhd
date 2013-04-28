@@ -185,6 +185,10 @@ BEGIN
 		
       
 		running <= "00000001";
+		
+		wait for 7 us;
+		
+		int <= X"01";
 				
 		wait;
 

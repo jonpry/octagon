@@ -155,7 +155,7 @@ begin
 		aluout.cop0.imask <= imask(tididx);
 		aluout.cop0.ecode <= ecode(tididx);
 		aluout.cop0.int <= int(tididx);
-		aluout.cop0.exc <= int(tididx);
+		aluout.cop0.exc <= exc(tididx);
 
 		wtididx := to_integer(unsigned(aluin.rout.cop0_tid));		
 		if aluin.rout.epc_wr = '1' then
