@@ -63,6 +63,9 @@ begin
 		aluout.memsize <= aluin.memsize;
 		aluout.load_unsigned <= aluin.load_unsigned;
 		aluout.store_cop0 <= aluin.store_cop0;
+		aluout.r_t <= aluin.r_t;
+		aluout.store_hi <= aluin.store_hi;
+		aluout.store_lo <= aluin.store_lo;
 	end if;
 end process;
 
@@ -100,6 +103,12 @@ begin
 				when specmux_epc 		=> aluout.spec <= aluin.cop0.epc;
 				when specmux_status	=> aluout.spec <= (31 downto 19 => '0') & aluin.tid & aluin.cop0.imask & "000000" & aluin.cop0.exc & aluin.cop0.int;
 				when specmux_cause	=> aluout.spec <= (31 downto 16 => '0') & aluin.cop0.ipend & "00" & aluin.cop0.ecode & "00";
+		end case;
+		
+	--Mux for multiplier
+		case aluin.mulmux is
+				when mulmux_hi		=> aluout.mul <= aluin.hi;
+				when mulmux_lo		=> aluout.mul <= aluin.lo;
 		end case;
 		
 	--PC Mux

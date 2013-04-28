@@ -63,6 +63,8 @@ begin
 		end if;
 		
 		lout.store_cop0 <= to_std_logic(dmuxout.valid='1' and dmuxout.store_cop0 = '1');
+		lout.store_hi <= to_std_logic(dmuxout.valid='1' and dmuxout.store_hi='1');
+		lout.store_lo <= to_std_logic(dmuxout.valid='1' and dmuxout.store_lo = '1');
 	end if;
 end process;
 

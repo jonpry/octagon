@@ -85,7 +85,12 @@ begin
 		end if;
 		
 		rout.cop0_tid <= lmuxout.tid;
-		--todo: write enables
+		rout.hi <= lmuxout.lmux;
+		rout.lo <= lmuxout.lmux;
+		
+		rout.hi_wr <= lmuxout.store_hi;
+		rout.lo_wr <= lmuxout.store_lo;
+	
 	end if;
 end process;
 

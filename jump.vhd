@@ -63,6 +63,8 @@ begin
 		jumpout.memsize <= aluin.memsize;
 		jumpout.load_unsigned <= aluin.load_unsigned;
 		jumpout.store_cop0 <= aluin.store_cop0;
+		jumpout.store_hi <= aluin.store_hi;
+		jumpout.store_lo <= aluin.store_lo;
 	end if;
 end process;
 
@@ -120,6 +122,8 @@ begin
 		case aluin.jmux is
 			when jmux_arith	=> jumpout.mux <= aluin.arith;
 			when jmux_spec		=> jumpout.mux <= aluin.spec;
+			when jmux_mul		=> jumpout.mux <= aluin.mul;
+			when jmux_rt		=> jumpout.mux <= aluin.r_t;
 		end case;
 	
 	-- Final barrel shift stage

@@ -42,8 +42,10 @@ end alu1;
 
 architecture Behavioral of alu1 is
 
-type epc_type is array(0 to 7) of std_logic_vector(31 downto 0);
-signal epc : epc_type := (others => (others => '0'));
+type reg_type is array(0 to 7) of std_logic_vector(31 downto 0);
+signal epc : reg_type := (others => (others => '0'));
+signal hi : reg_type := (others => (others => '0'));
+signal lo : reg_type := (others => (others => '0'));
 
 type itype is array(0 to 7) of std_logic_vector(7 downto 0);
 signal imask : itype := (others => (others => '0'));
@@ -93,6 +95,9 @@ begin
 		aluout.load_unsigned <= aluin.rfetch.load_unsigned;
 		aluout.store <= aluin.rfetch.store;
 		aluout.store_cop0 <= aluin.rfetch.store_cop0;
+		aluout.mulmux <= aluin.rfetch.mulmux;
+		aluout.store_hi <= aluin.rfetch.store_hi;
+		aluout.store_lo <= aluin.rfetch.store_lo;
 		
 		if aluin.rfetch.use_immediate = '1' then
 			r_t := aluin.rfetch.immediate;
@@ -156,6 +161,9 @@ begin
 		aluout.cop0.ecode <= ecode(tididx);
 		aluout.cop0.int <= int(tididx);
 		aluout.cop0.exc <= exc(tididx);
+		
+		aluout.hi <= hi(tididx);
+		aluout.lo <= lo(tididx);
 
 		wtididx := to_integer(unsigned(aluin.rout.cop0_tid));		
 		if aluin.rout.epc_wr = '1' then
@@ -174,6 +182,14 @@ begin
 		if aluin.rout.cause_wr = '1' then
 			ipend(wtididx) <= aluin.rout.cop0.ipend;		
 			ecode(wtididx) <= aluin.rout.cop0.ecode;
+		end if;
+		
+		if aluin.rout.hi_wr = '1' then
+			hi(wtididx) <= aluin.rout.hi;
+		end if;
+		
+		if aluin.rout.lo_wr = '1' then
+			lo(wtididx) <= aluin.rout.lo;
 		end if;
 		
 	end if;

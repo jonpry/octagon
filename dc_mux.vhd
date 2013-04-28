@@ -69,6 +69,8 @@ begin
 		muxout.do_int <= jumpout.do_int;
 		muxout.epc <= jumpout.epc;
 		muxout.ipend <= jumpout.ipend;
+		muxout.store_hi <= jumpout.store_hi;
+		muxout.store_lo <= jumpout.store_lo;
 	end if;
 end process;
 

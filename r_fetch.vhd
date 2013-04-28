@@ -74,6 +74,7 @@ begin
 		adr2 := rin.decout.ftid & rin.decout.r_t;
 		r_s <= regram1(to_integer(unsigned(adr)));
 		r_t <= regram2(to_integer(unsigned(adr2)));
+		
 		r_sq <= r_s;
 		r_tq <= r_t;
 		
@@ -109,6 +110,8 @@ process(clk)
 	variable cop0 : std_logic;
 	variable copreg : std_logic_vector(4 downto 0);
 	variable mtc0 : std_logic;
+	variable mmul : std_logic;
+	variable mtmul : std_logic;
 begin
 	if clk='1' and clk'Event then
 		opcode := rin.decout.instr(31 downto 26);
@@ -126,6 +129,12 @@ begin
 		copreg := instr(15 downto 11);
 		mtc0 := to_std_logic(cop0 = '1' and instr(25 downto 21) = "00100");
 		rout.store_cop0 <= mtc0;
+		
+	--Multiplier
+		mmul := to_std_logic(opzero='1' and func(5 downto 2) = "0100");
+		mtmul := to_std_logic(mmul = '1' and func(0) = '1');
+		rout.store_hi <= to_std_logic(mtmul = '1' and func(1) = '0');
+		rout.store_lo <= to_std_logic(mtmul = '1' and func(1) = '0');
 		
 	--link instructions have r_dest = 31
 		if link = '1' then
@@ -209,7 +218,8 @@ begin
 		reg_store := to_std_logic(load='1' or arith='1' or shift_do='1' or
 					opcode(5 downto 0) = "000011" or --jal
 					(opzero='1' and func(5 downto 0) = "001001") or --jalr
-					(cop0='1' and instr(25 downto 21) = "00000")); --mfc0 
+					(cop0='1' and instr(25 downto 21) = "00000") or --mfc0
+					(opzero='1' and func(5 downto 2) = "0100" and func(0) = '1')); --mfmul
 		rout.reg_store <= reg_store;
 		rout.store_cond <= to_std_logic(slt = '1' or 
 					(link='1' and reg_store='0'));
@@ -226,7 +236,8 @@ begin
 	--from operating. jump pc is calculate elseware anyways
 	--Stores use r_t for data in spite of having immediates
 	--cop0 is register only
-		rout.use_immediate <= to_std_logic(opzero = '0' and jumpi = '0' and store = '0' and cop0 = '0');
+		rout.use_immediate <= to_std_logic(opzero = '0' and jumpi = '0' and 
+							store = '0' and cop0 = '0' and mmul = '0');
 		
 		if opzero = '1' then
 			case func(1 downto 0) is
@@ -245,6 +256,14 @@ begin
 				when others => rout.logicop <= logicop_nor;
 			end case;
 		end if;
+		
+	--Priority encode for mulmux
+		if func(1) = '1' then
+			rout.mulmux <= mulmux_lo;
+		else
+			rout.mulmux <= mulmux_hi;
+		end if;
+	
 		
 	--Priority encoder for pcmux
 		if opcode(5 downto 1) = "00001" then
@@ -269,10 +288,18 @@ begin
 		end if;
 		
 	--Priority encoder for jmux
-		if arith = '1' or mtc0='1' then
+		if arith = '1' then
 			rout.jmux <= jmux_arith;
 		else
-			rout.jmux <= jmux_spec;
+			if mtc0='1' or mtmul='1' then
+				rout.jmux <= jmux_rt;
+			else
+				if mmul='1' then
+					rout.jmux <= jmux_mul;
+				else
+					rout.jmux <= jmux_spec;
+				end if;
+			end if;
 		end if;
 		
 	--Priority encoder for special mux
@@ -291,7 +318,7 @@ begin
 		end if;
 		
 	--Priority encoder for alu2mux
-		if add = '1' or cop0 = '1' then
+		if add = '1' then
 			rout.arithmux <= arithmux_add;
 		else
 			if add = '1' then
