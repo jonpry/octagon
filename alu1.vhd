@@ -92,6 +92,7 @@ begin
 		aluout.memsize <= aluin.rfetch.memsize;
 		aluout.load_unsigned <= aluin.rfetch.load_unsigned;
 		aluout.store <= aluin.rfetch.store;
+		aluout.store_cop0 <= aluin.rfetch.store_cop0;
 		
 		if aluin.rfetch.use_immediate = '1' then
 			r_t := aluin.rfetch.immediate;
@@ -155,16 +156,23 @@ begin
 		aluout.cop0.ecode <= ecode(tididx);
 		aluout.cop0.int <= int(tididx);
 		aluout.cop0.exc <= int(tididx);
-		
-		if aluin.cop0_wr = '1' then
-			wtididx := to_integer(unsigned(aluin.cop0_tid));
-			epc(wtididx) <= aluin.cop0.epc;
-			ipend(wtididx) <= aluin.cop0.ipend;
-			imask(wtididx) <= aluin.cop0.imask;
-			ecode(wtididx) <= aluin.cop0.ecode;
-			int(wtididx) <= aluin.cop0.int;
-			exc(wtididx) <= aluin.cop0.exc;
+
+		wtididx := to_integer(unsigned(aluin.rout.cop0_tid));		
+		if aluin.rout.epc_wr = '1' then
+			epc(wtididx) <= aluin.rout.cop0.epc;
 		end if;
+		
+		if aluin.rout.status_wr = '1' then
+			imask(wtididx) <= aluin.rout.cop0.imask;
+			int(wtididx) <= aluin.rout.cop0.int;
+			exc(wtididx) <= aluin.rout.cop0.exc;
+		end if;
+		
+		if aluin.rout.cause_wr = '1' then
+			ipend(wtididx) <= aluin.rout.cop0.ipend;		
+			ecode(wtididx) <= aluin.rout.cop0.ecode;
+		end if;
+		
 	end if;
 end process;
 

@@ -50,12 +50,16 @@ begin
 	if clk='1' and clk'Event then
 		lout.tid <= dmuxout.tid;
 		lout.r_dest <= dmuxout.r_dest;
+		lout.store_cop0 <= dmuxout.store_cop0;
 
+		--Valid here really mean reg write
 		if dmuxout.reg_store = '1' or (dmuxout.store_cond = '1' and dmuxout.met = '1') then
 			lout.valid <= to_std_logic(dmuxout.valid='1' and dmuxout.r_dest /= "00000");
 		else
 			lout.valid <= '0';
 		end if;
+		
+		lout.store_cop0 <= to_std_logic(dmuxout.valid='1' and dmuxout.store_cop0 = '1');
 	end if;
 end process;
 

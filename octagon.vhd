@@ -38,9 +38,6 @@ entity octagon is
 		int 				: in std_logic_vector(7 downto 0);
 		notrim_o 		: out std_logic_vector(20 downto 0);
 		wbmout			: out wbmout_type;
-		cop0				: in cop0_type;
-		cop0_wr			: in std_logic;
-		cop0_tid			: in std_logic_vector(2 downto 0);
 		tagidx			: in std_logic_vector(2 downto 0);
 		tagadr			: in std_logic_vector(3 downto 0);
 		tagval			: in std_logic_vector(IM_BITS-1 downto 10);
@@ -131,9 +128,7 @@ rin.reg_adr <= rstoreout.tid & rstoreout.r_dest;
 rin.reg_we <= rstoreout.valid;
 
 alu1in.rfetch <= rout;
-alu1in.cop0 <= cop0;
-alu1in.cop0_wr <= cop0_wr;
-alu1in.cop0_tid <= cop0_tid;
+alu1in.rout <= rstoreout;
 
 pc_module: entity work.pc_module port map(clk,pcin,pcout);  --1
 

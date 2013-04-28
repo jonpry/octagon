@@ -123,6 +123,7 @@ package octagon_types is
 		memadr			: std_logic_vector(1 downto 0);
 		load_unsigned 	: std_logic;
 		load				: std_logic;
+		store_cop0		: std_logic;
 	end record;
 	
 	type shift_type is record
@@ -175,6 +176,7 @@ package octagon_types is
 		memsize			: std_logic_vector(1 downto 0);
 		load_unsigned	: std_logic;
 		store				: std_logic;
+		store_cop0		: std_logic;
 	end record;
 	
 	type cop0_type is record
@@ -184,13 +186,6 @@ package octagon_types is
 		exc				: std_logic;
 		int				: std_logic;
 		ecode				: std_logic_vector(3 downto 0);
-	end record;
-	
-	type alu1in_type is record
-		cop0				: cop0_type;
-		rfetch			: rfetchout_type;
-		cop0_wr			: std_logic;
-		cop0_tid			: std_logic_vector(2 downto 0);
 	end record;
 	
 	type alu1out_type is record
@@ -225,6 +220,7 @@ package octagon_types is
 		diff				: std_logic_vector(31 downto 0);
 		sum_ovf			: std_logic;
 		diff_ovf			: std_logic;
+		store_cop0		: std_logic;
 	end record;
 	
 	type alu2out_type is record
@@ -252,6 +248,7 @@ package octagon_types is
 		be					: std_logic_vector(3 downto 0);
 		dcwren			: std_logic;
 		dcwradr			: std_logic_vector(9 downto 0);
+		store_cop0		: std_logic;
 	end record;
 	
 	type wbmout_type is record
@@ -278,6 +275,7 @@ package octagon_types is
 		memadr			: std_logic_vector(1 downto 0);
 		memsize			: std_logic_vector(1 downto 0);
 		load_unsigned	: std_logic;
+		store_cop0		: std_logic;
 	end record;
 	
 	type rstoreout_type is record
@@ -285,6 +283,11 @@ package octagon_types is
 		valid				: std_logic;
 		r_dest			: std_logic_vector(4 downto 0);
 		smux				: std_logic_vector(31 downto 0);
+		cop0				: cop0_type;
+		epc_wr			: std_logic;
+		cause_wr			: std_logic;
+		status_wr		: std_logic;
+		cop0_tid			: std_logic_vector(2 downto 0);
 	end record;
 	
 	type lmuxout_type is record
@@ -294,6 +297,7 @@ package octagon_types is
 		lmux				: std_logic_vector(31 downto 0);
 		loadv				: std_logic_vector(31 downto 0);
 		load				: std_logic;
+		store_cop0		: std_logic;
 	end record;
 	
 	type dcmemin_type is record
@@ -303,6 +307,11 @@ package octagon_types is
 		dmemwe			: std_logic;
 		dcout				: dcfetchout_type;
 		alu2out			: alu2out_type;
+	end record;
+	
+	type alu1in_type is record
+		rfetch			: rfetchout_type;
+		rout				: rstoreout_type;
 	end record;
 	
 end package;

@@ -52,5 +52,23 @@ rout.valid <= lmuxout.valid;
 --Smux
 rout.smux <= lmuxout.loadv when lmuxout.load = '1' else lmuxout.lmux;
 
+process(clk)
+begin
+	if clk='1' and clk'Event then
+		rout.cop0.epc <= lmuxout.lmux;
+		rout.cop0.imask <= lmuxout.lmux(15 downto 8);
+		rout.cop0.ipend <= lmuxout.lmux(15 downto 8);
+		rout.cop0.ecode <= lmuxout.lmux(5 downto 2);
+		rout.cop0.int <= lmuxout.lmux(0);
+		rout.cop0.exc <= lmuxout.lmux(1);
+		
+		rout.cop0_tid <= lmuxout.tid;
+		rout.status_wr <= to_std_logic(lmuxout.r_dest = "01100" and lmuxout.store_cop0 = '1');
+		rout.cause_wr <= to_std_logic(lmuxout.r_dest = "01101" and lmuxout.store_cop0 = '1');
+		rout.cause_wr <= to_std_logic(lmuxout.r_dest = "01110" and lmuxout.store_cop0 = '1');
+		--todo: write enables
+	end if;
+end process;
+
 end Behavioral;
 

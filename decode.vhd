@@ -44,9 +44,12 @@ architecture Behavioral of decode is
 
 begin
 
-decout.r_s <= muxout.instr(25 downto 21);
+--mfc0 needs to perform a move instruction which is emulated through
+--the add pipeline by using the zero register
+decout.r_s <= "00000" when muxout.instr(31 downto 26) = "010000" --cop0
+					else muxout.instr(25 downto 21);
 --bltz and the like are comparizons against zero, so we force zero reg usage
-decout.r_t <= "00000" when muxout.instr(31 downto 25) = "000001" else muxout.instr(20 downto 16);
+decout.r_t <= "00000" when muxout.instr(31 downto 26) = "000001" else muxout.instr(20 downto 16);
 decout.ftid <= muxout.tid;
 
 process(clk)

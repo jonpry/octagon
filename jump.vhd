@@ -61,6 +61,7 @@ begin
 		jumpout.memadr <= aluin.memadr;
 		jumpout.memsize <= aluin.memsize;
 		jumpout.load_unsigned <= aluin.load_unsigned;
+		jumpout.store_cop0 <= aluin.store_cop0;
 	end if;
 end process;
 

@@ -62,6 +62,7 @@ begin
 		aluout.dcwradr <= aluin.memadr(9 downto 0);
 		aluout.memsize <= aluin.memsize;
 		aluout.load_unsigned <= aluin.load_unsigned;
+		aluout.store_cop0 <= aluin.store_cop0;
 	end if;
 end process;
 

@@ -108,6 +108,7 @@ process(clk)
 	variable store : std_logic;
 	variable cop0 : std_logic;
 	variable copreg : std_logic_vector(4 downto 0);
+	variable mtc0 : std_logic;
 begin
 	if clk='1' and clk'Event then
 		opcode := rin.decout.instr(31 downto 26);
@@ -123,12 +124,14 @@ begin
 	-- Coprocessor stuff
 		cop0 := to_std_logic(opcode = "010000");
 		copreg := instr(15 downto 11);
+		mtc0 := to_std_logic(cop0 = '1' and instr(25 downto 21) = "00100");
+		rout.store_cop0 <= mtc0;
 		
 	--link instructions have r_dest = 31
 		if link = '1' then
 			rout.r_dest <= "11111";
 	--Type R instructions
-		elsif opzero = '1' then
+		elsif opzero = '1' or mtc0 = '1' then
 			rout.r_dest <= instr(15 downto 11);
 		else
 			rout.r_dest <= instr(20 downto 16);
@@ -222,7 +225,8 @@ begin
 	--Branch instructions do comparison on the 2 registers, so we prevent the mux into the alu
 	--from operating. jump pc is calculate elseware anyways
 	--Stores use r_t for data in spite of having immediates
-		rout.use_immediate <= to_std_logic(opzero = '0' and jumpi = '0' and store = '0');
+	--cop0 is register only
+		rout.use_immediate <= to_std_logic(opzero = '0' and jumpi = '0' and store = '0' and cop0 = '0');
 		
 		if opzero = '1' then
 			case func(1 downto 0) is
@@ -265,7 +269,7 @@ begin
 		end if;
 		
 	--Priority encoder for jmux
-		if arith = '1' then
+		if arith = '1' or mtc0='1' then
 			rout.jmux <= jmux_arith;
 		else
 			rout.jmux <= jmux_spec;
@@ -287,7 +291,7 @@ begin
 		end if;
 		
 	--Priority encoder for alu2mux
-		if add = '1' then
+		if add = '1' or cop0 = '1' then
 			rout.arithmux <= arithmux_add;
 		else
 			if add = '1' then
