@@ -133,8 +133,8 @@ begin
 	--Multiplier
 		mmul := to_std_logic(opzero='1' and func(5 downto 2) = "0100");
 		mtmul := to_std_logic(mmul = '1' and func(0) = '1');
-		rout.store_hi <= to_std_logic(mtmul = '1' and func(1) = '0');
-		rout.store_lo <= to_std_logic(mtmul = '1' and func(1) = '0');
+		rout.store_hi <= to_std_logic(mmul = '1' and func(1) = '0');
+		rout.store_lo <= to_std_logic(mmul = '1' and func(1) = '0');
 		
 	--link instructions have r_dest = 31
 		if link = '1' then
