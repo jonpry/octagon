@@ -56,10 +56,6 @@ end octagon;
 
 architecture Behavioral of octagon is
 
-signal rsave : std_logic_vector(31 downto 0);
-signal rsave2 : std_logic_vector(20 downto 0);
-signal rsave3 : std_logic_vector(20 downto 0);
-
 signal pcin : pcin_type;
 signal pcout : pcout_type;
 signal icin : icfetchin_type;
@@ -182,14 +178,14 @@ begin
 --		notrim(20) := notrim(20) or decout.math_unsigned;
 	--	notrim(20) := notrim(20) or alu2out.lt;
 
-		rsave2 <= notrim;
-		notrim := rsave2;
+	--	rsave2 <= notrim;
+	--	notrim := rsave2;
 		
 	--	notrim(15 downto 0) := notrim(15 downto 0) or alu1out.memadr(15 downto 0) or ( (31 downto DM_BITS => '0') & alu1out.memadr((DM_BITS-1) downto 16));
 	--	notrim(15 downto 0) := notrim(15 downto 0) or alu2out.diff(15 downto 0) or alu2out.diff(31 downto 16);
 	 	
-		rsave3 <= notrim;
-		notrim := rsave3;
+	--	rsave3 <= notrim;
+	--	notrim := rsave3;
 		
 	--	notrim(15 downto 0) := notrim(15 downto 0) or alu2out.logic(15 downto 0) or alu2out.logic(31 downto 16);
 		

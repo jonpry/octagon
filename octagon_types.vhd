@@ -37,6 +37,7 @@ package octagon_types is
 
 	type tag_type is array(0 to 15) of std_logic_vector(IM_BITS-1 downto 10);
 	type iout_type is array(0 to 7) of std_logic_vector(31 downto 0);
+	type dout_type is array(0 to 3) of std_logic_vector(31 downto 0);
 	type shiftop_type is (shiftop_none, shiftop_left, shiftop_right, shiftop_right_neg);
 	type logicop_type is (logicop_and, logicop_or, logicop_xor, logicop_nor);
 	type arithmux_type is (arithmux_add, arithmux_sub, arithmux_lui, arithmux_logic);
@@ -96,7 +97,7 @@ package octagon_types is
 	end record;
 	
 	type dcmemout_type is record
-		data				: iout_type;
+		data				: dout_type;
 		sel				: std_logic_vector(1 downto 0);
 	end record;
 	
@@ -109,7 +110,7 @@ package octagon_types is
 	
 	type dcmuxout_type is record
 		data				: std_logic_vector(31 downto 0);
-		slt				: std_logic_vector(31 downto 0);
+		slt				: std_logic;
 		mux				: std_logic_vector(31 downto 0);
 		shiftout			: std_logic_vector(31 downto 0);
 		tid				: std_logic_vector(2 downto 0);
@@ -266,7 +267,7 @@ package octagon_types is
 		met				: std_logic;
 		mux				: std_logic_vector(31 downto 0);
 		shiftout			: std_logic_vector(31 downto 0);
-		slt				: std_logic_vector(31 downto 0);
+		slt				: std_logic;
 		lmux				: lmux_type;
 		r_dest			: std_logic_vector(4 downto 0);
 		reg_store		: std_logic;

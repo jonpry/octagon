@@ -73,7 +73,7 @@ begin
 		case dmuxout.lmux is
 			when lmux_shift	=> lout.lmux <= dmuxout.shiftout;
 			when lmux_jmux		=> lout.lmux <= dmuxout.mux;
-			when lmux_slt		=> lout.lmux <= dmuxout.slt;
+			when lmux_slt		=> lout.lmux <= (30 downto 0=>'0') & dmuxout.slt;
 		end case;
 		
 		data := dmuxout.data;

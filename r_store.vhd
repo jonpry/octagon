@@ -65,7 +65,7 @@ begin
 		rout.cop0_tid <= lmuxout.tid;
 		rout.status_wr <= to_std_logic(lmuxout.r_dest = "01100" and lmuxout.store_cop0 = '1');
 		rout.cause_wr <= to_std_logic(lmuxout.r_dest = "01101" and lmuxout.store_cop0 = '1');
-		rout.cause_wr <= to_std_logic(lmuxout.r_dest = "01110" and lmuxout.store_cop0 = '1');
+		rout.epc_wr <= to_std_logic(lmuxout.r_dest = "01110" and lmuxout.store_cop0 = '1');
 		--todo: write enables
 	end if;
 end process;

@@ -84,12 +84,8 @@ process(clk)
 	variable shift_part : std_logic_vector(31 downto 0);
 begin
 	if clk='1' and clk'Event then
-		if aluin.met = '1' then
-			jumpout.slt <= (31 downto 1 => '0') & "1";
-		else
-			jumpout.slt <= (31 downto 0 => '0');
-		end if;
-
+		jumpout.slt <= aluin.met;
+		
 	-- Potentially add load to this mux
 		case aluin.jmux is
 			when jmux_arith	=> jumpout.mux <= aluin.arith;
