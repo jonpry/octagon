@@ -74,8 +74,8 @@ begin
 			dram(to_integer(unsigned(way & dcin.alu2out.dcwradr(9 downto 2))))(31 downto 24) <= dcin.alu2out.store_data(31 downto 24);
 		end if;
 		
-		if dcin.dmemwe = '1' and idxi = idx then
-			dram(to_integer(unsigned(dcin.dmemadr))) <= dcin.dmemval;
+		if dcin.dmemwe = '1' and dcin.dmemidx(2 downto 1) = idx then
+			dram(to_integer(unsigned(dcin.dmemidx(0) & dcin.dmemadr))) <= dcin.dmemval;
 		end if;
 	--TODO: this is all wrong. access to dcache ways must
 	--be on same address for read and write

@@ -101,7 +101,7 @@ begin
 		end if;
 		aluout.r_t <= r_t;
 		
-		aluout.pcadd <= std_logic_vector(unsigned(aluin.rfetch.pc(IM_BITS-1 downto 2)) + unsigned(aluin.rfetch.immediate(IM_BITS-3 downto 0))) & "00";
+		aluout.pcadd <= std_logic_vector(unsigned(aluin.rfetch.pc(IM_BITS-1 downto 2)) + unsigned(aluin.rfetch.immediate(IM_BITS-3 downto 0)) + 1) & "00";
 		aluout.memadr <= std_logic_vector(unsigned(aluin.rfetch.r_s(DM_BITS+1 downto 0)) + unsigned(aluin.rfetch.immediate(DM_BITS+1 downto 0)));
 
 		r_s_ext := aluin.rfetch.r_s(31) & aluin.rfetch.r_s;
