@@ -125,6 +125,9 @@ package octagon_types is
 		load_unsigned 	: std_logic;
 		load				: std_logic;
 		store_cop0		: std_logic;
+		do_int			: std_logic;
+		epc				: std_logic_vector(IM_BITS-1 downto 0);
+		ipend				: std_logic_vector(7 downto 0);
 	end record;
 	
 	type shift_type is record
@@ -250,6 +253,7 @@ package octagon_types is
 		dcwren			: std_logic;
 		dcwradr			: std_logic_vector(9 downto 0);
 		store_cop0		: std_logic;
+		imask				: std_logic_vector(7 downto 0);
 	end record;
 	
 	type wbmout_type is record
@@ -277,6 +281,9 @@ package octagon_types is
 		memsize			: std_logic_vector(1 downto 0);
 		load_unsigned	: std_logic;
 		store_cop0		: std_logic;
+		do_int			: std_logic;
+		epc				: std_logic_vector(IM_BITS-1 downto 0);
+		ipend				: std_logic_vector(7 downto 0);
 	end record;
 	
 	type rstoreout_type is record
@@ -287,7 +294,8 @@ package octagon_types is
 		cop0				: cop0_type;
 		epc_wr			: std_logic;
 		cause_wr			: std_logic;
-		status_wr		: std_logic;
+		exc_wr			: std_logic;
+		int_wr			: std_logic;
 		cop0_tid			: std_logic_vector(2 downto 0);
 	end record;
 	
@@ -299,6 +307,9 @@ package octagon_types is
 		loadv				: std_logic_vector(31 downto 0);
 		load				: std_logic;
 		store_cop0		: std_logic;
+		do_int			: std_logic;
+		epc				: std_logic_vector(IM_BITS-1 downto 0);
+		ipend				: std_logic_vector(7 downto 0);
 	end record;
 	
 	type dcmemin_type is record

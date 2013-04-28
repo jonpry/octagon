@@ -66,6 +66,9 @@ begin
 		muxout.load <= jumpout.load;
 		muxout.load_unsigned <= jumpout.load_unsigned;
 		muxout.store_cop0 <= jumpout.store_cop0;
+		muxout.do_int <= jumpout.do_int;
+		muxout.epc <= jumpout.epc;
+		muxout.ipend <= jumpout.ipend;
 	end if;
 end process;
 

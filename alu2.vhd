@@ -152,6 +152,18 @@ begin
 	end if;
 end process;
 
+--Handle interrupt enables
+process(clk)
+begin
+	if clk='1' and clk'Event then
+		if aluin.cop0.int = '1' and aluin.cop0.exc = '0' then
+			aluout.imask <= aluin.cop0.imask;
+		else
+			aluout.imask <= X"FF";
+		end if;
+	end if;
+end process;
+
 --Comparisons
 process(clk)
 	variable eq : std_logic;

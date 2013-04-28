@@ -36,6 +36,7 @@ entity jump is
 	Port ( 
 		clk : in std_logic;
 		aluin : in alu2out_type;
+		ints : in std_logic_vector(7 downto 0);
 		jumpout : out jumpout_type
 	);
 end jump;
@@ -65,16 +66,45 @@ begin
 	end if;
 end process;
 
+--if ints & ~imask /= 0
+--		ipend <= ints &! imask
+--		if dojump 
+--			epc = pcjump
+--		else
+--			if ovf  --ovf should not store to register
+--				epc = pc
+--			else
+--	  		   epc = pc + 4
+--		cause <= int
+--		exc <= '1'
+
 --Jump processing
 process(clk)
+	variable jump_target : std_logic_vector(IM_BITS-1 downto 0);
+	variable ipend : std_logic_vector(7 downto 0);
 begin
 	if clk='1' and clk'Event then
 		jumpout.do_jump <= '1';	
 		if aluin.met = '1' and aluin.do_jump='1' then
-			jumpout.jump_target <= aluin.pcjump;
+			jump_target := aluin.pcjump;
 		else
-			jumpout.jump_target <= std_logic_vector(unsigned(aluin.pc) + 4);
+			jump_target := std_logic_vector(unsigned(aluin.pc) + 4);
 		end if;
+		
+		ipend := ints and (not aluin.imask);
+		
+		--TODO: handle ovf
+		if ipend /= X"00" then
+			jumpout.jump_target <= (others => '0');
+			jumpout.do_int <= '1';
+		else
+			jumpout.jump_target <= jump_target;
+			jumpout.do_int <= '0';
+		end if;
+		
+		jumpout.epc <= jump_target;
+		jumpout.ipend <= ipend;
+		
 	end if;
 end process;
 

@@ -141,7 +141,7 @@ alu1 : entity work.alu1 port map(clk,alu1in,alu1out);			--6
 alu2 : entity work.alu2 port map(clk,alu1out,alu2out);		--7
 dc_fetch : entity work.dc_fetch port map(clk,dcin,dcout);
 
-jump : entity work.jump port map(clk,alu2out,jumpout);		--8
+jump : entity work.jump port map(clk,alu2out,int,jumpout);		--8
 dc_mem : entity work.dc_mem port map(clk,dcmemin,dcmemout);
 wb_master : entity work.wb_master port map(clk,dcmemin,wbmout);
 

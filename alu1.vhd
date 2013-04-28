@@ -162,9 +162,12 @@ begin
 			epc(wtididx) <= aluin.rout.cop0.epc;
 		end if;
 		
-		if aluin.rout.status_wr = '1' then
+		if aluin.rout.int_wr = '1' then
 			imask(wtididx) <= aluin.rout.cop0.imask;
 			int(wtididx) <= aluin.rout.cop0.int;
+		end if;
+
+		if aluin.rout.exc_wr = '1' then
 			exc(wtididx) <= aluin.rout.cop0.exc;
 		end if;
 		
