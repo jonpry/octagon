@@ -66,6 +66,7 @@ process(clk)
 	variable r_t_ext : std_logic_vector(32 downto 0);
 	variable sum 	  : std_logic_vector(32 downto 0);
 	variable diff 	  : std_logic_vector(32 downto 0);
+	variable	r_t	  : std_logic_vector(31 downto 0);
 begin
 	if clk='1' and clk'Event then
 		aluout.pc <= aluin.rfetch.pc;
@@ -93,16 +94,17 @@ begin
 		aluout.store <= aluin.rfetch.store;
 		
 		if aluin.rfetch.use_immediate = '1' then
-			aluout.r_t <= aluin.rfetch.immediate;
+			r_t := aluin.rfetch.immediate;
 		else
-			aluout.r_t <= aluin.rfetch.r_t;
+			r_t := aluin.rfetch.r_t;
 		end if;
+		aluout.r_t <= r_t;
 		
 		aluout.pcadd <= std_logic_vector(unsigned(aluin.rfetch.pc(IM_BITS-1 downto 2)) + unsigned(aluin.rfetch.immediate(IM_BITS-3 downto 0))) & "00";
 		aluout.memadr <= std_logic_vector(unsigned(aluin.rfetch.r_s(DM_BITS+1 downto 0)) + unsigned(aluin.rfetch.immediate(DM_BITS+1 downto 0)));
 
 		r_s_ext := aluin.rfetch.r_s(31) & aluin.rfetch.r_s;
-		r_t_ext := aluin.rfetch.r_t(31) & aluin.rfetch.r_t;
+		r_t_ext := r_t(31) & r_t;
 		
 		--Adder
 		sum := std_logic_vector(unsigned(r_s_ext) + unsigned(r_t_ext));
