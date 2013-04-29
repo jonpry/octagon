@@ -112,16 +112,23 @@ begin
 		r_s_ext := aluin.rfetch.r_s(31) & aluin.rfetch.r_s;
 		r_t_ext := r_t(31) & r_t;
 		
-		--Adder
+	--Adder
 		sum := std_logic_vector(unsigned(r_s_ext) + unsigned(r_t_ext));
 		aluout.sum_ovf <= to_std_logic(sum(32) /= sum(31));
 		aluout.sum <= sum(31 downto 0);
 		
-		--Subtractor
+	--Subtractor
 		diff := std_logic_vector(unsigned(r_s_ext) - unsigned(r_t_ext));
 		aluout.diff_ovf <= to_std_logic(diff(32) /= diff(31));
 		aluout.diff <= diff(31 downto 0);
 
+	--Compare
+		aluout.eq <= to_std_logic(aluin.rfetch.r_s = aluin.rfetch.r_t);
+		if aluin.rfetch.comp_unsigned = '1' then
+			aluout.lt <= to_std_logic(unsigned(aluin.rfetch.r_s) < unsigned(aluin.rfetch.r_t));				
+		else
+			aluout.lt <= to_std_logic(signed(aluin.rfetch.r_s) < signed(aluin.rfetch.r_t));
+		end if;
 	end if;
 end process;
 

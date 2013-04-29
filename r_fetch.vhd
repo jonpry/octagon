@@ -133,8 +133,8 @@ begin
 	--Multiplier
 		mmul := to_std_logic(opzero='1' and func(5 downto 2) = "0100");
 		mtmul := to_std_logic(mmul = '1' and func(0) = '1');
-		rout.store_hi <= to_std_logic(mmul = '1' and func(1) = '0');
-		rout.store_lo <= to_std_logic(mmul = '1' and func(1) = '0');
+		rout.store_hi <= to_std_logic(mmul = '1' and func(1 downto 0) = "01");
+		rout.store_lo <= to_std_logic(mmul = '1' and func(1 downto 0) = "11" );
 		
 	--link instructions have r_dest = 31
 		if link = '1' then
@@ -219,7 +219,7 @@ begin
 					opcode(5 downto 0) = "000011" or --jal
 					(opzero='1' and func(5 downto 0) = "001001") or --jalr
 					(cop0='1' and instr(25 downto 21) = "00000") or --mfc0
-					(opzero='1' and func(5 downto 2) = "0100" and func(0) = '1')); --mfmul
+					(opzero='1' and func(5 downto 2) = "0100" and func(0) = '0')); --mfmul
 		rout.reg_store <= reg_store;
 		rout.store_cond <= to_std_logic(slt = '1' or 
 					(link='1' and reg_store='0'));
@@ -288,10 +288,10 @@ begin
 		end if;
 		
 	--Priority encoder for jmux
-		if arith = '1' then
+		if arith = '1' or mtmul='1' then
 			rout.jmux <= jmux_arith;
 		else
-			if mtc0='1' or mtmul='1' then
+			if mtc0='1' then
 				rout.jmux <= jmux_rt;
 			else
 				if mmul='1' then

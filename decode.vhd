@@ -46,7 +46,7 @@ begin
 
 decout.r_s <= muxout.instr(25 downto 21);
 --bltz and the like are comparizons against zero, so we force zero reg usage
-decout.r_t <= muxout.instr(20 downto 16); --"00000" when muxout.instr(31 downto 26) = "000001" else muxout.instr(20 downto 16);
+decout.r_t <= "00000" when muxout.instr(31 downto 26) = "000001" else muxout.instr(20 downto 16);
 decout.ftid <= muxout.tid;
 
 process(clk)

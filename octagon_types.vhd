@@ -236,6 +236,8 @@ package octagon_types is
 		mulmux			: mulmux_type;
 		store_hi			: std_logic;
 		store_lo			: std_logic;
+		eq					: std_logic;
+		lt					: std_logic;
 	end record;
 	
 	type alu2out_type is record
