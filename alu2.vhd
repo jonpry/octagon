@@ -66,6 +66,7 @@ begin
 		aluout.r_t <= aluin.r_t;
 		aluout.store_hi <= aluin.store_hi;
 		aluout.store_lo <= aluin.store_lo;
+		aluout.rfe <= aluin.rfe;
 	end if;
 end process;
 
@@ -117,6 +118,7 @@ begin
 				when pcmux_reg		=> aluout.pcjump <= aluin.r_s(IM_BITS-1 downto 0);
 				--TODO: this is not compatible with changing IM_BITS
 				when pcmux_imm26	=> aluout.pcjump <= aluin.immediate(23 downto 0) & "00";
+				when pcmux_rfe 	=> aluout.pcjump <= aluin.cop0.epc(IM_BITS-1 downto 0);
 		end case;
 		
 	--shifter for stores goes in this stage

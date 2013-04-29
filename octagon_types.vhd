@@ -46,7 +46,7 @@ package octagon_types is
 	type mulmux_type is (mulmux_hi, mulmux_lo);
 	type jmux_type is (jmux_arith, jmux_spec, jmux_mul, jmux_rt);
 	type lmux_type is (lmux_shift, lmux_slt, lmux_jmux);
-	type pcmux_type is (pcmux_reg, pcmux_imm26, pcmux_imm16);
+	type pcmux_type is (pcmux_reg, pcmux_imm26, pcmux_imm16, pcmux_rfe);
 	
 	type pcin_type is record
 		jump_target 	: std_logic_vector(IM_BITS-1 downto 0);
@@ -131,6 +131,7 @@ package octagon_types is
 		ipend				: std_logic_vector(7 downto 0);
 		store_hi			: std_logic;
 		store_lo			: std_logic;
+		rfe				: std_logic;
 	end record;
 	
 	type shift_type is record
@@ -187,6 +188,7 @@ package octagon_types is
 		mulmux			: mulmux_type;
 		store_hi			: std_logic;
 		store_lo			: std_logic;
+		rfe				: std_logic;
 	end record;
 	
 	type cop0_type is record
@@ -238,6 +240,7 @@ package octagon_types is
 		store_lo			: std_logic;
 		eq					: std_logic;
 		lt					: std_logic;
+		rfe				: std_logic;
 	end record;
 	
 	type alu2out_type is record
@@ -271,6 +274,7 @@ package octagon_types is
 		r_t				: std_logic_vector(31 downto 0);
 		store_hi			: std_logic;
 		store_lo			: std_logic;
+		rfe				: std_logic;
 	end record;
 	
 	type wbmout_type is record
@@ -303,6 +307,7 @@ package octagon_types is
 		ipend				: std_logic_vector(7 downto 0);
 		store_hi			: std_logic;
 		store_lo			: std_logic;
+		rfe				: std_logic;
 	end record;
 	
 	type rstoreout_type is record
@@ -335,6 +340,7 @@ package octagon_types is
 		ipend				: std_logic_vector(7 downto 0);
 		store_hi			: std_logic;
 		store_lo			: std_logic;
+		rfe				: std_logic;
 	end record;
 	
 	type dcmemin_type is record

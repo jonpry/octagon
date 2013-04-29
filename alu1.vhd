@@ -98,6 +98,7 @@ begin
 		aluout.mulmux <= aluin.rfetch.mulmux;
 		aluout.store_hi <= aluin.rfetch.store_hi;
 		aluout.store_lo <= aluin.rfetch.store_lo;
+		aluout.rfe <= aluin.rfetch.rfe;
 		
 		if aluin.rfetch.use_immediate = '1' then
 			r_t := aluin.rfetch.immediate;

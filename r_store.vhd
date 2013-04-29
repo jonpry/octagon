@@ -67,14 +67,21 @@ begin
 			rout.exc_wr <= '1';
 			rout.int_wr <= '0';
 		else
+			status_wr := to_std_logic(lmuxout.r_dest = "01100" and lmuxout.store_cop0 = '1');
+
+			if lmuxout.rfe = '1' then
+				rout.cop0.exc <= '0';
+				rout.exc_wr <= '1';
+			else
+				rout.cop0.exc <= lmuxout.lmux(1);
+				rout.exc_wr <= status_wr;
+			end if;
 			rout.cop0.epc <= lmuxout.lmux;
 			rout.epc_wr <= to_std_logic(lmuxout.r_dest = "01110" and lmuxout.store_cop0 = '1');
 
 			rout.cop0.imask <= lmuxout.lmux(15 downto 8);
-			rout.cop0.exc <= lmuxout.lmux(1);
+
 			rout.cop0.int <= lmuxout.lmux(0);
-			status_wr := to_std_logic(lmuxout.r_dest = "01100" and lmuxout.store_cop0 = '1');
-			rout.exc_wr <= status_wr;
 			rout.int_wr <= status_wr;
 
 			rout.cop0.ecode <= lmuxout.lmux(5 downto 2);

@@ -71,6 +71,7 @@ begin
 		muxout.ipend <= jumpout.ipend;
 		muxout.store_hi <= jumpout.store_hi;
 		muxout.store_lo <= jumpout.store_lo;
+		muxout.rfe <= jumpout.rfe;
 	end if;
 end process;
 

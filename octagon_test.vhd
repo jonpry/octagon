@@ -188,7 +188,12 @@ BEGIN
 		
 		wait for 7 us;
 		
+		--TODO: interrupts need some kind of latching system
 		int <= X"01";
+		
+		wait for clk_period * 10;
+		
+		int <= X"00";
 				
 		wait;
 

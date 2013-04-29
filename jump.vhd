@@ -65,6 +65,7 @@ begin
 		jumpout.store_cop0 <= aluin.store_cop0;
 		jumpout.store_hi <= aluin.store_hi;
 		jumpout.store_lo <= aluin.store_lo;
+		jumpout.rfe <= aluin.rfe;
 	end if;
 end process;
 
@@ -87,7 +88,7 @@ process(clk)
 begin
 	if clk='1' and clk'Event then
 		jumpout.do_jump <= '1';	
-		if aluin.met = '1' and aluin.do_jump='1' then
+		if aluin.rfe = '1' or (aluin.met = '1' and aluin.do_jump='1') then
 			jump_target := aluin.pcjump;
 		else
 			jump_target := std_logic_vector(unsigned(aluin.pc) + 4);

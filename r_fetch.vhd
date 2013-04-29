@@ -112,6 +112,7 @@ process(clk)
 	variable mtc0 : std_logic;
 	variable mmul : std_logic;
 	variable mtmul : std_logic;
+	variable rfe : std_logic;
 begin
 	if clk='1' and clk'Event then
 		opcode := rin.decout.instr(31 downto 26);
@@ -147,8 +148,9 @@ begin
 		end if;
 		
 	-- Decode RFE instruction 
---		rout.rfe <= to_std_logic(instr(31 downto 21)="01000010000" and func ="010000");
-
+		rfe := to_std_logic(instr(31 downto 21)="01000010000" and func ="010000");
+		rout.rfe <= rfe;
+		
 	--Load instructions
 		load := to_std_logic(instr(31 downto 29)="100");
 		rout.load <= load;
@@ -272,7 +274,11 @@ begin
 			if jumpi = '1' then
 				rout.pcmux <= pcmux_imm16;
 			else
-				rout.pcmux <= pcmux_reg;
+				if rfe = '1' then
+					rout.pcmux <= pcmux_rfe;
+				else
+					rout.pcmux <= pcmux_reg;
+				end if;
 			end if;
 		end if;
 		
