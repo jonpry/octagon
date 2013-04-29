@@ -149,6 +149,7 @@ package octagon_types is
 		r_s				: std_logic_vector(4 downto 0);
 		r_t				: std_logic_vector(4 downto 0);
 		instr				: std_logic_vector(31 downto 0);
+		imiss				: std_logic;
 	end record;
 	
 	type rfetchin_type is record
@@ -355,6 +356,27 @@ package octagon_types is
 	type alu1in_type is record
 		rfetch			: rfetchout_type;
 		rout				: rstoreout_type;
+	end record;
+	
+	type ictlout_type is record
+		memadr			: std_logic_vector(9 downto 0);
+		tagadr			: std_logic_vector(IM_BITS-1 downto 6);
+		tag_wr			: std_logic;
+		tagidx			: std_logic_vector(2 downto 0);
+		mcb_en			: std_logic;
+		mcb_cmd			: std_logic_vector(2 downto 0);
+		mcb_bl			: std_logic_vector(5 downto 0);
+		mcb_adr			: std_logic_vector(29 downto 0);
+		mcb_rden			: std_logic;
+		data				: std_logic_vector(31 downto 0);
+		restarts			: std_logic_vector(7 downto 0);
+	end record;
+	
+	type ictlin_type is record
+		mcb_data			: std_logic_vector(31 downto 0);
+		mcb_empty		: std_logic;
+		mcb_cmd_full	: std_logic;
+		restarted		: std_logic_vector(7 downto 0);
 	end record;
 	
 end package;
