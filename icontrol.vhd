@@ -71,6 +71,8 @@ signal cmd_empty : std_logic;
 signal cmd_tid : std_logic_vector(2 downto 0);
 signal cmd_dout : std_logic_vector(IM_BITS-1 downto 6);
 
+signal rden_delay : std_logic;
+
 signal restarts : std_logic_vector(7 downto 0) := X"00";
 
 begin
@@ -139,17 +141,14 @@ begin
 			end if;
 		elsif cmd_state = cmd_waitfordata then
 			if iin.mcb_empty = '0' then
-				iout.mcb_rden <= '1';
 				cmd_state <= cmd_transfer_data;
 			end if;
 		elsif cmd_state = cmd_transfer_data then
-			if wcount = "1111" then
+			if wcount = "1111" and iin.mcb_empty = '0' then
 				cmd_state <= cmd_update_tag;
-			else
-				iout.mcb_rden <= '1';
 			end if;
 		elsif cmd_state = cmd_update_tag then
-			cmd_state <= cmd_restart;
+			cmd_state <= cmd_restart;  
 		elsif cmd_state = cmd_restart then
 			cmd_rd <= '1';
 			cmd_state <= cmd_delay1;
@@ -176,14 +175,28 @@ begin
 			iout.tag_wr <= '1';
 			nextidx <= nextidx + 1;	
 		end if;
+		
+		if cmd_state = cmd_waitfordata then
+			rden_delay <= '1';
+		end if;
 	
 		iout.memwe <= '0';
 		iout.memadr <= cmd_dout(9 downto 6) & std_logic_vector(wcount) & "00";
 		if cmd_state = cmd_transfer_data then
+			--this may not be fast enough. must generate this signal async
+			if wcount = "1111" and iin.mcb_empty = '0' then
+				iout.mcb_rden <= '0';
+			else
+				iout.mcb_rden <= '1';
+			end if;
 			if iin.mcb_empty = '0' then
-				wcount <= wcount + 1;
 				iout.data <= iin.mcb_data;
 				iout.memwe <= '1';
+				if rden_delay = '1' then
+					rden_delay <= '0';
+				else
+					wcount <= wcount + 1;
+				end if;
 			end if;
 		end if;
 	end if;

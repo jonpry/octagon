@@ -49,6 +49,8 @@ architecture Behavioral of d_fetch is
 type dtype is array(0 to 511) of std_logic_vector(31 downto 0);
 signal dram : dtype := (others => (others => '0'));
 
+signal dirty : std_logic_vector(31 downto 0) := (others => '0');
+
 begin
 
 process(clk)
@@ -60,6 +62,10 @@ begin
 		wren := to_std_logic(dcin.alu2out.dcwren='1' and 
 					dcin.dcout.owns(to_integer(unsigned(idx & way)))='1' and 
 					dcin.dcout.nc='0');
+					
+		if wren = '1' then
+			dirty(to_integer(unsigned(way & dcin.alu2out.dcwradr(9 downto 6)))) <= '1';
+		end if;
 		
 		if wren = '1' and dcin.alu2out.be(0) = '1' then
 			dram(to_integer(unsigned(way & dcin.alu2out.dcwradr(9 downto 2))))(7 downto 0) <= dcin.alu2out.store_data(7 downto 0);
@@ -75,6 +81,7 @@ begin
 		end if;
 		
 		if dcin.dmemwe = '1' and dcin.dmemidx(2 downto 1) = idx then
+			dram(to_integer(unsigned(dcin.dmemidx(0) & dcin.dmemadr(7 downto 4)))) <= '0';
 			dram(to_integer(unsigned(dcin.dmemidx(0) & dcin.dmemadr))) <= dcin.dmemval;
 		end if;
 	--TODO: this is all wrong. access to dcache ways must

@@ -108,7 +108,7 @@ ARCHITECTURE behavior OF octagon_test IS
 	type IMEM_STATE_T is (RESET,WAIT_FOR_REQ,TRANSFER_WRITE,TRANSFER);
 	signal state : IMEM_STATE_T := WAIT_FOR_REQ;
  
- 	signal count : std_logic_vector(5 downto 0);
+ 	signal count : std_logic_vector(6 downto 0);
 	signal len : std_logic_vector(5 downto 0);
 	signal addr : std_logic_vector(24 downto 0);
 BEGIN
@@ -139,6 +139,8 @@ BEGIN
         );
 		  
 	process(clk)
+		variable next_count : std_logic_vector(6 downto 0);
+		variable slice_count : std_logic_vector(5 downto 0);
 	begin
 		if clk='1' and clk'Event then
 			if state = WAIT_FOR_REQ then
@@ -147,24 +149,32 @@ BEGIN
 					state <= TRANSFER after 100 ps;
 					len <= mcb_bl after 100 ps;
 					addr <= mcb_adr(26 downto 2) after 100 ps;
-					count <= "000000" after 100 ps;
+					count <= "0000000" after 100 ps;
 				end if;
 			else
-				if count <= len then
-						mcb_data <= dm(to_integer(unsigned(addr)+unsigned(count))) after 100 ps;
+				next_count := std_logic_vector(unsigned(count) + 1);
+				slice_count := count(6 downto 1);
+				if unsigned(count(6 downto 1)) <= unsigned(len) then
+						mcb_data <= dm(to_integer(unsigned(addr)+unsigned(slice_count))) after 100 ps;
 						mcb_empty <= '0' after 100 ps;
 					if mcb_rden='1' then
-						if count < len then
-							mcb_data <= dm(to_integer(unsigned(addr)+unsigned(count)+1)) after 100 ps;
+						if unsigned(count(5 downto 1)) < unsigned(len) then
+							mcb_empty <= not count(0);
+							mcb_data <= dm(to_integer(unsigned(addr)+unsigned(slice_count)+1)) after 100 ps;
 						else
 							mcb_empty <= '1' after 100 ps;
 							state <= WAIT_FOR_REQ after 100 ps;
 						end if;
-						count <= std_logic_vector(unsigned(count) + 1) after 100 ps;
+						count <= next_count;
 					end if;
 				else
-					mcb_empty <= '1' after 100 ps;
-					state <= WAIT_FOR_REQ after 100 ps;
+					if unsigned(count(6 downto 1)) <= (unsigned(len)+1) and count(0) = '0' then
+							mcb_empty <= count(0);
+							mcb_data <= dm(to_integer(unsigned(addr)+unsigned(slice_count))) after 100 ps;
+					else
+						mcb_empty <= '1' after 100 ps;
+						state <= WAIT_FOR_REQ after 100 ps;
+					end if;
 				end if;
 			end if;
 		end if;
