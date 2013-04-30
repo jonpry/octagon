@@ -51,16 +51,19 @@ ARCHITECTURE behavior OF octagon_test IS
 		tagidx			: in std_logic_vector(2 downto 0);
 		tagadr			: in std_logic_vector(3 downto 0);
 		tagval			: in std_logic_vector(IM_BITS-1 downto 10);
-		itagwe			: in std_logic;
-		imemidx			: in std_logic_vector(2 downto 0);
-		imemadr			: in std_logic_vector(7 downto 0);
-		imemval			: in std_logic_vector(31 downto 0);
-		imemwe			: in std_logic;
 		dtagwe			: in std_logic;
 		dmemidx			: in std_logic_vector(2 downto 0);
 		dmemadr			: in std_logic_vector(7 downto 0);
 		dmemval			: in std_logic_vector(31 downto 0);
-		dmemwe			: in std_logic
+		dmemwe			: in std_logic;		
+		mcb_cmd			: out std_logic_vector(2 downto 0);
+		mcb_bl			: out std_logic_vector(5 downto 0);
+		mcb_adr			: out std_logic_vector(29 downto 0);
+		mcb_rden			: out std_logic;
+		mcb_en			: out std_logic;
+		mcb_data			: in std_logic_vector(31 downto 0);
+		mcb_empty		: in std_logic;
+		mcb_cmd_full	: in std_logic
         );
     END COMPONENT;
     
@@ -72,27 +75,42 @@ ARCHITECTURE behavior OF octagon_test IS
    signal tagidx : std_logic_vector(2 downto 0) := (others => '0');
    signal tagadr : std_logic_vector(3 downto 0) := (others => '0');
    signal tagval : std_logic_vector(25 downto 10) := (others => '0');
-   signal itagwe : std_logic := '0';
    signal dtagwe : std_logic := '0';
-   signal imemidx : std_logic_vector(2 downto 0) := (others => '0');
-   signal imemadr : std_logic_vector(7 downto 0) := (others => '0');
-   signal imemval : std_logic_vector(31 downto 0) := (others => '0');
-   signal imemwe : std_logic := '0';
    signal dmemidx : std_logic_vector(2 downto 0) := (others => '0');
    signal dmemadr : std_logic_vector(7 downto 0) := (others => '0');
    signal dmemval : std_logic_vector(31 downto 0) := (others => '0');
    signal dmemwe : std_logic := '0';
-
+	signal mcb_data : std_logic_vector(31 downto 0) := (others => '0');
+	signal mcb_empty : std_logic := '0';
+	signal mcb_cmd_full : std_logic := '0';
+	
  	--Outputs
 	signal notrim_o : std_logic_vector(20 downto 0);
 	signal wbmout : wbmout_type;
+	signal mcb_cmd	: std_logic_vector(2 downto 0);
+	signal mcb_bl : std_logic_vector(5 downto 0);
+	signal mcb_adr	: std_logic_vector(29 downto 0);
+	signal mcb_rden : std_logic;
+	signal mcb_en	: std_logic;
+	
    -- Clock period definitions
    constant clk_period : time := 10 ns;
 	
 	type char_file is file of character; -- one byte each	
 	file my_file : char_file;
 	constant file_name : string := "/home/jon/mips/main.bin";
+	
+		-- the data ram
+	constant nwords : integer := 2 ** 14;
+	type ram_type is array(0 to nwords-1) of std_logic_vector(31 downto 0);
+	signal dm : ram_type := (others => (others => '0'));
+	
+	type IMEM_STATE_T is (RESET,WAIT_FOR_REQ,TRANSFER_WRITE,TRANSFER);
+	signal state : IMEM_STATE_T := WAIT_FOR_REQ;
  
+ 	signal count : std_logic_vector(5 downto 0);
+	signal len : std_logic_vector(5 downto 0);
+	signal addr : std_logic_vector(24 downto 0);
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
@@ -104,18 +122,53 @@ BEGIN
           tagidx => tagidx,
           tagadr => tagadr,
           tagval => tagval,
-          itagwe => itagwe,
           dtagwe => dtagwe,
-          imemidx => imemidx,
-          imemadr => imemadr,
-          imemval => imemval,
-          imemwe => imemwe,
-          dmemidx => imemidx,
-          dmemadr => imemadr,
-          dmemval => imemval,
-          dmemwe => imemwe,
-			 wbmout => wbmout
+          dmemidx => dmemidx,
+          dmemadr => dmemadr,
+          dmemval => dmemval,
+          dmemwe => dmemwe,
+			 wbmout => wbmout,
+			 mcb_cmd => mcb_cmd,
+			 mcb_bl => mcb_bl,
+			 mcb_adr => mcb_adr,
+			 mcb_rden => mcb_rden,
+			 mcb_en => mcb_en,
+			 mcb_data => mcb_data,
+			 mcb_empty => mcb_empty,
+			 mcb_cmd_full => mcb_cmd_full
         );
+		  
+	process(clk)
+	begin
+		if clk='1' and clk'Event then
+			if state = WAIT_FOR_REQ then
+				mcb_empty <= '1' after 100 ps;
+				if mcb_en = '1' then
+					state <= TRANSFER after 100 ps;
+					len <= mcb_bl after 100 ps;
+					addr <= mcb_adr(26 downto 2) after 100 ps;
+					count <= "000000" after 100 ps;
+				end if;
+			else
+				if count <= len then
+						mcb_data <= dm(to_integer(unsigned(addr)+unsigned(count))) after 100 ps;
+						mcb_empty <= '0' after 100 ps;
+					if mcb_rden='1' then
+						if count < len then
+							mcb_data <= dm(to_integer(unsigned(addr)+unsigned(count)+1)) after 100 ps;
+						else
+							mcb_empty <= '1' after 100 ps;
+							state <= WAIT_FOR_REQ after 100 ps;
+						end if;
+						count <= std_logic_vector(unsigned(count) + 1) after 100 ps;
+					end if;
+				else
+					mcb_empty <= '1' after 100 ps;
+					state <= WAIT_FOR_REQ after 100 ps;
+				end if;
+			end if;
+		end if;
+	end process;  
 
    -- Clock process definitions
    clk_process :process
@@ -137,25 +190,22 @@ BEGIN
       wait for 100 ns;	
 		
 		running <= (others => '0');
-		itagwe <= '0';
 		dtagwe <= '0';
 
       wait for clk_period*10;
 				
 		I := 0;
 		while I < 128 loop
-			itagwe <= '1';
+			dtagwe <= '1';
 			vec := std_logic_vector(to_unsigned(I,vec'length));
 			tagidx <= vec(6 downto 4);
 			tagadr <= vec(3 downto 0);
 			tagval <= X"00" & vec(11 downto 4);
 
-			dtagwe <= '1';			
 			wait for clk_period;
 			I := I + 1;
 		end loop;
   
-		itagwe <= '0';
 		dtagwe <= '0';
 
 		wait for clk_period;
@@ -163,23 +213,25 @@ BEGIN
 		I := 0;	
 		file_open(my_file, file_name, read_mode);		
 		while not ENDFILE(my_file) loop
-			imemwe <= '1';
+			dmemwe <= '1';
 			vec := std_logic_vector(to_unsigned(I,vec'length));
-			imemadr <= vec(7 downto 0);
-			imemidx <= vec(10 downto 8);
+			dmemadr <= vec(7 downto 0);
+			dmemidx <= vec(10 downto 8);
 			read(my_file, my_char);
-			imemval(7 downto 0) <= std_logic_vector(to_unsigned(character'pos(my_char),8));
+			dmemval(7 downto 0) <= std_logic_vector(to_unsigned(character'pos(my_char),8));
 			read(my_file, my_char);
-			imemval(15 downto 8) <= std_logic_vector(to_unsigned(character'pos(my_char),8));
+			dmemval(15 downto 8) <= std_logic_vector(to_unsigned(character'pos(my_char),8));
 			read(my_file, my_char);
-			imemval(23 downto 16) <= std_logic_vector(to_unsigned(character'pos(my_char),8));
+			dmemval(23 downto 16) <= std_logic_vector(to_unsigned(character'pos(my_char),8));
 			read(my_file, my_char);
-			imemval(31 downto 24) <= std_logic_vector(to_unsigned(character'pos(my_char),8));
+			dmemval(31 downto 24) <= std_logic_vector(to_unsigned(character'pos(my_char),8));
 			wait for clk_period;
+			
+			dm(i) <= dmemval;
 			I := I + 1;
 		end loop;
 		file_close(my_file);
-		imemwe <= '0';
+		dmemwe <= '0';
 		
 		wait for clk_period;
 		

@@ -91,7 +91,11 @@ begin
 		if aluin.rfe = '1' or (aluin.met = '1' and aluin.do_jump='1') then
 			jump_target := aluin.pcjump;
 		else
-			jump_target := std_logic_vector(unsigned(aluin.pc) + 4);
+			if aluin.valid = '1' then
+				jump_target := std_logic_vector(unsigned(aluin.pc) + 4);
+			else
+				jump_target := aluin.pc;
+			end if;
 		end if;
 		
 		ipend := ints and (not aluin.imask);

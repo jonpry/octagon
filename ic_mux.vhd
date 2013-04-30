@@ -92,7 +92,9 @@ begin
 		--TODO: this is a miss, need to handle it
 		if fetchout.owns = "00000000" then
 			muxout.valid <= '0';
+			muxout.imiss <= fetchout.valid;
 		else
+			muxout.imiss <= '0';
 			muxout.valid <= fetchout.valid;
 		end if;
 	end if;

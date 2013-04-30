@@ -41,16 +41,19 @@ entity octagon is
 		tagidx			: in std_logic_vector(2 downto 0);
 		tagadr			: in std_logic_vector(3 downto 0);
 		tagval			: in std_logic_vector(IM_BITS-1 downto 10);
-		itagwe			: in std_logic;
-		imemidx			: in std_logic_vector(2 downto 0);
-		imemadr			: in std_logic_vector(7 downto 0);
-		imemval			: in std_logic_vector(31 downto 0);
-		imemwe			: in std_logic;
 		dtagwe			: in std_logic;
 		dmemidx			: in std_logic_vector(2 downto 0);
 		dmemadr			: in std_logic_vector(7 downto 0);
 		dmemval			: in std_logic_vector(31 downto 0);
-		dmemwe			: in std_logic
+		dmemwe			: in std_logic;
+		mcb_cmd			: out std_logic_vector(2 downto 0);
+		mcb_bl			: out std_logic_vector(5 downto 0);
+		mcb_adr			: out std_logic_vector(29 downto 0);
+		mcb_rden			: out std_logic;
+		mcb_en			: out std_logic;
+		mcb_data			: in std_logic_vector(31 downto 0);
+		mcb_empty		: in std_logic;
+		mcb_cmd_full	: in std_logic
 	);
 end octagon;
 
@@ -75,6 +78,8 @@ signal jumpout : jumpout_type;
 signal rstoreout : rstoreout_type;
 signal dcmemin : dcmemin_type; 
 signal dcmemout : dcmemout_type;
+signal ictlin : ictlin_type;
+signal ictlout : ictlout_type;
 
 begin
 
@@ -94,16 +99,27 @@ pcin.running <= running;
 pcin.int <= int;
 pcin.jump <= jumpout.do_jump;
 pcin.valid <= jumpout.valid;
+pcin.restarts <= ictlout.restarts;
 
 icin.pcout <= pcout;
-icin.tagval <= tagval;
-icin.tagadr <= tagadr;
-icin.tagidx <= tagidx;
-icin.tagwe <= itagwe;
-icin.imemval <= imemval;
-icin.imemadr <= imemadr;
-icin.imemidx <= imemidx;
-icin.imemwe <= imemwe;
+icin.tagval <= ictlout.tagadr(IM_BITS-1 downto 10);
+icin.tagadr <= ictlout.tagadr(9 downto 6);
+icin.tagidx <= ictlout.tagidx;
+icin.tagwe <= ictlout.tag_wr;
+icin.imemval <= ictlout.data;
+icin.imemadr <= ictlout.memadr(9 downto 2);
+icin.imemidx <= ictlout.tagidx;
+icin.imemwe <= ictlout.memwe;
+
+mcb_cmd <= ictlout.mcb_cmd;
+mcb_bl <= ictlout.mcb_bl;
+mcb_adr <= ictlout.mcb_adr;
+mcb_rden <= ictlout.mcb_rden;
+mcb_en <= ictlout.mcb_en;
+ictlin.mcb_data <= mcb_data;
+ictlin.mcb_empty <= mcb_empty;
+ictlin.mcb_cmd_full <= mcb_cmd_full;
+ictlin.restarted <= pcout.restarted;
 
 dcin.adr <= alu1out.memadr;
 dcin.tagval <= tagval;
@@ -133,6 +149,7 @@ ic_fetch : entity work.ic_fetch port map(clk,icin,icout);	--2
 ic_mux : entity work.ic_mux port map(clk,icout,imuxout);		--3
 
 decode : entity work.decode port map(clk,imuxout,decout);	--4
+icontrol : entity work.icontrol port map(clk,imuxout,ictlin,ictlout);
 
 r_fetch : entity work.r_fetch port map(clk,rin,rout);			--5
 

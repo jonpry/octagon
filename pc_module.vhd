@@ -58,6 +58,7 @@ signal running_edge : std_logic := '0';
 signal enabled : std_logic := '0';
 signal go_to_reset : std_logic;
 signal valid : std_logic;
+signal restart : std_logic;
 
 signal gndv : std_logic_vector(31 downto 0) := X"00000000";
 begin
@@ -68,9 +69,13 @@ pcout.tid <= std_logic_vector(countq);
 --Pre stage, operates at T-1 to setup values for main PC code
 count2 <= count + 1;
 process(clk)
+	variable restartV : std_logic;
 begin
 	if clk='1' and clk'Event then
-
+		restartV := pcin.restarts(to_integer(count2));
+		pcout.restarted(to_integer(count2)) <= restartV;
+		restart <= restartV;
+		
 		running_q(to_integer(count2)) <= pcin.running(to_integer(count2));
 		go_to_reset <= '0';
 		if running_q(to_integer(count2)) = '0' and pcin.running(to_integer(count2)) = '1' then
@@ -83,7 +88,7 @@ begin
 	end if;
 end process;
 
-valid <= '1' when (running_edge = '1' or pcin.valid = '1') and enabled = '1' else '0';
+valid <= '1' when (running_edge = '1' or pcin.valid = '1' or restart='1') and enabled = '1' else '0';
 pc_next <= (others => '0') when enabled = '0' or running_edge = '1' else pcin.jump_target;
 
 pcout.pc_next <= pc_next;

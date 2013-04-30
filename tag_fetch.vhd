@@ -43,7 +43,7 @@ end tag_fetch;
 architecture Behavioral of tag_fetch is
 
 --Ram to store Tags
-signal tagram : tag_type := (others => (others => '0'));
+signal tagram : tag_type := (others => (others => '1'));
 signal tagadr : std_logic_vector(3 downto 0);
 
 begin

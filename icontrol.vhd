@@ -35,8 +35,7 @@ use work.octagon_funcs.all;
 entity icontrol is
 	Port ( 
 		clk : in  std_logic;
-		decout : in decout_type;
-		imemout : in icfetchout_type;
+		muxout : in icmuxout_type;
 		iin : in ictlin_type;
 		iout : out ictlout_type
 	);
@@ -44,14 +43,15 @@ end icontrol;
 
 architecture Behavioral of icontrol is
 
-type ictl_type is (ictl_wfr, ictl_tagcheck, ictl_noreq, ictl_req);
-type cmd_type is (cmd_wait, cmd_restart, cmd_waitfordata, cmd_transfer_data, cmd_update_tag);
+type ictl_type is (ictl_wfr, ictl_tagcheck, ictl_noreq, ictl_req, ictl_delay, ictl_delay2);
+type cmd_type is (cmd_wait, cmd_restart, cmd_waitfordata, cmd_transfer_data, cmd_update_tag,
+						cmd_delay1, cmd_delay2);
 
 signal cmd_state : cmd_type := cmd_wait;
 signal state : ictl_type := ictl_wfr;
 signal prevcmdstate : cmd_type := cmd_wait;
 
-signal nextidx : unsigned(2 downto 0);
+signal nextidx : unsigned(2 downto 0) := "000";
 
 signal icfifo_rd : std_logic := '0';
 signal icfifo_empty : std_logic;
@@ -79,8 +79,8 @@ iout.restarts <= restarts;
 
 icmd_fifo : entity work.icmd_fifo port map(clk, cmd_rd, cmd_wr, icfifo_tid, 
 					dnr, icfifo_dout, cmd_dout, cmd_tid, cmddnr, cmd_empty);
-ic_fifo : entity work.ic_fifo port map(clk, icfifo_rd, decout.imiss, decout.tid, 
-					decout.pc(IM_BITS-1 downto 6), icfifo_dout, icfifo_tid, icfifo_empty);
+ic_fifo : entity work.ic_fifo port map(clk, icfifo_rd, muxout.imiss, muxout.tid, 
+					muxout.pc(IM_BITS-1 downto 6), icfifo_dout, icfifo_tid, icfifo_empty);
 ilookahead : entity work.ilookahead port map(clk, ilookahead_wr, icfifo_dout, ilookahead_cmp);
 
 
@@ -90,6 +90,7 @@ begin
 	if clk='1' and clk'Event then
 		icfifo_rd <= '0';
 		ilookahead_wr <= '0';
+		cmd_wr <= '0';
 		
 		if state = ictl_wfr then
 			if icfifo_empty = '0' and iin.mcb_cmd_full = '0' then
@@ -106,12 +107,16 @@ begin
 				dnr <= '0';
 				icfifo_rd <= '1';
 				cmd_wr <= '1';
-				state <= ictl_wfr;		
+				state <= ictl_delay;		
 		elsif state = ictl_noreq then
 				dnr <= '1';
-				state <= ictl_wfr;
+				state <= ictl_delay;
 				icfifo_rd <= '1';
 				cmd_wr <= '1';
+		elsif state = ictl_delay then
+				state <= ictl_delay2;
+		elsif state = ictl_delay2 then
+				state <= ictl_wfr;
 		end if;
 	end if;
 end process;
@@ -147,14 +152,22 @@ begin
 			cmd_state <= cmd_restart;
 		elsif cmd_state = cmd_restart then
 			cmd_rd <= '1';
+			cmd_state <= cmd_delay1;
+		elsif cmd_state = cmd_delay1 then
+			cmd_state <= cmd_delay2;
+		elsif cmd_state = cmd_delay2 then
+			cmd_state <= cmd_wait;
+		end if;
+		
+		if cmd_state = cmd_wait then
+			wcount <= (others => '0');
 		end if;
 	
 		iout.tag_wr <= '0';
 		if cmd_state = cmd_transfer_data and prevcmdstate = cmd_waitfordata then
-			iout.tagadr <= (others => '1');
+			iout.tagadr <= (IM_BITS-1 downto 10 => '1') & cmd_dout(9 downto 6);
 			iout.tagidx <= std_logic_vector(nextidx);
 			iout.tag_wr <= '1';
-			wcount <= (others => '0');
 		end if;
 		
 		if cmd_state = cmd_update_tag then
@@ -164,11 +177,13 @@ begin
 			nextidx <= nextidx + 1;	
 		end if;
 	
+		iout.memwe <= '0';
 		iout.memadr <= cmd_dout(9 downto 6) & std_logic_vector(wcount) & "00";
 		if cmd_state = cmd_transfer_data then
 			if iin.mcb_empty = '0' then
 				wcount <= wcount + 1;
 				iout.data <= iin.mcb_data;
+				iout.memwe <= '1';
 			end if;
 		end if;
 	end if;

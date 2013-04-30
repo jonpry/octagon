@@ -54,6 +54,7 @@ package octagon_types is
 		int 				: std_logic_vector(7 downto 0);
 		jump 				: std_logic;
 		valid 			: std_logic;
+		restarts			: std_logic_vector(7 downto 0);
 	end record;
 	
 	type pcout_type is record
@@ -61,6 +62,7 @@ package octagon_types is
 		pc_next			: std_logic_vector(IM_BITS-1 downto 0);
 		valid				: std_logic;
 		tid				: std_logic_vector(2 downto 0);
+		restarted		: std_logic_vector(7 downto 0);
 	end record;
 	
 	type icfetchin_type is record
@@ -107,6 +109,7 @@ package octagon_types is
 		tid				: std_logic_vector(2 downto 0);
 		valid				: std_logic;
 		instr				: std_logic_vector(31 downto 0);
+		imiss				: std_logic;
 	end record;
 	
 	type dcmuxout_type is record
@@ -149,7 +152,6 @@ package octagon_types is
 		r_s				: std_logic_vector(4 downto 0);
 		r_t				: std_logic_vector(4 downto 0);
 		instr				: std_logic_vector(31 downto 0);
-		imiss				: std_logic;
 	end record;
 	
 	type rfetchin_type is record
@@ -360,6 +362,7 @@ package octagon_types is
 	
 	type ictlout_type is record
 		memadr			: std_logic_vector(9 downto 0);
+		memwe				: std_logic;
 		tagadr			: std_logic_vector(IM_BITS-1 downto 6);
 		tag_wr			: std_logic;
 		tagidx			: std_logic_vector(2 downto 0);
