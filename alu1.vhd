@@ -124,11 +124,11 @@ begin
 		aluout.diff <= diff(31 downto 0);
 
 	--Compare
-		aluout.eq <= to_std_logic(aluin.rfetch.r_s = aluin.rfetch.r_t);
+		aluout.eq <= to_std_logic(aluin.rfetch.r_s = r_t);
 		if aluin.rfetch.comp_unsigned = '1' then
-			aluout.lt <= to_std_logic(unsigned(aluin.rfetch.r_s) < unsigned(aluin.rfetch.r_t));				
+			aluout.lt <= to_std_logic(unsigned(aluin.rfetch.r_s) < unsigned(r_t));				
 		else
-			aluout.lt <= to_std_logic(signed(aluin.rfetch.r_s) < signed(aluin.rfetch.r_t));
+			aluout.lt <= to_std_logic(signed(aluin.rfetch.r_s) < signed(r_t));
 		end if;
 	end if;
 end process;

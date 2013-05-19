@@ -223,7 +223,7 @@ begin
 					(cop0='1' and instr(25 downto 21) = "00000") or --mfc0
 					(opzero='1' and func(5 downto 2) = "0100" and func(0) = '0')); --mfmul
 		rout.reg_store <= reg_store;
-		rout.store_cond <= to_std_logic(slt = '1' or 
+		rout.store_cond <= to_std_logic( --slt = '1' or 
 					(link='1' and reg_store='0'));
 		
 	--Immediate handling	
