@@ -94,15 +94,13 @@ begin
 		valid := to_std_logic(aluin.valid = '1' and ((aluin.load='0' and aluin.store = '0') or dcout.owns /= X"00"));
 		jumpout.valid <= valid;
 		
-		if aluin.rfe = '1' or (aluin.met = '1' and aluin.do_jump='1') then
+		if valid = '0' then
+			jump_target := aluin.pc;
+		elsif aluin.rfe = '1' or (aluin.met = '1' and aluin.do_jump='1') then
 			jump_target := aluin.pcjump;
 		else
-			if valid = '1' then
-				jump_target := std_logic_vector(unsigned(aluin.pc) + 4);
-			else
-				jump_target := aluin.pc;
-			end if;
-		end if;
+			jump_target := std_logic_vector(unsigned(aluin.pc) + 4);
+ 		end if;
 		
 		ipend := ints and (not aluin.imask);
 		
