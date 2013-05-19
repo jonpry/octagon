@@ -63,6 +63,7 @@ process(clk)
 begin
 	if clk='1' and clk'Event then
 		dcout.owns <= owns;
+		dcout.adr <= dcin.adr;
 		
 		dcout.sel(0) <= to_std_logic(owns(1)='1' or owns(3)='1' or owns(5)='1' or owns(7)='1');
 		dcout.sel(1) <= to_std_logic(owns(2)='1' or owns(3)='1' or owns(6)='1' or owns(7)='1');

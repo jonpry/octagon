@@ -37,6 +37,7 @@ entity jump is
 		clk : in std_logic;
 		aluin : in alu2out_type;
 		ints : in std_logic_vector(7 downto 0);
+		dcout : in dcfetchout_type;
 		jumpout : out jumpout_type
 	);
 end jump;
@@ -51,7 +52,6 @@ process(clk)
 begin
 	if clk='1' and clk'Event then
 		jumpout.tid <= aluin.tid;
-		jumpout.valid <= aluin.valid;
 		jumpout.pc <= aluin.pc;
 		jumpout.lmux <= aluin.lmux;
 		jumpout.r_dest <= aluin.r_dest;
@@ -85,13 +85,19 @@ end process;
 process(clk)
 	variable jump_target : std_logic_vector(IM_BITS-1 downto 0);
 	variable ipend : std_logic_vector(7 downto 0);
+	variable valid : std_logic;
 begin
 	if clk='1' and clk'Event then
 		jumpout.do_jump <= '1';	
+		
+		--TODO: owns only matters for memory operations
+		valid := to_std_logic(aluin.valid = '1' and ((aluin.load='0' and aluin.store = '0') or dcout.owns /= X"00"));
+		jumpout.valid <= valid;
+		
 		if aluin.rfe = '1' or (aluin.met = '1' and aluin.do_jump='1') then
 			jump_target := aluin.pcjump;
 		else
-			if aluin.valid = '1' then
+			if valid = '1' then
 				jump_target := std_logic_vector(unsigned(aluin.pc) + 4);
 			else
 				jump_target := aluin.pc;
@@ -101,7 +107,7 @@ begin
 		ipend := ints and (not aluin.imask);
 		
 		--TODO: handle ovf
-		if ipend /= X"00" then
+		if ipend /= X"00" and valid = '1' then
 			jumpout.jump_target <= (others => '0');
 			jumpout.do_int <= '1';
 		else

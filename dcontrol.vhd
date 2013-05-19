@@ -35,7 +35,7 @@ use work.octagon_funcs.all;
 entity dcontrol is
 	Port ( 
 		clk : in  std_logic;
-		muxout : in icmuxout_type;
+		muxout : in dcmemout_type;
 		dcin : in dctlin_type;
 		dcout : out dctlout_type
 	);
@@ -89,8 +89,8 @@ dcout.restarts <= restarts;
 dcmd_fifo : entity work.dcmd_fifo port map(clk, cmd_rd, cmd_wr, icfifo_tid, 
 					dnr, icfifo_dout, cmd_dout, cmd_tid, 
 					cmddnr, cmd_empty);
-dc_fifo : entity work.dc_fifo port map(clk, icfifo_rd, muxout.imiss, muxout.tid, 
-					muxout.pc(IM_BITS-1 downto 6), icfifo_dout, icfifo_tid, icfifo_empty);
+dc_fifo : entity work.dc_fifo port map(clk, icfifo_rd, muxout.dmiss, muxout.tid, 
+					muxout.adr(IM_BITS-1 downto 6), icfifo_dout, icfifo_tid, icfifo_empty);
 ilookahead : entity work.ilookahead port map(clk, ilookahead_wr, icfifo_dout, ilookahead_cmp);
 
 

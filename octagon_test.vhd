@@ -47,15 +47,7 @@ ARCHITECTURE behavior OF octagon_test IS
 		running 			: in std_logic_vector(7 downto 0);
 		int 				: in std_logic_vector(7 downto 0);
 		notrim_o 		: out std_logic_vector(20 downto 0);
-		wbmout			: out wbmout_type;
-		tagidx			: in std_logic_vector(2 downto 0);
-		tagadr			: in std_logic_vector(3 downto 0);
-		tagval			: in std_logic_vector(IM_BITS-1 downto 10);
-		dtagwe			: in std_logic;
-		dmemidx			: in std_logic_vector(2 downto 0);
-		dmemadr			: in std_logic_vector(7 downto 0);
-		dmemval			: in std_logic_vector(31 downto 0);
-		dmemwe			: in std_logic;		
+		wbmout			: out wbmout_type;	
 		mcb_cmd			: out std_logic_vector(2 downto 0);
 		mcb_bl			: out std_logic_vector(5 downto 0);
 		mcb_adr			: out std_logic_vector(29 downto 0);
@@ -63,7 +55,17 @@ ARCHITECTURE behavior OF octagon_test IS
 		mcb_en			: out std_logic;
 		mcb_data			: in std_logic_vector(31 downto 0);
 		mcb_empty		: in std_logic;
-		mcb_cmd_full	: in std_logic
+		mcb_cmd_full	: in std_logic;
+		dmcb_cmd			: out std_logic_vector(2 downto 0);
+		dmcb_bl			: out std_logic_vector(5 downto 0);
+		dmcb_adr			: out std_logic_vector(29 downto 0);
+		dmcb_rden		: out std_logic;
+		dmcb_en			: out std_logic;
+		dmcb_data		: in std_logic_vector(31 downto 0);
+		dmcb_empty		: in std_logic;
+		dmcb_cmd_full	: in std_logic;
+		dmcb_dout		: out std_logic_vector(31 downto 0);
+		dmcb_wren		: out std_logic
         );
     END COMPONENT;
     
@@ -72,17 +74,13 @@ ARCHITECTURE behavior OF octagon_test IS
    signal clk : std_logic := '0';
 	signal running : std_logic_vector(7 downto 0) := (others => '0');
 	signal int	: std_logic_vector(7 downto 0) := (others => '0');
-   signal tagidx : std_logic_vector(2 downto 0) := (others => '0');
-   signal tagadr : std_logic_vector(3 downto 0) := (others => '0');
-   signal tagval : std_logic_vector(25 downto 10) := (others => '0');
-   signal dtagwe : std_logic := '0';
-   signal dmemidx : std_logic_vector(2 downto 0) := (others => '0');
-   signal dmemadr : std_logic_vector(7 downto 0) := (others => '0');
-   signal dmemval : std_logic_vector(31 downto 0) := (others => '0');
-   signal dmemwe : std_logic := '0';
+
 	signal mcb_data : std_logic_vector(31 downto 0) := (others => '0');
 	signal mcb_empty : std_logic := '0';
 	signal mcb_cmd_full : std_logic := '0';
+	signal dmcb_data : std_logic_vector(31 downto 0) := (others => '0');
+	signal dmcb_empty : std_logic := '0';
+	signal dmcb_cmd_full : std_logic := '0';
 	
  	--Outputs
 	signal notrim_o : std_logic_vector(20 downto 0);
@@ -92,6 +90,13 @@ ARCHITECTURE behavior OF octagon_test IS
 	signal mcb_adr	: std_logic_vector(29 downto 0);
 	signal mcb_rden : std_logic;
 	signal mcb_en	: std_logic;
+	signal dmcb_cmd	: std_logic_vector(2 downto 0);
+	signal dmcb_bl : std_logic_vector(5 downto 0);
+	signal dmcb_adr	: std_logic_vector(29 downto 0);
+	signal dmcb_rden : std_logic;
+	signal dmcb_en	: std_logic;
+	signal dmcb_wren : std_logic;
+	signal dmcb_dout : std_logic_vector(31 downto 0);
 	
    -- Clock period definitions
    constant clk_period : time := 10 ns;
@@ -107,10 +112,15 @@ ARCHITECTURE behavior OF octagon_test IS
 	
 	type IMEM_STATE_T is (RESET,WAIT_FOR_REQ,TRANSFER_WRITE,TRANSFER);
 	signal state : IMEM_STATE_T := WAIT_FOR_REQ;
+	signal dstate : IMEM_STATE_T := WAIT_FOR_REQ;
  
  	signal count : std_logic_vector(6 downto 0);
 	signal len : std_logic_vector(5 downto 0);
 	signal addr : std_logic_vector(24 downto 0);
+	
+ 	signal dcount : std_logic_vector(6 downto 0);
+	signal dlen : std_logic_vector(5 downto 0);
+	signal daddr : std_logic_vector(24 downto 0);
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
@@ -119,15 +129,7 @@ BEGIN
 			 running => running,
 			 int => int,
           notrim_o => notrim_o,
-          tagidx => tagidx,
-          tagadr => tagadr,
-          tagval => tagval,
-          dtagwe => dtagwe,
-          dmemidx => dmemidx,
-          dmemadr => dmemadr,
-          dmemval => dmemval,
-          dmemwe => dmemwe,
-			 wbmout => wbmout,
+ 			 wbmout => wbmout,
 			 mcb_cmd => mcb_cmd,
 			 mcb_bl => mcb_bl,
 			 mcb_adr => mcb_adr,
@@ -135,7 +137,18 @@ BEGIN
 			 mcb_en => mcb_en,
 			 mcb_data => mcb_data,
 			 mcb_empty => mcb_empty,
-			 mcb_cmd_full => mcb_cmd_full
+			 mcb_cmd_full => mcb_cmd_full,
+ 			 dmcb_cmd => dmcb_cmd,
+			 dmcb_bl => dmcb_bl,
+			 dmcb_adr => dmcb_adr,
+			 dmcb_rden => dmcb_rden,
+			 dmcb_wren => dmcb_wren,
+			 dmcb_dout => dmcb_dout,
+			 dmcb_en => dmcb_en,
+			 dmcb_data => dmcb_data,
+			 dmcb_empty => dmcb_empty,
+			 dmcb_cmd_full => dmcb_cmd_full
+ 
         );
 		  
 	process(clk)
@@ -179,6 +192,48 @@ BEGIN
 			end if;
 		end if;
 	end process;  
+	
+	process(clk)
+		variable next_count : std_logic_vector(6 downto 0);
+		variable slice_count : std_logic_vector(5 downto 0);
+	begin
+		if clk='1' and clk'Event then
+			if dstate = WAIT_FOR_REQ then
+				dmcb_empty <= '1' after 100 ps;
+				if dmcb_en = '1' then
+					dstate <= TRANSFER after 100 ps;
+					dlen <= dmcb_bl after 100 ps;
+					daddr <= dmcb_adr(26 downto 2) after 100 ps;
+					dcount <= "0000000" after 100 ps;
+				end if;
+			else
+				next_count := std_logic_vector(unsigned(dcount) + 1);
+				slice_count := dcount(6 downto 1);
+				if unsigned(dcount(6 downto 1)) <= unsigned(dlen) then
+						dmcb_data <= dm(to_integer(unsigned(daddr)+unsigned(slice_count))) after 100 ps;
+						dmcb_empty <= '0' after 100 ps;
+					if dmcb_rden='1' then
+						if unsigned(dcount(5 downto 1)) < unsigned(dlen) then
+							dmcb_empty <= not dcount(0);
+							dmcb_data <= dm(to_integer(unsigned(daddr)+unsigned(slice_count)+1)) after 100 ps;
+						else
+							dmcb_empty <= '1' after 100 ps;
+							dstate <= WAIT_FOR_REQ after 100 ps;
+						end if;
+						dcount <= next_count;
+					end if;
+				else
+					if unsigned(dcount(6 downto 1)) <= (unsigned(dlen)+1) and dcount(0) = '0' then
+							dmcb_empty <= dcount(0);
+							dmcb_data <= dm(to_integer(unsigned(daddr)+unsigned(slice_count))) after 100 ps;
+					else
+						dmcb_empty <= '1' after 100 ps;
+						dstate <= WAIT_FOR_REQ after 100 ps;
+					end if;
+				end if;
+			end if;
+		end if;
+	end process;  
 
    -- Clock process definitions
    clk_process :process
@@ -195,53 +250,43 @@ BEGIN
 	variable I : integer range 0 to 64000;
 	variable vec : std_logic_vector(15 downto 0);
 	variable my_char : character;
+	variable dmemval : std_logic_vector(31 downto 0);
    begin		
       -- hold reset state for 100 ns.
       wait for 100 ns;	
 		
 		running <= (others => '0');
-		dtagwe <= '0';
 
       wait for clk_period*10;
 				
 		I := 0;
 		while I < 128 loop
-			dtagwe <= '1';
 			vec := std_logic_vector(to_unsigned(I,vec'length));
-			tagidx <= vec(6 downto 4);
-			tagadr <= vec(3 downto 0);
-			tagval <= X"00" & vec(11 downto 4);
-
 			wait for clk_period;
 			I := I + 1;
 		end loop;
   
-		dtagwe <= '0';
 
 		wait for clk_period;
 
 		I := 0;	
 		file_open(my_file, file_name, read_mode);		
 		while not ENDFILE(my_file) loop
-			dmemwe <= '1';
 			vec := std_logic_vector(to_unsigned(I,vec'length));
-			dmemadr <= vec(7 downto 0);
-			dmemidx <= vec(10 downto 8);
 			read(my_file, my_char);
-			dmemval(7 downto 0) <= std_logic_vector(to_unsigned(character'pos(my_char),8));
+			dmemval(7 downto 0) := std_logic_vector(to_unsigned(character'pos(my_char),8));
 			read(my_file, my_char);
-			dmemval(15 downto 8) <= std_logic_vector(to_unsigned(character'pos(my_char),8));
+			dmemval(15 downto 8) := std_logic_vector(to_unsigned(character'pos(my_char),8));
 			read(my_file, my_char);
-			dmemval(23 downto 16) <= std_logic_vector(to_unsigned(character'pos(my_char),8));
+			dmemval(23 downto 16) := std_logic_vector(to_unsigned(character'pos(my_char),8));
 			read(my_file, my_char);
-			dmemval(31 downto 24) <= std_logic_vector(to_unsigned(character'pos(my_char),8));
+			dmemval(31 downto 24) := std_logic_vector(to_unsigned(character'pos(my_char),8));
 			wait for clk_period;
 			
 			dm(i) <= dmemval;
 			I := I + 1;
 		end loop;
 		file_close(my_file);
-		dmemwe <= '0';
 		
 		wait for clk_period;
 		
@@ -253,7 +298,7 @@ BEGIN
 		--TODO: interrupts need some kind of latching system
 		int <= X"01";
 		
-		wait for clk_period * 10;
+		wait for clk_period * 100;
 		
 		int <= X"00";
 				

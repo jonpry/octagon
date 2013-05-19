@@ -97,11 +97,15 @@ package octagon_types is
 		owns				: std_logic_vector(7 downto 0);
 		sel				: std_logic_vector(2 downto 0);
 		nc					: std_logic;
+		adr				: std_logic_vector(DM_BITS+1 downto 0);
 	end record;
 	
 	type dcmemout_type is record
 		data				: dout_type;
 		sel				: std_logic_vector(1 downto 0);
+		dmiss				: std_logic;
+		tid				: std_logic_vector(2 downto 0);
+		adr				: std_logic_vector(DM_BITS+1 downto 0);
 	end record;
 	
 	type icmuxout_type is record
@@ -264,6 +268,7 @@ package octagon_types is
 		store_cond		: std_logic;
 		do_jump			: std_logic;
 		load				: std_logic;
+		store				: std_logic;
 		memadr			: std_logic_vector(1 downto 0);
 		memsize			: std_logic_vector(1 downto 0);
 		load_unsigned	: std_logic;

@@ -58,6 +58,7 @@ begin
 		aluout.store_cond <= aluin.store_cond;
 		aluout.do_jump <= aluin.do_jump;
 		aluout.load <= aluin.load;
+		aluout.store <= aluin.store;
 		aluout.memadr <= aluin.memadr(1 downto 0);
 		aluout.dcwradr <= aluin.memadr(9 downto 0);
 		aluout.memsize <= aluin.memsize;
