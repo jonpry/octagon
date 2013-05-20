@@ -86,12 +86,14 @@ process(clk)
 	variable jump_target : std_logic_vector(IM_BITS-1 downto 0);
 	variable ipend : std_logic_vector(7 downto 0);
 	variable valid : std_logic;
+	variable miss : std_logic;
 begin
 	if clk='1' and clk'Event then
 		jumpout.do_jump <= '1';	
 		
 		--TODO: owns only matters for memory operations
-		valid := to_std_logic(aluin.valid = '1' and ((aluin.load='0' and aluin.store = '0') or dcout.owns /= X"00"));
+		miss := to_std_logic(dcout.owns = X"00");--dcout.sel = "000" and dcout.owns(0) = '0');
+		valid := to_std_logic(aluin.valid = '1' and ((aluin.load='0' and aluin.store = '0') or miss = '0'));
 		jumpout.valid <= valid;
 		
 		if valid = '0' then

@@ -96,6 +96,7 @@ package octagon_types is
 	type dcfetchout_type is record
 		owns				: std_logic_vector(7 downto 0);
 		sel				: std_logic_vector(2 downto 0);
+--		miss				: std_logic;
 		nc					: std_logic;
 		adr				: std_logic_vector(DM_BITS+1 downto 0);
 	end record;

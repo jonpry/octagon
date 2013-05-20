@@ -62,10 +62,12 @@ d_fetch3 : entity work.d_fetch port map(clk,dcin,dcout.data(3),"11",sel(2 downto
 
 
 process(clk)
+	variable miss : std_logic;
 begin
 	if clk='1' and clk'Event then
+		miss := to_std_logic(dcin.dcout.owns = X"00"); --to_std_logic(dcin.dcout.sel = "000" and dcin.dcout.owns(0) = '0');
 		dcout.sel <= sel(2 downto 1);
-		dcout.dmiss <= to_std_logic(owns = X"00" and (dcin.alu2out.load = '1' or dcin.alu2out.store = '1') and dcin.alu2out.valid='1');
+		dcout.dmiss <= to_std_logic(miss='1' and (dcin.alu2out.load = '1' or dcin.alu2out.store = '1') and dcin.alu2out.valid='1');
 		dcout.tid <= dcin.alu2out.tid;
 		dcout.adr <= dcin.dcout.adr;
 	end if;

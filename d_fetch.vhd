@@ -53,6 +53,9 @@ signal dram : dtype := (others => (others => '0'));
 
 signal dirty : std_logic_vector(31 downto 0) := (others => '0');
 
+attribute ram_style: string;
+attribute ram_style of dirty : signal is "distributed";
+
 begin
 
 process(clk)

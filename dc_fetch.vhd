@@ -68,6 +68,8 @@ begin
 		dcout.sel(0) <= to_std_logic(owns(1)='1' or owns(3)='1' or owns(5)='1' or owns(7)='1');
 		dcout.sel(1) <= to_std_logic(owns(2)='1' or owns(3)='1' or owns(6)='1' or owns(7)='1');
 		dcout.sel(2) <= to_std_logic(owns(4)='1' or owns(5)='1' or owns(6)='1' or owns(7)='1');
+		
+		--dcout.miss <= to_std_logic(owns = X"00");
 
 	--Catch accesses to non cached memory
 		dcout.nc <= to_std_logic(dcin.adr(DM_BITS+1 downto DM_BITS) /= "00");

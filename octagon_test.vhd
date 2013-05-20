@@ -193,6 +193,7 @@ BEGIN
 		end if;
 	end process;  
 	
+	--D read side
 	process(clk)
 		variable next_count : std_logic_vector(6 downto 0);
 		variable slice_count : std_logic_vector(5 downto 0);
@@ -200,7 +201,7 @@ BEGIN
 		if clk='1' and clk'Event then
 			if dstate = WAIT_FOR_REQ then
 				dmcb_empty <= '1' after 100 ps;
-				if dmcb_en = '1' then
+				if dmcb_en = '1' and dmcb_cmd = "001" then
 					dstate <= TRANSFER after 100 ps;
 					dlen <= dmcb_bl after 100 ps;
 					daddr <= dmcb_adr(26 downto 2) after 100 ps;

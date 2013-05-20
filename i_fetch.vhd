@@ -45,6 +45,11 @@ architecture Behavioral of i_fetch is
 type itype is array(0 to 255) of std_logic_vector(31 downto 0);
 signal iram : itype := (others => (others => '0'));
 signal ioutd : std_logic_vector(31 downto 0);
+
+--Prevent absorbtion of output register stage
+attribute keep : string;  
+attribute keep of iout: signal is "true";  
+
 begin
 
 process(clk)
