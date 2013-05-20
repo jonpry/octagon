@@ -106,6 +106,8 @@ package octagon_types is
 		dmiss				: std_logic;
 		tid				: std_logic_vector(2 downto 0);
 		adr				: std_logic_vector(DM_BITS+1 downto 0);
+		dirty				: std_logic_vector(3 downto 0);
+		ctl_data			: dout_type;
 	end record;
 	
 	type icmuxout_type is record
@@ -410,10 +412,6 @@ package octagon_types is
 		mcb_empty		: std_logic;
 		mcb_cmd_full	: std_logic;
 		restarted		: std_logic_vector(7 downto 0);
-		dirty				: std_logic_vector(3 downto 0);
-		
-	--Probably goes somewhere else
-		dout				: dout_type;
 	end record;
 	
 end package;

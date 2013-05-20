@@ -141,6 +141,7 @@ begin
 	if clk='1' and clk'Event then
 		cmd_rd <= '0';
 		dcout.mcb_rden <= '0';
+		dcout.mcb_wren <= '0';
 		prevcmdstate <= cmd_state;
 	
 		if cmd_state = cmd_wait then
@@ -209,7 +210,7 @@ begin
 		end if;
 		
 		if cmd_state = cmd_checkdirty then
-			dirty <= dcin.dirty(to_integer(nextidx(2 downto 1)));
+			dirty <= muxout.dirty(to_integer(nextidx(2 downto 1)));
 		end if;
 		
 		if cmd_state = cmd_update_tag then
@@ -248,10 +249,11 @@ begin
 				end if;
 			end if;
 		end if;
-		
-		dcout.mcb_data <= dcin.dout(to_integer(unsigned(nextidx(2 downto 1))));
 	end if;
 end process;
+
+dcout.mcb_data <= muxout.ctl_data(to_integer(unsigned(nextidx(2 downto 1))));
+
 
 --Restart
 process(clk)

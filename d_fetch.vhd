@@ -39,7 +39,9 @@ entity d_fetch is
 		dout : out std_logic_vector(31 downto 0);
 		idx : in std_logic_vector(1 downto 0);
 		idxi : in std_logic_vector(1 downto 0);
-		way : in std_logic
+		way : in std_logic;
+		dirt : out std_logic;
+		cout : out std_logic_vector(31 downto 0)
 	);
 end d_fetch;
 
@@ -80,16 +82,14 @@ begin
 			dram(to_integer(unsigned(way & dcin.alu2out.dcwradr(9 downto 2))))(31 downto 24) <= dcin.alu2out.store_data(31 downto 24);
 		end if;
 		
+		--Second port stuffs
 		if dcin.dmemwe = '1' and dcin.dmemidx(2 downto 1) = idx then
 			dirty(to_integer(unsigned(dcin.dmemidx(0) & dcin.dmemadr(7 downto 4)))) <= '0';
 			dram(to_integer(unsigned(dcin.dmemidx(0) & dcin.dmemadr))) <= dcin.dmemval;
 		end if;
-	--TODO: this is all wrong. access to dcache ways must
-	--be on same address for read and write
-	--so we must delay the read on dcache until the way has been located
-	--	if dcin.wren = '1' and dcin.owns(idxint) = '1' then
-	--		dram(to_integer(unsigned(dcin.wradr(9 downto 2)))) <= dcin.data;
-	--	end if;
+		
+		dirt <= dirty(to_integer(unsigned(dcin.dmemidx(0) & dcin.dmemadr(7 downto 4))));
+		cout <= dram(to_integer(unsigned(dcin.dmemidx(0) & dcin.dmemadr)));
 	end if;
 end process;
 

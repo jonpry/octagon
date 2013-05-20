@@ -55,10 +55,10 @@ selin <= dcin.dcout.owns;
 sel(1) <= to_std_logic(selin(2)='1' or selin(3)='1' or selin(6)='1' or selin(7)='1');
 sel(2) <= to_std_logic(selin(4)='1' or selin(5)='1' or selin(6)='1' or selin(7)='1');
 		
-d_fetch0 : entity work.d_fetch port map(clk,dcin,dcout.data(0),"00",sel(2 downto 1),owns(1));
-d_fetch1 : entity work.d_fetch port map(clk,dcin,dcout.data(1),"01",sel(2 downto 1),owns(3));
-d_fetch2 : entity work.d_fetch port map(clk,dcin,dcout.data(2),"10",sel(2 downto 1),owns(5));
-d_fetch3 : entity work.d_fetch port map(clk,dcin,dcout.data(3),"11",sel(2 downto 1),owns(7));
+d_fetch0 : entity work.d_fetch port map(clk,dcin,dcout.data(0),"00",sel(2 downto 1),owns(1),dcout.dirty(0),dcout.ctl_data(0));
+d_fetch1 : entity work.d_fetch port map(clk,dcin,dcout.data(1),"01",sel(2 downto 1),owns(3),dcout.dirty(1),dcout.ctl_data(1));
+d_fetch2 : entity work.d_fetch port map(clk,dcin,dcout.data(2),"10",sel(2 downto 1),owns(5),dcout.dirty(2),dcout.ctl_data(2));
+d_fetch3 : entity work.d_fetch port map(clk,dcin,dcout.data(3),"11",sel(2 downto 1),owns(7),dcout.dirty(3),dcout.ctl_data(3));
 
 
 process(clk)

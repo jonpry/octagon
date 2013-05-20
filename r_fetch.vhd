@@ -327,7 +327,7 @@ begin
 		if add = '1' then
 			rout.arithmux <= arithmux_add;
 		else
-			if add = '1' then
+			if sub = '1' then
 				rout.arithmux <= arithmux_sub;
 			else 
 				if lui = '1' then
