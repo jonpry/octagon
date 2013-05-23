@@ -50,8 +50,10 @@ package octagon_types is
 	
 	type pcin_type is record
 		jump_target 	: std_logic_vector(IM_BITS-1 downto 0);
+		pc				 	: std_logic_vector(IM_BITS-1 downto 0);
 		running 			: std_logic_vector(7 downto 0);
 		int 				: std_logic_vector(7 downto 0);
+		do_int			: std_logic;
 		jump 				: std_logic;
 		valid 			: std_logic;
 		restarts			: std_logic_vector(7 downto 0);

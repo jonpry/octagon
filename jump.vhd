@@ -96,9 +96,7 @@ begin
 		valid := to_std_logic(aluin.valid = '1' and ((aluin.load='0' and aluin.store = '0') or miss = '0'));
 		jumpout.valid <= valid;
 		
-		if valid = '0' then
-			jump_target := aluin.pc;
-		elsif aluin.rfe = '1' or (aluin.met = '1' and aluin.do_jump='1') then
+		if aluin.rfe = '1' or (aluin.met = '1' and aluin.do_jump='1') then
 			jump_target := aluin.pcjump;
 		else
 			jump_target := std_logic_vector(unsigned(aluin.pc) + 4);
@@ -106,13 +104,13 @@ begin
 		
 		ipend := ints and (not aluin.imask);
 		
+		jumpout.jump_target <= jump_target;
+		
 		--TODO: handle ovf
 		if ipend /= X"00" and valid = '1' then
-			jumpout.jump_target <= (others => '0');
 			jumpout.do_int <= '1';
 		else
-			jumpout.jump_target <= jump_target;
-			jumpout.do_int <= '0';
+			jumpout.do_int <= '0'; 
 		end if;
 		
 		jumpout.epc <= jump_target;

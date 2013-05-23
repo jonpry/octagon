@@ -54,6 +54,7 @@ signal running_q : std_logic_vector(7 downto 0) := "00000000";
 signal pc_add : std_logic_vector(IM_BITS-1 downto 0);
 signal pc_jump : std_logic_vector(IM_BITS-1 downto 0);
 signal pc_next : std_logic_vector(IM_BITS-1 downto 0);
+signal target : std_logic_vector(IM_BITS-1 downto 0);
 signal running_edge : std_logic := '0';
 signal enabled : std_logic := '0';
 signal go_to_reset : std_logic;
@@ -88,8 +89,10 @@ begin
 	end if;
 end process;
 
-valid <= '1' when (running_edge = '1' or pcin.valid = '1' or restart='1') and enabled = '1' else '0';
-pc_next <= (others => '0') when enabled = '0' or running_edge = '1' else pcin.jump_target;
+valid <= '1' when (pcin.valid = '1' or restart='1' or running_edge='1') and enabled = '1' else '0';
+target <= pcin.jump_target when pcin.valid = '1' else pcin.pc;
+
+pc_next <= (others => '0') when enabled = '0' or running_edge = '1' or pcin.do_int = '1' else target;
 
 pcout.pc_next <= pc_next;
 

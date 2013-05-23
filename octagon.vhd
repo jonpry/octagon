@@ -99,6 +99,8 @@ begin
 --11 store
 
 pcin.jump_target <= jumpout.jump_target;
+pcin.do_int <= jumpout.do_int;
+pcin.pc <= jumpout.pc;
 pcin.running <= running;
 pcin.int <= int;
 pcin.jump <= jumpout.do_jump;
