@@ -99,6 +99,7 @@ begin
 		aluout.store_hi <= aluin.rfetch.store_hi;
 		aluout.store_lo <= aluin.rfetch.store_lo;
 		aluout.rfe <= aluin.rfetch.rfe;
+		aluout.use_immediate <= aluin.rfetch.use_immediate;
 		
 		if aluin.rfetch.use_immediate = '1' then
 			r_t := aluin.rfetch.immediate;
@@ -126,9 +127,11 @@ begin
 	--Compare
 		aluout.eq <= to_std_logic(aluin.rfetch.r_s = r_t);
 		if aluin.rfetch.comp_unsigned = '1' then
-			aluout.lt <= to_std_logic(unsigned(aluin.rfetch.r_s) < unsigned(r_t));				
+			aluout.lt_reg <= to_std_logic(unsigned(aluin.rfetch.r_s) < unsigned(aluin.rfetch.r_t));
+			aluout.lt_imm <= to_std_logic(unsigned(aluin.rfetch.r_s) < unsigned(aluin.rfetch.immediate));
 		else
-			aluout.lt <= to_std_logic(signed(aluin.rfetch.r_s) < signed(r_t));
+			aluout.lt_reg <= to_std_logic(signed(aluin.rfetch.r_s) < signed(aluin.rfetch.r_t));
+			aluout.lt_imm <= to_std_logic(signed(aluin.rfetch.r_s) < signed(aluin.rfetch.immediate));
 		end if;
 	end if;
 end process;

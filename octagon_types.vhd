@@ -251,8 +251,10 @@ package octagon_types is
 		store_hi			: std_logic;
 		store_lo			: std_logic;
 		eq					: std_logic;
-		lt					: std_logic;
+		lt_reg			: std_logic;
+		lt_imm			: std_logic;
 		rfe				: std_logic;
+		use_immediate	: std_logic;
 	end record;
 	
 	type alu2out_type is record
