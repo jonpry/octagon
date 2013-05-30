@@ -224,13 +224,16 @@ BEGIN
 				end if;
 			elsif dcpump_state = DCPUMP_TRANSFER then
 				pumplen <= pumplen + 1;
-				if pumplen = (unsigned(cmdblout) - 1)  then
+				if pumplen = unsigned(cmdblout)  then
 					dcfiforden <= '0';
 					cmdrden <= '1';
 					dcpump_state <= DCPUMP_DONE;
 				end if;
-				dm( to_integer(unsigned(cmdadrout(29 downto 2)) + pumplen)) <= dcfifoout;
+				if pumplen > 0 then
+					dm( to_integer(unsigned(cmdadrout(29 downto 2)) + pumplen - 1)) <= dcfifoout;
+				end if;
 			else
+				dm( to_integer(unsigned(cmdadrout(29 downto 2)) + pumplen - 1)) <= dcfifoout;
 				cmdrden <= '0';
 				dcpump_state <= DCPUMP_WAIT;
 			end if;
