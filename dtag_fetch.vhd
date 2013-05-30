@@ -36,7 +36,8 @@ entity dtag_fetch is
 		clk : in  std_logic;
 		dcin : in dcfetchin_type;
 		idx : in std_logic_vector(2 downto 0);
-		own : out std_logic
+		own : out std_logic;
+		tag : out std_logic_vector(DM_BITS-1 downto 10)
 	);
 end dtag_fetch;
 
@@ -57,6 +58,7 @@ own <= '1' when this_tag = dcin.adr(DM_BITS-1 downto 10) else '0';
 process(clk)
 begin
 	if clk='1' and clk'Event then
+		tag <= tagram(to_integer(unsigned(dcin.tagadr)));
 		if dcin.tagwe = '1' and dcin.tagidx = idx then
 			tagram(to_integer(unsigned(dcin.tagadr))) <= dcin.tagval;
 		end if;

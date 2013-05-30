@@ -138,6 +138,7 @@ dctlin.mcb_data <= dmcb_data;
 dctlin.mcb_empty <= dmcb_empty;
 dctlin.mcb_cmd_full <= dmcb_cmd_full;
 dctlin.restarted <= pcout.restarted;
+dctlin.tag <= dcout.tag;
 
 dcin.adr <= alu1out.memadr;
 dcin.tagval <= dctlout.tagadr(IM_BITS-1 downto 10);

@@ -46,7 +46,7 @@ architecture Behavioral of dcontrol is
 type ictl_type is (ictl_wfr, ictl_tagcheck, ictl_noreq, ictl_req, ictl_delay, ictl_delay2,
 						 ictl_wait_for_req);
 type cmd_type is (cmd_wait, cmd_restart, cmd_waitfordata, cmd_transfer_data, cmd_update_tag,
-						cmd_delay1, cmd_delay2, cmd_invtag, cmd_checkdirty, cmd_invwait, cmd_checkdirty2,
+						cmd_delay1, cmd_delay2, cmd_readtag, cmd_invtag, cmd_checkdirty, cmd_invwait, cmd_checkdirty2,
 						cmd_write, cmd_write_done, cmd_write_done2);
 
 signal cmd_state : cmd_type := cmd_wait;
@@ -81,6 +81,8 @@ signal restarts : std_logic_vector(7 downto 0) := X"00";
 
 signal mcb_req_done : std_logic;
 signal cmd_mcb_req_done : std_logic;
+
+signal oldtag : std_logic_vector(DM_BITS-1 downto 10);
 
 begin
 
@@ -149,9 +151,11 @@ begin
 				if cmddnr = '1' then
 					cmd_state <= cmd_restart;
 				else
-					cmd_state <= cmd_invtag;
+					cmd_state <= cmd_readtag;
 				end if;
 			end if;
+		elsif cmd_state = cmd_readtag then
+			cmd_state <= cmd_invtag;
 		elsif cmd_state = cmd_invtag then
 			cmd_state <= cmd_invwait;
 		elsif cmd_state = cmd_invwait then
@@ -203,12 +207,20 @@ begin
 		end if;
 	
 		dcout.tag_wr <= '0';
-		if cmd_state = cmd_invtag then
+		if cmd_state = cmd_readtag then
 			dcout.tagadr <= (IM_BITS-1 downto 10 => '1') & cmd_dout(9 downto 6);
 			dcout.tagidx <= std_logic_vector(nextidx);
+		end if;
+		
+		if cmd_state = cmd_invtag then
 			dcout.tag_wr <= '1';
 		end if;
 		
+		if cmd_state = cmd_checkdirty then
+			oldtag <= dcin.tag;
+		end if;
+		
+		--TODO: probably need one more wait cycle here
 		if cmd_state = cmd_checkdirty then
 			dirty <= muxout.dirty(to_integer(nextidx(2 downto 1)));
 		end if;
@@ -285,7 +297,7 @@ begin
 			dcout.mcb_cmd <= "000";
 			dcout.mcb_en <= '1';
 			cmd_mcb_req_done <= '1';
-			dcout.mcb_adr <= "0000" & cmd_dout & (5 downto 0 => '0');
+			dcout.mcb_adr <= "0000" & oldtag & cmd_dout(9 downto 6) & (5 downto 0 => '0');
 		end if;
 	end if;
 end process;

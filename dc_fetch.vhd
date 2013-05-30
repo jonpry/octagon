@@ -44,20 +44,24 @@ architecture Behavioral of dc_fetch is
 
 signal owns : std_logic_vector(7 downto 0);
 
+type tag_type is array(0 to 7) of std_logic_vector(DM_BITS-1 downto 10);
+
+signal tag : tag_type;
+
 begin
 
 --8192 byte cache organized as 8 ways of 1024 bytes (9 downto 0)
 --Lines are 64bytes, (5 downto 0)
 --16 lines per way
 
-tag_fetch0 : entity work.dtag_fetch port map(clk,dcin,"000",owns(0));
-tag_fetch1 : entity work.dtag_fetch port map(clk,dcin,"001",owns(1));
-tag_fetch2 : entity work.dtag_fetch port map(clk,dcin,"010",owns(2));
-tag_fetch3 : entity work.dtag_fetch port map(clk,dcin,"011",owns(3));
-tag_fetch4 : entity work.dtag_fetch port map(clk,dcin,"100",owns(4));
-tag_fetch5 : entity work.dtag_fetch port map(clk,dcin,"101",owns(5));
-tag_fetch6 : entity work.dtag_fetch port map(clk,dcin,"110",owns(6));
-tag_fetch7 : entity work.dtag_fetch port map(clk,dcin,"111",owns(7));
+tag_fetch0 : entity work.dtag_fetch port map(clk,dcin,"000",owns(0),tag(0));
+tag_fetch1 : entity work.dtag_fetch port map(clk,dcin,"001",owns(1),tag(1));
+tag_fetch2 : entity work.dtag_fetch port map(clk,dcin,"010",owns(2),tag(2));
+tag_fetch3 : entity work.dtag_fetch port map(clk,dcin,"011",owns(3),tag(3));
+tag_fetch4 : entity work.dtag_fetch port map(clk,dcin,"100",owns(4),tag(4));
+tag_fetch5 : entity work.dtag_fetch port map(clk,dcin,"101",owns(5),tag(5));
+tag_fetch6 : entity work.dtag_fetch port map(clk,dcin,"110",owns(6),tag(6));
+tag_fetch7 : entity work.dtag_fetch port map(clk,dcin,"111",owns(7),tag(7));
 
 process(clk)
 begin
@@ -73,6 +77,8 @@ begin
 
 	--Catch accesses to non cached memory
 		dcout.nc <= to_std_logic(dcin.adr(DM_BITS+1 downto DM_BITS) /= "00");
+		
+		dcout.tag <= tag(to_integer(unsigned(dcin.tagidx)));
 	end if;
 end process;
 

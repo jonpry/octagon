@@ -101,6 +101,7 @@ package octagon_types is
 --		miss				: std_logic;
 		nc					: std_logic;
 		adr				: std_logic_vector(DM_BITS+1 downto 0);
+		tag				: std_logic_vector(DM_BITS-1 downto 10);
 	end record;
 	
 	type dcmemout_type is record
@@ -417,6 +418,7 @@ package octagon_types is
 		mcb_empty		: std_logic;
 		mcb_cmd_full	: std_logic;
 		restarted		: std_logic_vector(7 downto 0);
+		tag				: std_logic_vector(DM_BITS-1 downto 10);
 	end record;
 	
 end package;

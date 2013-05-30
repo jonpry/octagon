@@ -121,6 +121,32 @@ ARCHITECTURE behavior OF octagon_test IS
  	signal dcount : std_logic_vector(6 downto 0);
 	signal dlen : std_logic_vector(5 downto 0);
 	signal daddr : std_logic_vector(24 downto 0);
+	
+	--DC data fifo
+	type dcram_type is array(0 to 63) of std_logic_vector(31 downto 0);
+	signal dcdin : dcram_type := (others => (others => '0'));
+	signal dcwraddr : unsigned(5 downto 0) := (others => '0');
+	signal dcrdaddr : unsigned(5 downto 0) := (others => '0');
+	signal dcfiforden : std_logic := '0';
+	signal dcfifoout : std_logic_vector(31 downto 0);
+	
+	--DC cmd fifo
+	type cmdram_type is array(0 to 3) of std_logic_vector(35 downto 0);
+	signal cmds : cmdram_type := (others => (others => '0'));
+	signal cmdwraddr : unsigned(1 downto 0) := (others => '0');
+	signal cmdrdaddr : unsigned(1 downto 0) := (others => '0');
+	signal cmdrden : std_logic := '0';
+	signal cmdblout : std_logic_vector(5 downto 0);
+	signal cmdadrout : std_logic_vector(29 downto 0);	
+	
+	--DM pump
+	signal index : integer range 0 to 64000;
+	signal dmin : std_logic_vector(31 downto 0);
+	signal dmwr : std_logic := '0';
+	type DCPUMP_STATE_T is (DCPUMP_WAIT, DCPUMP_TRANSFER, DCPUMP_DONE);
+	signal dcpump_state : DCPUMP_STATE_T := DCPUMP_WAIT;
+	signal pumplen : unsigned(5 downto 0);
+	
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
@@ -150,6 +176,66 @@ BEGIN
 			 dmcb_cmd_full => dmcb_cmd_full
  
         );
+		  
+	--DC Data fifo
+	process(clk)
+	begin
+		if clk='1' and clk'Event then
+			if dmcb_wren = '1' then
+				dcdin(to_integer(dcwraddr)) <= dmcb_dout;
+				dcwraddr <= dcwraddr + 1;
+			end if;
+			dcfifoout <= dcdin(to_integer(dcrdaddr));
+			if dcfiforden = '1' then
+				dcrdaddr <= dcrdaddr + 1;
+			end if;
+		end if;
+	end process;
+	
+	
+	--DC Data fifo
+	process(clk)
+	begin
+		if clk='1' and clk'Event then
+			if dmcb_en = '1' and dmcb_cmd = "000" then 
+				cmds(to_integer(cmdwraddr)) <= dmcb_bl & dmcb_adr;
+				cmdwraddr <= cmdwraddr + 1;
+			end if;
+			cmdblout <= cmds(to_integer(cmdrdaddr))(35 downto 30);
+			cmdadrout <= cmds(to_integer(cmdrdaddr))(29 downto 0);
+			if cmdrden = '1' then
+				cmdrdaddr <= cmdrdaddr + 1;
+			end if;
+		end if;
+	end process;
+	
+	--DC write machine
+	process(clk)
+	begin
+		if clk='1' and clk'Event then
+			if dcpump_state = DCPUMP_WAIT then
+				if dmwr = '1' then
+					dm(index) <= dmin;
+				end if;
+				if cmdwraddr /= cmdrdaddr then
+					dcpump_state <= DCPUMP_TRANSFER;
+					dcfiforden <= '1';
+					pumplen <= (others => '0');
+				end if;
+			elsif dcpump_state = DCPUMP_TRANSFER then
+				pumplen <= pumplen + 1;
+				if pumplen = (unsigned(cmdblout) - 1)  then
+					dcfiforden <= '0';
+					cmdrden <= '1';
+					dcpump_state <= DCPUMP_DONE;
+				end if;
+				dm( to_integer(unsigned(cmdadrout(29 downto 2)) + pumplen)) <= dcfifoout;
+			else
+				cmdrden <= '0';
+				dcpump_state <= DCPUMP_WAIT;
+			end if;
+		end if;
+	end process;
 		  
 	process(clk)
 		variable next_count : std_logic_vector(6 downto 0);
@@ -257,6 +343,7 @@ BEGIN
       wait for 100 ns;	
 		
 		running <= (others => '0');
+		dmwr <= '0';
 
       wait for clk_period*10;
 				
@@ -284,14 +371,16 @@ BEGIN
 			dmemval(31 downto 24) := std_logic_vector(to_unsigned(character'pos(my_char),8));
 			wait for clk_period;
 			
-			dm(i) <= dmemval;
+			dmin <= dmemval;
+			index <= I;
+			dmwr <= '1';
 			I := I + 1;
 		end loop;
 		file_close(my_file);
 		
 		wait for clk_period;
 		
-      
+      dmwr <= '0';
 		running <= "00000001";
 		
 		wait for 7 us;
