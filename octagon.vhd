@@ -36,8 +36,8 @@ entity octagon is
 		clk 				: in  std_logic;
 		running 			: in std_logic_vector(7 downto 0);
 		int 				: in std_logic_vector(7 downto 0);
-		notrim_o 		: out std_logic_vector(20 downto 0);
 		wbmout			: out wbmout_type;
+		wbcyc				: in std_logic;
 		mcb_cmd			: out std_logic_vector(2 downto 0);
 		mcb_bl			: out std_logic_vector(5 downto 0);
 		mcb_adr			: out std_logic_vector(29 downto 0);
@@ -84,6 +84,8 @@ signal ictlin : ictlin_type;
 signal ictlout : ictlout_type;
 signal dctlin : dctlin_type;
 signal dctlout : dctlout_type;
+signal wbmouti : wbmout_type;
+signal wbmin : wbmin_type;
 
 begin
 
@@ -105,7 +107,7 @@ pcin.running <= running;
 pcin.int <= int;
 pcin.jump <= jumpout.do_jump;
 pcin.valid <= jumpout.valid;
-pcin.restarts <= ictlout.restarts or dctlout.restarts;
+pcin.restarts <= ictlout.restarts or dctlout.restarts or wbmouti.restarts;
 
 icin.pcout <= pcout;
 icin.tagval <= ictlout.tagadr(IM_BITS-1 downto 10);
@@ -161,6 +163,10 @@ rin.reg_we <= rstoreout.valid;
 alu1in.rfetch <= rout;
 alu1in.rout <= rstoreout;
 
+wbmout <= wbmouti;
+wbmin.restarted <= pcout.restarted;
+wbmin.cyc <= wbcyc;
+
 pc_module: entity work.pc_module port map(clk,pcin,pcout);  --1
 
 ic_fetch : entity work.ic_fetch port map(clk,icin,icout);	--2
@@ -177,9 +183,9 @@ alu1 : entity work.alu1 port map(clk,alu1in,alu1out);			--6
 alu2 : entity work.alu2 port map(clk,alu1out,alu2out);		--7
 dc_fetch : entity work.dc_fetch port map(clk,dcin,dcout);
 
-jump : entity work.jump port map(clk,alu2out,int,dcout,jumpout);	--8
+jump : entity work.jump port map(clk,alu2out,int,dcout,wbmouti,jumpout);	--8
 dc_mem : entity work.dc_mem port map(clk,dcmemin,dcmemout);
-wb_master : entity work.wb_master port map(clk,dcmemin,wbmout);
+wb_master : entity work.wb_master port map(clk,dcmemin,wbmin,wbmouti);
 
 dcontrol : entity work.dcontrol port map(clk,dcmemout,dctlin,dctlout);
 dc_mux : entity work.dc_mux port map(clk,jumpout,dcmemout,dmuxout); --8+1
@@ -187,50 +193,6 @@ dc_mux : entity work.dc_mux port map(clk,jumpout,dcmemout,dmuxout); --8+1
 l_mux : entity work.l_mux port map(clk,dmuxout,lmuxout); --8+2
 
 r_store : entity work.r_store port map(clk,lmuxout,rstoreout); --8+2.5 -- async on output of l_mux
-
-process(clk)
-variable notrim : std_logic_vector(20 downto 0);
-begin
-	if clk='1' and clk'Event then
-
-		
-		notrim := (others => '0');
---		notrim (15 downto 0) := rsave(15 downto 0) or decout.long_target(15 downto 0);
---		notrim (9 downto 0) := notrim(9 downto 0) or decout.long_target(25 downto 16);
-		
---		notrim(4 downto 0) := notrim(4 downto 0) or decout.r_dest;
---		notrim(11 downto 10) := notrim(11 downto 10) or decout.memsize;
---		notrim(15) := notrim(16) or decout.link;
---		notrim(16) := notrim(16) or decout.rfe;
---		notrim(16) := notrim(16) or decout.load;
---		notrim(17) := notrim(17) or decout.store;
---		notrim(17) := notrim(17) or decout.load_unsigned;
---		notrim(17) := notrim(17) or decout.long_jump;
---		notrim(18) := notrim(18) or jumpout.met;
---		notrim(18) := notrim(18) or decout.slt;
-		notrim(19) := notrim(19) or alu2out.arith_ovf;
-	--	notrim(19) := notrim(19) or decout.logic;
-	--	notrim(19) := notrim(19) or alu2out.ltu;
---		notrim(20) := notrim(20) or decout.jump;
---		notrim(20) := notrim(20) or decout.math_unsigned;
-	--	notrim(20) := notrim(20) or alu2out.lt;
-
-	--	rsave2 <= notrim;
-	--	notrim := rsave2;
-		
-	--	notrim(15 downto 0) := notrim(15 downto 0) or alu1out.memadr(15 downto 0) or ( (31 downto DM_BITS => '0') & alu1out.memadr((DM_BITS-1) downto 16));
-	--	notrim(15 downto 0) := notrim(15 downto 0) or alu2out.diff(15 downto 0) or alu2out.diff(31 downto 16);
-	 	
-	--	rsave3 <= notrim;
-	--	notrim := rsave3;
-		
-	--	notrim(15 downto 0) := notrim(15 downto 0) or alu2out.logic(15 downto 0) or alu2out.logic(31 downto 16);
-		
-		notrim_o <= notrim;
-
-
-	end if;
-end process;
 
 end Behavioral;
 

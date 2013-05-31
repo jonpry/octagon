@@ -38,6 +38,7 @@ entity jump is
 		aluin : in alu2out_type;
 		ints : in std_logic_vector(7 downto 0);
 		dcout : in dcfetchout_type;
+		wbout : in wbmout_type;
 		jumpout : out jumpout_type
 	);
 end jump;
@@ -93,7 +94,7 @@ begin
 		
 		--TODO: owns only matters for memory operations
 		miss := to_std_logic(dcout.owns = X"00");--dcout.sel = "000" and dcout.owns(0) = '0');
-		valid := to_std_logic(aluin.valid = '1' and ((aluin.load='0' and aluin.store = '0') or miss = '0'));
+		valid := to_std_logic(aluin.valid = '1' and ((aluin.load='0' and aluin.store = '0') or miss = '0') and wbout.stall = '0');
 		jumpout.valid <= valid;
 		
 		if aluin.rfe = '1' or (aluin.met = '1' and aluin.do_jump='1') then
