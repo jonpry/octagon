@@ -46,8 +46,8 @@ ARCHITECTURE behavior OF octagon_test IS
 		clk 				: in  std_logic;
 		running 			: in std_logic_vector(7 downto 0);
 		int 				: in std_logic_vector(7 downto 0);
-		notrim_o 		: out std_logic_vector(20 downto 0);
 		wbmout			: out wbmout_type;	
+		wbcyc				: in std_logic;
 		mcb_cmd			: out std_logic_vector(2 downto 0);
 		mcb_bl			: out std_logic_vector(5 downto 0);
 		mcb_adr			: out std_logic_vector(29 downto 0);
@@ -81,9 +81,9 @@ ARCHITECTURE behavior OF octagon_test IS
 	signal dmcb_data : std_logic_vector(31 downto 0) := (others => '0');
 	signal dmcb_empty : std_logic := '0';
 	signal dmcb_cmd_full : std_logic := '0';
+	signal wbcyc : std_logic := '1';
 	
  	--Outputs
-	signal notrim_o : std_logic_vector(20 downto 0);
 	signal wbmout : wbmout_type;
 	signal mcb_cmd	: std_logic_vector(2 downto 0);
 	signal mcb_bl : std_logic_vector(5 downto 0);
@@ -154,8 +154,8 @@ BEGIN
           clk => clk,
 			 running => running,
 			 int => int,
-          notrim_o => notrim_o,
  			 wbmout => wbmout,
+			 wbcyc => wbcyc,
 			 mcb_cmd => mcb_cmd,
 			 mcb_bl => mcb_bl,
 			 mcb_adr => mcb_adr,

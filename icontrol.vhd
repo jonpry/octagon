@@ -74,6 +74,9 @@ signal cmd_dout : std_logic_vector(IM_BITS-1 downto 6);
 signal rden_delay : std_logic;
 
 signal restarts : std_logic_vector(7 downto 0) := X"00";
+signal memwe : std_logic;
+signal data : std_logic_vector(31 downto 0);
+
 
 begin
 
@@ -180,7 +183,7 @@ begin
 			rden_delay <= '1';
 		end if;
 	
-		iout.memwe <= '0';
+		memwe <= '0';
 		iout.memadr <= cmd_dout(9 downto 6) & std_logic_vector(wcount) & "00";
 		if cmd_state = cmd_transfer_data then
 			--this may not be fast enough. must generate this signal async
@@ -190,8 +193,8 @@ begin
 				iout.mcb_rden <= '1';
 			end if;
 			if iin.mcb_empty = '0' then
-				iout.data <= iin.mcb_data;
-				iout.memwe <= '1';
+				data <= iin.mcb_data;
+				memwe <= '1';
 				if rden_delay = '1' then
 					rden_delay <= '0';
 				else
@@ -199,6 +202,9 @@ begin
 				end if;
 			end if;
 		end if;
+		
+		iout.memwe <= memwe;
+		iout.data <= data;
 	end if;
 end process;
 

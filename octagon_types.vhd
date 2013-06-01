@@ -162,6 +162,7 @@ package octagon_types is
 		r_s				: std_logic_vector(4 downto 0);
 		r_t				: std_logic_vector(4 downto 0);
 		instr				: std_logic_vector(31 downto 0);
+		r_tz				: std_logic;
 	end record;
 	
 	type rfetchin_type is record

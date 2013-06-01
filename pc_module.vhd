@@ -61,6 +61,9 @@ signal go_to_reset : std_logic;
 signal valid : std_logic;
 signal restart : std_logic;
 
+signal restarted : std_logic_vector(7 downto 0);
+signal restarts : std_logic_vector(7 downto 0);
+
 signal gndv : std_logic_vector(31 downto 0) := X"00000000";
 begin
 
@@ -73,8 +76,10 @@ process(clk)
 	variable restartV : std_logic;
 begin
 	if clk='1' and clk'Event then
-		restartV := pcin.restarts(to_integer(count2));
-		pcout.restarted(to_integer(count2)) <= restartV;
+		restarts <= pcin.restarts;
+		restartV := restarts(to_integer(count2));
+		restarted(to_integer(count2)) <= restartV;
+		pcout.restarted <= restarted;
 		restart <= restartV;
 		
 		running_q(to_integer(count2)) <= pcin.running(to_integer(count2));

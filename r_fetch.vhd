@@ -76,7 +76,11 @@ begin
 		r_t <= regram2(to_integer(unsigned(adr2)));
 		
 		r_sq <= r_s;
-		r_tq <= r_t;
+		if rin.decout.r_tz = '1' then
+			r_tq <= (others => '0');
+		else
+			r_tq <= r_t;
+		end if;
 		
 		if rin.reg_we = '1' then
 			regram1(to_integer(unsigned(rin.reg_adr))) <= rin.reg_val;
