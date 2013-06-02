@@ -160,6 +160,8 @@ begin
 		end case;
 		
 		aluout.dcwren <= aluin.valid and aluin.store;
+		aluout.dcrden <= aluin.valid and aluin.load;
+		aluout.dcop <= aluin.valid and (aluin.store or aluin.load);
 		
 	end if;
 end process;

@@ -45,9 +45,12 @@ architecture Behavioral of wb_master is
 
 type adr_type is array (0 to 15) of std_logic_vector(DM_BITS-1 downto 0);
 type dat_type is array (0 to 15) of std_logic_vector(31 downto 0);
+type tid_type is array (0 to 15) of std_logic_vector(2 downto 0);
 
 signal adrmem : adr_type;
 signal datmem : dat_type;
+signal tidmem : tid_type;
+signal wrmem  : std_logic_vector(15 downto 0);
 
 signal wrptr : unsigned(3 downto 0) := "0000";
 signal rdptr : unsigned(3 downto 0) := "0000";
@@ -55,19 +58,26 @@ signal rdptr : unsigned(3 downto 0) := "0000";
 signal stall : std_logic;
 signal restarts : std_logic_vector(7 downto 0) := X"00";
 
+signal read_tid : std_logic_vector(2 downto 0);
+signal read_dat : std_logic_vector(31 downto 0);
+signal read_done : std_logic := '0';
+
 begin
 
 wbout.stall <= stall;
 wbout.restarts <= restarts;
 
 process(clk)
+	variable wren : std_logic;
 begin
 	if clk='1' and clk'Event then
 		restarts <= restarts and not wbin.restarted;
 
 		--Stall is a signal to parallel stage, so we predict if the next 
 		stall <= to_std_logic((wrptr + 2 = rdptr) or (wrptr + 1 = rdptr));
-		if dcin.dcout.nc = '1' and dcin.alu2out.valid = '1' and dcin.alu2out.dcwren = '1' then
+		if dcin.dcout.nc = '1' and dcin.alu2out.valid = '1' and dcin.alu2out.dcop = '1' then
+			wren := dcin.alu2out.dcwren;
+			--TODO: read operations stall on fifo full and unconditionally without restart
 			if stall = '1' then
 				--Jump unit will stall but we immediately cause restart
 				restarts(to_integer(unsigned(dcin.alu2out.tid))) <= '1';
@@ -75,20 +85,32 @@ begin
 				wrptr <= wrptr + 1;
 				adrmem(to_integer(wrptr)) <= dcin.alu2out.dcwradr;
 				datmem(to_integer(wrptr)) <= dcin.alu2out.store_data;
+				tidmem(to_integer(wrptr)) <= dcin.alu2out.tid;
+				wrmem(to_integer(wrptr)) <= wren;
 			end if;
 		end if;
 	end if;
 end process;
 
 process(clk)
+	variable wren : std_logic;
 begin
 	if clk='1' and clk'Event then
 		if rdptr /= wrptr then
 			wbout.req <= '1';
+			--TODO: another read instruction cannot be tended until the first has reentered the pipeline
 			if wbin.cyc = '1' then
 				wbout.adr <= adrmem(to_integer(rdptr));
 				wbout.data <= datmem(to_integer(rdptr));
+				wren := wrmem(to_integer(rdptr));
+				wbout.wren <= wren;
 				rdptr <= rdptr + 1;
+				if wbin.ack ='1' and wren = '1' then
+					--read complete
+					read_dat <= wbin.dat;
+					read_tid <= tidmem(to_integer(rdptr));
+					read_done <= '1';
+				end if;
 			end if;
 		else
 			wbout.req <= '0';

@@ -38,6 +38,8 @@ entity octagon is
 		int 				: in std_logic_vector(7 downto 0);
 		wbmout			: out wbmout_type;
 		wbcyc				: in std_logic;
+		wback				: in std_logic;
+		wbdata			: in std_logic_vector(31 downto 0);
 		mcb_cmd			: out std_logic_vector(2 downto 0);
 		mcb_bl			: out std_logic_vector(5 downto 0);
 		mcb_adr			: out std_logic_vector(29 downto 0);
@@ -166,6 +168,8 @@ alu1in.rout <= rstoreout;
 wbmout <= wbmouti;
 wbmin.restarted <= pcout.restarted;
 wbmin.cyc <= wbcyc;
+wbmin.ack <= wback;
+wbmin.dat <= wbdata;
 
 pc_module: entity work.pc_module port map(clk,pcin,pcout);  --1
 

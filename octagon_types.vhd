@@ -284,6 +284,8 @@ package octagon_types is
 		store_data		: std_logic_vector(31 downto 0);
 		be					: std_logic_vector(3 downto 0);
 		dcwren			: std_logic;
+		dcrden			: std_logic;
+		dcop				: std_logic;
 		dcwradr			: std_logic_vector(DM_BITS-1 downto 0);
 		store_cop0		: std_logic;
 		imask				: std_logic_vector(7 downto 0);
@@ -298,12 +300,15 @@ package octagon_types is
 		req				: std_logic;
 		adr				: std_logic_vector(DM_BITS-1 downto 0);
 		data				: std_logic_vector(31 downto 0);
+		wren				: std_logic;
 		stall				: std_logic;
 		restarts			: std_logic_vector(7 downto 0);
 	end record;
 	
 	type wbmin_type is record
 		cyc				: std_logic;
+		ack				: std_logic;
+		dat				: std_logic_vector(31 downto 0);
 		restarted 		: std_logic_vector(7 downto 0);
 	end record;
 	
