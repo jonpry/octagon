@@ -110,7 +110,8 @@ pcin.pc <= jumpout.pc;
 pcin.running <= running;
 pcin.int <= int;
 pcin.jump <= jumpout.do_jump;
-pcin.valid <= jumpout.valid;
+pcin.cvalid <= jumpout.cvalid;
+pcin.abort <= jumpout.abort;
 pcin.restarts <= ictlout.restarts or dctlout.restarts or wbmout.restarts or wbrout.restarts;
 
 icin.pcout <= pcout;

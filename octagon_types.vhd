@@ -55,7 +55,8 @@ package octagon_types is
 		int 				: std_logic_vector(7 downto 0);
 		do_int			: std_logic;
 		jump 				: std_logic;
-		valid 			: std_logic;
+		cvalid 			: std_logic;
+		abort				: std_logic;
 		restarts			: std_logic_vector(7 downto 0);
 	end record;
 	
@@ -145,6 +146,8 @@ package octagon_types is
 		store_hi			: std_logic;
 		store_lo			: std_logic;
 		rfe				: std_logic;
+		wbr_complete 	: std_logic;
+		wbr_data			: std_logic_vector(31 downto 0);
 	end record;
 	
 	type shift_type is record
@@ -298,6 +301,8 @@ package octagon_types is
 		rfe				: std_logic;
 		wbr_complete 	: std_logic;
 		wbr_data			: std_logic_vector(31 downto 0);
+		memop				: std_logic;
+		lnc				: std_logic;
 	end record;
 	
 	type wbmoutsig_type is record
@@ -339,7 +344,8 @@ package octagon_types is
 		jump_target		: std_logic_vector(IM_BITS-1 downto 0);
 		do_jump			: std_logic;
 		tid				: std_logic_vector(2 downto 0);
-		valid				: std_logic;	
+		cvalid			: std_logic;	
+		abort				: std_logic;
 		met				: std_logic;
 		mux				: std_logic_vector(31 downto 0);
 		shiftout			: std_logic_vector(31 downto 0);
@@ -394,6 +400,8 @@ package octagon_types is
 		store_hi			: std_logic;
 		store_lo			: std_logic;
 		rfe				: std_logic;
+		wbr_complete 	: std_logic;
+		wbr_data			: std_logic_vector(31 downto 0);
 	end record;
 	
 	type dcmemin_type is record

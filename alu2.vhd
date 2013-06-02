@@ -70,6 +70,8 @@ begin
 		aluout.rfe <= aluin.rfe;
 		aluout.wbr_complete <= aluin.wbr_complete;
 		aluout.wbr_data <= aluin.wbr_data;
+		aluout.memop <= aluin.load or aluin.store;
+		aluout.lnc <= to_std_logic(aluin.load = '1' and aluin.wbr_complete = '0');
 	end if;
 end process;
 

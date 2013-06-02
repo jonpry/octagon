@@ -94,10 +94,10 @@ begin
 	end if;
 end process;
 
-valid <= '1' when (pcin.valid = '1' or restart='1' or running_edge='1') and enabled = '1' else '0';
-target <= pcin.jump_target when pcin.valid = '1' else pcin.pc;
+valid <= '1' when ((pcin.cvalid = '1' and pcin.abort='0') or restart='1' or running_edge='1') and enabled = '1' else '0';
+target <= pcin.jump_target when (pcin.cvalid = '1' and pcin.abort = '0') else pcin.pc;
 
-pc_next <= (others => '0') when enabled = '0' or running_edge = '1' or pcin.do_int = '1' else target;
+pc_next <= (others => '0') when enabled = '0' or running_edge = '1' else target;
 
 pcout.pc_next <= pc_next;
 

@@ -56,7 +56,7 @@ begin
 		muxout.reg_store <= jumpout.reg_store;
 		muxout.store_cond <= jumpout.store_cond;
 		muxout.met <= jumpout.met;
-		muxout.valid <= jumpout.valid;
+		muxout.valid <= to_std_logic(jumpout.cvalid='1' and jumpout.abort='0');
 		muxout.lmux <= jumpout.lmux;
 		muxout.slt <= jumpout.slt;
 		muxout.mux <= jumpout.mux;
@@ -66,19 +66,17 @@ begin
 		muxout.load <= jumpout.load;
 		muxout.load_unsigned <= jumpout.load_unsigned;
 		muxout.store_cop0 <= jumpout.store_cop0;
-		muxout.do_int <= jumpout.do_int;
+		muxout.do_int <= to_std_logic(jumpout.do_int = '1' and jumpout.cvalid='1' and jumpout.abort = '0');
 		muxout.epc <= jumpout.epc;
 		muxout.ipend <= jumpout.ipend;
 		muxout.store_hi <= jumpout.store_hi;
 		muxout.store_lo <= jumpout.store_lo;
 		muxout.rfe <= jumpout.rfe;
 
-		data := memout.data(to_integer(unsigned(memout.sel)));
-		if jumpout.wbr_complete = '1' then
-			muxout.data <= jumpout.wbr_data;
-		else
-			muxout.data <= data;
-		end if;
+		muxout.data <= memout.data(to_integer(unsigned(memout.sel)));
+		muxout.wbr_complete <= jumpout.wbr_complete;
+		muxout.wbr_data <= jumpout.wbr_data;
+
 	end if;
 end process;
 

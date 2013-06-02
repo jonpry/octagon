@@ -42,6 +42,8 @@ end r_store;
 
 architecture Behavioral of r_store is
 
+signal loadv : std_logic_vector(31 downto 0);
+
 begin
 
 --Control signals
@@ -50,7 +52,8 @@ rout.r_dest <= lmuxout.r_dest;
 rout.valid <= lmuxout.valid;
 
 --Smux
-rout.smux <= lmuxout.loadv when lmuxout.load = '1' else lmuxout.lmux;
+loadv <= lmuxout.wbr_data when lmuxout.wbr_complete = '1' else lmuxout.loadv;
+rout.smux <= loadv when lmuxout.load = '1' else lmuxout.lmux;
 
 process(clk)
 	variable status_wr : std_logic;

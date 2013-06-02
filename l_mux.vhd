@@ -82,6 +82,9 @@ begin
 			when lmux_slt		=> lout.lmux <= (30 downto 0=>'0') & dmuxout.slt;
 		end case;
 		
+		lout.wbr_complete <= dmuxout.wbr_complete;
+		lout.wbr_data <= dmuxout.wbr_data;
+		
 		data := dmuxout.data;
 		
 	--Barrel shifter sign extender thingy for loads

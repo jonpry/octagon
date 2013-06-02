@@ -48,6 +48,9 @@ type dat_type is array (0 to 7) of std_logic_vector(31 downto 0);
 signal data : dat_type := (others => (others => '0'));
 signal valid : std_logic_vector(7 downto 0) := X"00"; 
 
+attribute ram_style: string;
+attribute ram_style of valid : signal is "distributed";
+
 signal restarts : std_logic_vector(7 downto 0) := X"00";
 
 begin

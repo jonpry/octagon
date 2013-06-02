@@ -86,7 +86,6 @@ end process;
 process(clk)
 	variable jump_target : std_logic_vector(IM_BITS-1 downto 0);
 	variable ipend : std_logic_vector(7 downto 0);
-	variable valid : std_logic;
 	variable miss : std_logic;
 begin
 	if clk='1' and clk'Event then
@@ -94,13 +93,11 @@ begin
 		
 		--TODO: owns only matters for memory operations
 		miss := to_std_logic(dcout.owns = X"00");--dcout.sel = "000" and dcout.owns(0) = '0');
-		valid := to_std_logic(aluin.valid = '1' and ((aluin.load='0' and aluin.store = '0') or miss = '0') and wbout.stall = '0' and
-									 not (aluin.load = '1' and dcout.nc = '1' and aluin.wbr_complete = '0'));
-									 
+		jumpout.cvalid  <= to_std_logic(aluin.valid = '1' and wbout.stall = '0' and
+									 not (aluin.lnc = '1' and dcout.nc = '1'));
+		jumpout.abort <= to_std_logic(miss = '1' and aluin.memop = '1');							 
 --	0 if	1 1 0							 
 --	0 if  1 1 1
-									 
-		jumpout.valid <= valid;
 		
 		if aluin.rfe = '1' or (aluin.met = '1' and aluin.do_jump='1') then
 			jump_target := aluin.pcjump;
@@ -109,16 +106,16 @@ begin
  		end if;
 		
 		ipend := ints and (not aluin.imask);
-		
-		jumpout.jump_target <= jump_target;
-		
+				
 		--TODO: handle ovf
-		if ipend /= X"00" and valid = '1' then
+		if ipend /= X"00" then
 			jumpout.do_int <= '1';
+			jumpout.jump_target <= (others => '0');
 		else
 			jumpout.do_int <= '0'; 
+			jumpout.jump_target <= jump_target;
 		end if;
-		
+				
 		jumpout.epc <= jump_target;
 		jumpout.ipend <= ipend;
 		jumpout.wbr_complete <= aluin.wbr_complete;
