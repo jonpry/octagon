@@ -95,7 +95,7 @@ begin
 		miss := to_std_logic(dcout.owns = X"00");--dcout.sel = "000" and dcout.owns(0) = '0');
 		jumpout.cvalid  <= to_std_logic(aluin.valid = '1' and wbout.stall = '0' and
 									 not (aluin.lnc = '1' and dcout.nc = '1'));
-		jumpout.abort <= to_std_logic(miss = '1' and aluin.memop = '1');							 
+		jumpout.abort <= to_std_logic(miss = '1' and aluin.memop = '1' and dcout.nc = '0');							 
 --	0 if	1 1 0							 
 --	0 if  1 1 1
 		

@@ -85,7 +85,7 @@ ARCHITECTURE behavior OF octagon_test IS
 	signal dmcb_cmd_full : std_logic := '0';
 	signal wbcyc : std_logic := '1';
 	signal wback : std_logic := '1';
-	signal wbdata : std_logic_vector(31 downto 0) := (others => '0');
+	signal wbdata : std_logic_vector(31 downto 0) := X"00AABB00";
 	
  	--Outputs
 	signal wbmout : wbmoutsig_type;
