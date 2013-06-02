@@ -36,7 +36,7 @@ entity octagon is
 		clk 				: in  std_logic;
 		running 			: in std_logic_vector(7 downto 0);
 		int 				: in std_logic_vector(7 downto 0);
-		wbmout			: out wbmout_type;
+		wbmoutsigs		: out wbmoutsig_type;
 		wbcyc				: in std_logic;
 		wback				: in std_logic;
 		wbdata			: in std_logic_vector(31 downto 0);
@@ -86,8 +86,10 @@ signal ictlin : ictlin_type;
 signal ictlout : ictlout_type;
 signal dctlin : dctlin_type;
 signal dctlout : dctlout_type;
-signal wbmouti : wbmout_type;
+signal wbmout : wbmout_type;
 signal wbmin : wbmin_type;
+signal wbrout : wbrout_type;
+signal wbrin : wbrin_type;
 
 begin
 
@@ -109,7 +111,7 @@ pcin.running <= running;
 pcin.int <= int;
 pcin.jump <= jumpout.do_jump;
 pcin.valid <= jumpout.valid;
-pcin.restarts <= ictlout.restarts or dctlout.restarts or wbmouti.restarts;
+pcin.restarts <= ictlout.restarts or dctlout.restarts or wbmout.restarts or wbrout.restarts;
 
 icin.pcout <= pcout;
 icin.tagval <= ictlout.tagadr(IM_BITS-1 downto 10);
@@ -164,12 +166,18 @@ rin.reg_we <= rstoreout.valid;
 
 alu1in.rfetch <= rout;
 alu1in.rout <= rstoreout;
+alu1in.wbrout <= wbrout;
 
-wbmout <= wbmouti;
+wbmoutsigs <= wbmout.sigs;
 wbmin.restarted <= pcout.restarted;
 wbmin.cyc <= wbcyc;
 wbmin.ack <= wback;
 wbmin.dat <= wbdata;
+
+wbrin.restarted <= pcout.restarted;
+wbrin.dat <= wbmout.wbrin.dat;
+wbrin.valid <= wbmout.wbrin.valid;
+wbrin.tid <= wbmout.wbrin.tid;
 
 pc_module: entity work.pc_module port map(clk,pcin,pcout);  --1
 
@@ -181,15 +189,16 @@ decode : entity work.decode port map(clk,imuxout,decout);	--4
 icontrol : entity work.icontrol port map(clk,imuxout,ictlin,ictlout);
 
 r_fetch : entity work.r_fetch port map(clk,rin,rout);			--5
+wbreader : entity work.wbreader port map(clk,wbrin,decout,wbrout);
 
 alu1 : entity work.alu1 port map(clk,alu1in,alu1out);			--6
 
 alu2 : entity work.alu2 port map(clk,alu1out,alu2out);		--7
 dc_fetch : entity work.dc_fetch port map(clk,dcin,dcout);
 
-jump : entity work.jump port map(clk,alu2out,int,dcout,wbmouti,jumpout);	--8
+jump : entity work.jump port map(clk,alu2out,int,dcout,wbmout,jumpout);	--8
 dc_mem : entity work.dc_mem port map(clk,dcmemin,dcmemout);
-wb_master : entity work.wb_master port map(clk,dcmemin,wbmin,wbmouti);
+wb_master : entity work.wb_master port map(clk,dcmemin,wbmin,wbmout);
 
 dcontrol : entity work.dcontrol port map(clk,dcmemout,dctlin,dctlout);
 dc_mux : entity work.dc_mux port map(clk,jumpout,dcmemout,dmuxout); --8+1

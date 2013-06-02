@@ -94,7 +94,12 @@ begin
 		
 		--TODO: owns only matters for memory operations
 		miss := to_std_logic(dcout.owns = X"00");--dcout.sel = "000" and dcout.owns(0) = '0');
-		valid := to_std_logic(aluin.valid = '1' and ((aluin.load='0' and aluin.store = '0') or miss = '0') and wbout.stall = '0');
+		valid := to_std_logic(aluin.valid = '1' and ((aluin.load='0' and aluin.store = '0') or miss = '0') and wbout.stall = '0' and
+									 not (aluin.load = '1' and dcout.nc = '1' and aluin.wbr_complete = '0'));
+									 
+--	0 if	1 1 0							 
+--	0 if  1 1 1
+									 
 		jumpout.valid <= valid;
 		
 		if aluin.rfe = '1' or (aluin.met = '1' and aluin.do_jump='1') then
@@ -116,6 +121,8 @@ begin
 		
 		jumpout.epc <= jump_target;
 		jumpout.ipend <= ipend;
+		jumpout.wbr_complete <= aluin.wbr_complete;
+		jumpout.wbr_data <= aluin.wbr_data;
 		
 	end if;
 end process;

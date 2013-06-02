@@ -101,6 +101,9 @@ begin
 		aluout.rfe <= aluin.rfetch.rfe;
 		aluout.use_immediate <= aluin.rfetch.use_immediate;
 		
+		aluout.wbr_complete <= aluin.wbrout.valid;
+		aluout.wbr_data <= aluin.wbrout.data;
+		
 		if aluin.rfetch.use_immediate = '1' then
 			r_t := aluin.rfetch.immediate;
 		else

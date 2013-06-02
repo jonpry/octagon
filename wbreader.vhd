@@ -36,13 +36,41 @@ entity wbreader is
 	Port ( 
 		clk : in  std_logic;
 		wbrin : in wbrin_type;
+		decout : in decout_type;
 		wbrout : out wbrout_type
 	);
 end wbreader;
 
 architecture Behavioral of wbreader is
 
+type dat_type is array (0 to 7) of std_logic_vector(31 downto 0);
+
+signal data : dat_type := (others => (others => '0'));
+signal valid : std_logic_vector(7 downto 0) := X"00"; 
+
+signal restarts : std_logic_vector(7 downto 0) := X"00";
+
 begin
+
+wbrout.restarts <= restarts;
+
+process(clk)
+begin
+	if clk='1' and clk'Event then
+		restarts <= restarts and not wbrin.restarted;
+		if wbrin.valid = '1' then
+			data(to_integer(unsigned(wbrin.tid))) <= wbrin.dat;
+			valid(to_integer(unsigned(wbrin.tid))) <= '1';
+			restarts(to_integer(unsigned(wbrin.tid))) <= '1';	
+		end if;
+		
+		if decout.valid = '1' then
+			wbrout.valid <= valid(to_integer(unsigned(decout.tid)));
+			valid(to_integer(unsigned(decout.tid))) <= '0';
+			wbrout.data <= data(to_integer(unsigned(decout.tid)));
+		end if;
+	end if;
+end process;
 
 end Behavioral;
 

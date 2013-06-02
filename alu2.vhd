@@ -68,6 +68,8 @@ begin
 		aluout.store_hi <= aluin.store_hi;
 		aluout.store_lo <= aluin.store_lo;
 		aluout.rfe <= aluin.rfe;
+		aluout.wbr_complete <= aluin.wbr_complete;
+		aluout.wbr_data <= aluin.wbr_data;
 	end if;
 end process;
 

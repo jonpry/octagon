@@ -48,6 +48,7 @@ begin
 process(clk)
 	variable sel : std_logic_vector(2 downto 0);
 	variable selin : std_logic_vector(7 downto 0);
+	variable data	: std_logic_vector(31 downto 0);
 begin
 	if clk='1' and clk'Event then
 		muxout.tid <= jumpout.tid;
@@ -60,7 +61,6 @@ begin
 		muxout.slt <= jumpout.slt;
 		muxout.mux <= jumpout.mux;
 		muxout.shiftout <= jumpout.shiftout;
-		muxout.data <= memout.data(to_integer(unsigned(memout.sel)));
 		muxout.memsize <= jumpout.memsize;
 		muxout.memadr <= jumpout.memadr;
 		muxout.load <= jumpout.load;
@@ -72,6 +72,13 @@ begin
 		muxout.store_hi <= jumpout.store_hi;
 		muxout.store_lo <= jumpout.store_lo;
 		muxout.rfe <= jumpout.rfe;
+
+		data := memout.data(to_integer(unsigned(memout.sel)));
+		if jumpout.wbr_complete = '1' then
+			muxout.data <= jumpout.wbr_data;
+		else
+			muxout.data <= data;
+		end if;
 	end if;
 end process;
 

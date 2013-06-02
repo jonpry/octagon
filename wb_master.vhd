@@ -58,14 +58,13 @@ signal rdptr : unsigned(3 downto 0) := "0000";
 signal stall : std_logic;
 signal restarts : std_logic_vector(7 downto 0) := X"00";
 
-signal read_tid : std_logic_vector(2 downto 0);
-signal read_dat : std_logic_vector(31 downto 0);
 signal read_done : std_logic := '0';
 
 begin
 
 wbout.stall <= stall;
 wbout.restarts <= restarts;
+wbout.wbrin.valid <= read_done;
 
 process(clk)
 	variable wren : std_logic;
@@ -75,7 +74,7 @@ begin
 
 		--Stall is a signal to parallel stage, so we predict if the next 
 		stall <= to_std_logic((wrptr + 2 = rdptr) or (wrptr + 1 = rdptr));
-		if dcin.dcout.nc = '1' and dcin.alu2out.valid = '1' and dcin.alu2out.dcop = '1' then
+		if dcin.dcout.nc = '1' and dcin.alu2out.valid = '1' and dcin.alu2out.dcop = '1' and dcin.alu2out.wbr_complete = '0' then
 			wren := dcin.alu2out.dcwren;
 			--TODO: read operations stall on fifo full and unconditionally without restart
 			if stall = '1' then
@@ -95,25 +94,26 @@ end process;
 process(clk)
 	variable wren : std_logic;
 begin
-	if clk='1' and clk'Event then
+	if clk='1' and clk'Event then	
+		read_done <= '0';
 		if rdptr /= wrptr then
-			wbout.req <= '1';
+			wbout.sigs.req <= '1';
 			--TODO: another read instruction cannot be tended until the first has reentered the pipeline
 			if wbin.cyc = '1' then
-				wbout.adr <= adrmem(to_integer(rdptr));
-				wbout.data <= datmem(to_integer(rdptr));
+				wbout.sigs.adr <= adrmem(to_integer(rdptr));
+				wbout.sigs.data <= datmem(to_integer(rdptr));
 				wren := wrmem(to_integer(rdptr));
-				wbout.wren <= wren;
+				wbout.sigs.wren <= wren;
 				rdptr <= rdptr + 1;
-				if wbin.ack ='1' and wren = '1' then
+				if wbin.ack ='1' and wren = '0' then
 					--read complete
-					read_dat <= wbin.dat;
-					read_tid <= tidmem(to_integer(rdptr));
+					wbout.wbrin.dat <= wbin.dat;
+					wbout.wbrin.tid <= tidmem(to_integer(rdptr));
 					read_done <= '1';
 				end if;
 			end if;
 		else
-			wbout.req <= '0';
+			wbout.sigs.req <= '0';
 		end if;
 	end if;
 end process;

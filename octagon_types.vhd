@@ -257,6 +257,8 @@ package octagon_types is
 		lt_imm			: std_logic;
 		rfe				: std_logic;
 		use_immediate	: std_logic;
+		wbr_complete 	: std_logic;
+		wbr_data			: std_logic_vector(31 downto 0);
 	end record;
 	
 	type alu2out_type is record
@@ -294,13 +296,33 @@ package octagon_types is
 		store_hi			: std_logic;
 		store_lo			: std_logic;
 		rfe				: std_logic;
+		wbr_complete 	: std_logic;
+		wbr_data			: std_logic_vector(31 downto 0);
 	end record;
 	
-	type wbmout_type is record
+	type wbmoutsig_type is record
 		req				: std_logic;
 		adr				: std_logic_vector(DM_BITS-1 downto 0);
 		data				: std_logic_vector(31 downto 0);
-		wren				: std_logic;
+		wren				: std_logic;	
+	end record;
+	
+	type wbrin_type is record
+		tid				: std_logic_vector(2 downto 0);
+		dat				: std_logic_vector(31 downto 0);
+		valid				: std_logic;
+		restarted		: std_logic_vector(7 downto 0);
+	end record;
+	
+	type wbrout_type is record
+		restarts 		: std_logic_vector(7 downto 0);
+		valid				: std_logic;
+		data				: std_logic_vector(31 downto 0);
+	end record;
+	
+	type wbmout_type is record
+		sigs				: wbmoutsig_type;
+		wbrin				: wbrin_type;
 		stall				: std_logic;
 		restarts			: std_logic_vector(7 downto 0);
 	end record;
@@ -311,7 +333,7 @@ package octagon_types is
 		dat				: std_logic_vector(31 downto 0);
 		restarted 		: std_logic_vector(7 downto 0);
 	end record;
-	
+		
 	type jumpout_type is record
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		jump_target		: std_logic_vector(IM_BITS-1 downto 0);
@@ -337,6 +359,8 @@ package octagon_types is
 		store_hi			: std_logic;
 		store_lo			: std_logic;
 		rfe				: std_logic;
+		wbr_complete 	: std_logic;
+		wbr_data			: std_logic_vector(31 downto 0);
 	end record;
 	
 	type rstoreout_type is record
@@ -384,6 +408,7 @@ package octagon_types is
 	type alu1in_type is record
 		rfetch			: rfetchout_type;
 		rout				: rstoreout_type;
+		wbrout			: wbrout_type;
 	end record;
 	
 	type ictlout_type is record
