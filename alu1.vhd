@@ -100,10 +100,12 @@ begin
 		aluout.store_lo <= aluin.rfetch.store_lo;
 		aluout.rfe <= aluin.rfetch.rfe;
 		aluout.use_immediate <= aluin.rfetch.use_immediate;
-		
+		aluout.cacheop <= aluin.rfetch.cacheop;
+		aluout.dcache_op <= to_std_logic(aluin.rfetch.cache = '1' and aluin.rfetch.inotd = '0' and aluin.rfetch.valid = '1');
+
 		aluout.wbr_complete <= aluin.wbrout.valid;
 		aluout.wbr_data <= aluin.wbrout.data;
-		
+				
 		if aluin.rfetch.use_immediate = '1' then
 			r_t := aluin.rfetch.immediate;
 		else

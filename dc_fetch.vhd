@@ -79,6 +79,9 @@ begin
 		dcout.nc <= to_std_logic(dcin.adr(DM_BITS+1 downto DM_BITS) /= "00");
 		
 		dcout.tag <= tag(to_integer(unsigned(dcin.tagidx)));
+		
+		dcout.cacheop <= dcin.cacheop;
+		dcout.dcache_op <= dcin.dcache_op;
 	end if;
 end process;
 

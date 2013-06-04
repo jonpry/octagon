@@ -148,6 +148,8 @@ dctlin.restarted <= pcout.restarted;
 dctlin.tag <= dcout.tag;
 
 dcin.adr <= alu1out.memadr;
+dcin.dcache_op <= alu1out.dcache_op;
+dcin.cacheop <= alu1out.cacheop;
 dcin.tagval <= dctlout.tagadr(IM_BITS-1 downto 10);
 dcin.tagadr <= dctlout.tagadr(9 downto 6);
 dcin.tagidx <= dctlout.tagidx;

@@ -72,6 +72,7 @@ begin
 		aluout.wbr_data <= aluin.wbr_data;
 		aluout.memop <= aluin.load or aluin.store;
 		aluout.lnc <= to_std_logic(aluin.load = '1' and aluin.wbr_complete = '0');
+		aluout.dcache_op <= aluin.dcache_op;
 	end if;
 end process;
 

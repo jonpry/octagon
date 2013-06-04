@@ -47,6 +47,7 @@ package octagon_types is
 	type jmux_type is (jmux_arith, jmux_spec, jmux_mul, jmux_rt);
 	type lmux_type is (lmux_shift, lmux_slt, lmux_jmux);
 	type pcmux_type is (pcmux_reg, pcmux_imm26, pcmux_imm16, pcmux_rfe);
+	type cacheop_type is (cacheop_inv, cacheop_clean, cacheop_cinv, cacheop_unk);
 	
 	type pcin_type is record
 		jump_target 	: std_logic_vector(IM_BITS-1 downto 0);
@@ -86,6 +87,8 @@ package octagon_types is
 		tagadr			: std_logic_vector(3 downto 0);
 		tagval			: std_logic_vector(IM_BITS-1 downto 10);
 		tagwe				: std_logic;
+		cacheop			: cacheop_type;
+		dcache_op		: std_logic;
 	end record;
 	
 	type icfetchout_type is record
@@ -103,6 +106,8 @@ package octagon_types is
 		nc					: std_logic;
 		adr				: std_logic_vector(DM_BITS+1 downto 0);
 		tag				: std_logic_vector(DM_BITS-1 downto 10);
+		cacheop			: cacheop_type;
+		dcache_op		: std_logic;
 	end record;
 	
 	type dcmemout_type is record
@@ -113,6 +118,8 @@ package octagon_types is
 		adr				: std_logic_vector(DM_BITS+1 downto 0);
 		dirty				: std_logic_vector(3 downto 0);
 		ctl_data			: dout_type;
+		cacheop			: cacheop_type;
+		dcache_op		: std_logic;
 	end record;
 	
 	type icmuxout_type is record
@@ -206,6 +213,10 @@ package octagon_types is
 		store_hi			: std_logic;
 		store_lo			: std_logic;
 		rfe				: std_logic;
+		cache				: std_logic;
+		inotd				: std_logic;
+		cacheop			: cacheop_type;
+		cache_p			: std_logic;
 	end record;
 	
 	type cop0_type is record
@@ -262,6 +273,8 @@ package octagon_types is
 		use_immediate	: std_logic;
 		wbr_complete 	: std_logic;
 		wbr_data			: std_logic_vector(31 downto 0);
+		cacheop			: cacheop_type;
+		dcache_op		: std_logic;
 	end record;
 	
 	type alu2out_type is record
@@ -303,6 +316,7 @@ package octagon_types is
 		wbr_data			: std_logic_vector(31 downto 0);
 		memop				: std_logic;
 		lnc				: std_logic;
+		dcache_op		: std_logic;
 	end record;
 	
 	type wbmoutsig_type is record

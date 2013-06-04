@@ -70,6 +70,9 @@ begin
 		dcout.dmiss <= to_std_logic(miss='1' and (dcin.alu2out.load = '1' or dcin.alu2out.store = '1') and dcin.alu2out.valid='1');
 		dcout.tid <= dcin.alu2out.tid;
 		dcout.adr <= dcin.dcout.adr;
+		
+		dcout.cacheop <= dcin.dcout.cacheop;
+		dcout.dcache_op <= dcin.dcout.dcache_op;
 	end if;
 end process;
 

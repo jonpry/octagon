@@ -117,6 +117,7 @@ process(clk)
 	variable mmul : std_logic;
 	variable mtmul : std_logic;
 	variable rfe : std_logic;
+	variable cache : std_logic;
 begin
 	if clk='1' and clk'Event then
 		opcode := rin.decout.instr(31 downto 26);
@@ -160,7 +161,7 @@ begin
 		rout.load <= load;
 		
 	-- Decode store operations
-		store := to_std_logic(instr(31 downto 29)="101");
+		store := to_std_logic(instr(31 downto 29)="101" and instr(28 downto 26) /= "111");
 		rout.store <= store;
 		
 		rout.memsize <= instr(27 downto 26);
@@ -190,6 +191,20 @@ begin
 		logic := to_std_logic((opzero='1' and func(5 downto 2) ="1001") or
 								instr(31 downto 28)="0011");
 --		rout.logic <= logic;
+		
+	--Cache
+		cache := to_std_logic(opcode = "101111");
+		rout.cache <= cache;
+		rout.inotd <= to_std_logic(instr(17 downto 16) = "00");
+		
+		case instr(19 downto 18) is
+			when "00"  =>  rout.cacheop <= cacheop_inv;
+			when "01"  =>  rout.cacheop <= cacheop_clean;
+			when "10"  =>  rout.cacheop <= cacheop_cinv;
+			when others => rout.cacheop <= cacheop_unk;
+		end case;
+		
+		rout.cache_p <= instr(20);
 		
 	--Shift parameters
 		rout.shift.amount <= instr(10 downto 6);
