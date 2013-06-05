@@ -175,7 +175,7 @@ begin
 		elsif cmd_state = cmd_invtag then
 			cmd_state <= cmd_invwait;
 		elsif cmd_state = cmd_invwait then
-			if cmd_mntn = '1' then
+			if cmd_mntn = '1' and cmd_cacheop = cacheop_inv then
 				cmd_state <= cmd_restart;
 			else
 				cmd_state <= cmd_checkdirty;
@@ -200,7 +200,11 @@ begin
 			cmd_state <= cmd_write_done2;
 		elsif cmd_state = cmd_write_done2 then
 			if cmd_mcb_req_done = '1' then
-				cmd_state <= cmd_waitfordata;
+				if cmd_mntn = '1' then
+					cmd_state <= cmd_restart;
+				else
+					cmd_state <= cmd_waitfordata;
+				end if;
 			end if;
 		elsif cmd_state = cmd_waitfordata then
 			if dcin.mcb_empty = '0' then
@@ -237,7 +241,9 @@ begin
 		end if;
 		
 		if cmd_state = cmd_invtag then
-			dcout.tag_wr <= '1';
+			if cmd_mntn = '0' or cmd_cacheop /= cacheop_clean then
+				dcout.tag_wr <= '1';
+			end if;
 			dcout.clean <= '1';
 		end if;
 		
