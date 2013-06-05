@@ -39,39 +39,63 @@ entity dc_fifo is
 		wr : in std_logic;
 		tidi : in std_logic_vector(2 downto 0);
 		din : in std_logic_vector(IM_BITS-1 downto 6);
+		missi : in std_logic;
+		mntni : in std_logic;
+		opi : in cacheop_type;
 		dout : out std_logic_vector(IM_BITS-1 downto 6);
 		tido : out std_logic_vector(2 downto 0);
+		misso : out std_logic;
+		mntno : out std_logic;
+		opo : out cacheop_type;
 		empty : out std_logic
 	);
 end dc_fifo;
 
 architecture Behavioral of dc_fifo is
 
+--TODO: !!!!this fifo can only store 7 pending stalls!
+
 type fd_type is array(0 to 7) of std_logic_vector(IM_BITS-1 downto 6);
 type tid_type is array(0 to 7) of std_logic_vector(2 downto 0);
+type cop_type is array(0 to 7) of cacheop_type;
+
 
 signal fifo_data : fd_type := (others => (others => '0'));
 signal fifo_tiddata : tid_type := (others => (others => '0'));
+signal fifo_copdata : cop_type;
+signal fifo_missdata : std_logic_vector(7 downto 0);
+signal fifo_mntndata : std_logic_vector(7 downto 0);
 
-signal rdptr : unsigned(2 downto 0) := "000";
-signal wrptr : unsigned(2 downto 0) := "000";
+
+signal rdptr : unsigned(3 downto 0) := "0000";
+signal wrptr : unsigned(3 downto 0) := "0000";
 
 begin
 
 process(clk)
+	variable rdI : Integer;
+	variable wrI : Integer;
 begin
 	if clk='1' and clk'Event then
 		empty <= to_std_logic(rdptr = wrptr);	
-		dout <= fifo_data(to_integer(rdptr));
-		tido <= fifo_tiddata(to_integer(rdptr));
+		rdI := to_integer(rdptr(2 downto 0));
+		dout <= fifo_data(rdI);
+		tido <= fifo_tiddata(rdI);
+		opo <= fifo_copdata(rdI);
+		mntno <= fifo_mntndata(rdI);
+		misso <= fifo_missdata(rdI);
 		
 		if rd='1' then
 			rdptr <= rdptr + 1;
 		end if;
 		
 		if wr='1' then
-			fifo_data(to_integer(wrptr)) <= din;
-			fifo_tiddata(to_integer(wrptr)) <= tidi;
+			wrI := to_integer(wrptr(2 downto 0));
+			fifo_data(wrI) <= din;
+			fifo_tiddata(wrI) <= tidi;
+			fifo_copdata(wrI) <= opi;
+			fifo_mntndata(wrI) <= mntni;
+			fifo_missdata(wrI) <= missi;
 			wrptr <= wrptr + 1;
 		end if;
 	end if;

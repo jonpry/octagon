@@ -148,17 +148,22 @@ dctlin.restarted <= pcout.restarted;
 dctlin.tag <= dcout.tag;
 
 dcin.adr <= alu1out.memadr;
+dcin.tid <= alu1out.tid;
 dcin.dcache_op <= alu1out.dcache_op;
 dcin.cacheop <= alu1out.cacheop;
+dcin.cache_p <= alu1out.cache_p;
 dcin.tagval <= dctlout.tagadr(IM_BITS-1 downto 10);
 dcin.tagadr <= dctlout.tagadr(9 downto 6);
 dcin.tagidx <= dctlout.tagidx;
 dcin.tagwe <= dctlout.tag_wr;
+dcin.mntn_restart <= dctlout.mntn_restart;
+dcin.mntn_tid <= dctlout.mntn_tid;
 
 dcmemin.dmemval <= dctlout.data;
 dcmemin.dmemadr <= dctlout.memadr(9 downto 2);
 dcmemin.dmemidx <= dctlout.tagidx;
 dcmemin.dmemwe <= dctlout.memwe;
+dcmemin.dclean <= dctlout.clean;
 dcmemin.alu2out <= alu2out;
 dcmemin.dcout <= dcout;
 

@@ -59,6 +59,9 @@ signal icfifo_rd : std_logic := '0';
 signal icfifo_empty : std_logic;
 signal icfifo_dout : std_logic_vector(IM_BITS-1 downto 6);
 signal icfifo_tid : std_logic_vector(2 downto 0);
+signal icfifo_miss : std_logic;
+signal icfifo_mntn : std_logic;
+signal icfifo_cacheop : cacheop_type;
 
 signal wcount : unsigned(3 downto 0);
 signal rcount : unsigned(3 downto 0);
@@ -73,6 +76,9 @@ signal cmd_rd : std_logic;
 signal cmd_empty : std_logic;
 signal cmd_tid : std_logic_vector(2 downto 0);
 signal cmd_dout : std_logic_vector(IM_BITS-1 downto 6);
+signal cmd_cacheop : cacheop_type;
+signal cmd_miss : std_logic;
+signal cmd_mntn : std_logic;
 
 signal rden_delay : std_logic;
 signal dirty : std_logic;
@@ -88,11 +94,15 @@ begin
 
 dcout.restarts <= restarts;
 
+--TODO: pipe dc_fifo cache maintanance signals into dcmd_fifo
+
 dcmd_fifo : entity work.dcmd_fifo port map(clk, cmd_rd, cmd_wr, icfifo_tid, 
-					dnr, icfifo_dout, cmd_dout, cmd_tid, 
-					cmddnr, cmd_empty);
-dc_fifo : entity work.dc_fifo port map(clk, icfifo_rd, muxout.dmiss, muxout.tid, 
-					muxout.adr(IM_BITS-1 downto 6), icfifo_dout, icfifo_tid, icfifo_empty);
+					dnr, icfifo_dout, icfifo_cacheop, icfifo_mntn, icfifo_miss, 
+					cmd_dout, cmd_tid, cmddnr, cmd_cacheop, cmd_mntn, cmd_miss, cmd_empty);
+dc_fifo : entity work.dc_fifo port map(clk, icfifo_rd, muxout.do_op, muxout.tid, 
+					muxout.adr(IM_BITS-1 downto 6), muxout.dmiss, muxout.dcache_op,
+					muxout.cacheop, icfifo_dout, icfifo_tid, icfifo_miss, icfifo_mntn, 
+					icfifo_cacheop, icfifo_empty);
 ilookahead : entity work.ilookahead port map(clk, ilookahead_wr, icfifo_dout, ilookahead_cmp);
 
 
@@ -106,7 +116,11 @@ begin
 		
 		if state = ictl_wfr then
 			if icfifo_empty = '0' and dcin.mcb_cmd_full = '0' then
-				state <= ictl_tagcheck;
+				if muxout.dcache_op = '1' then
+					state <= ictl_noreq; --Flush and invalidate handled by second state machine
+				else
+					state <= ictl_tagcheck;
+				end if;
 			end if;
 		elsif state = ictl_tagcheck then	
 			if ilookahead_cmp /= X"00" then
@@ -144,11 +158,13 @@ begin
 		cmd_rd <= '0';
 		dcout.mcb_rden <= '0';
 		dcout.mcb_wren <= '0';
+		dcout.clean <= '0';
 		prevcmdstate <= cmd_state;
 	
 		if cmd_state = cmd_wait then
 			if cmd_empty = '0' then
-				if cmddnr = '1' then
+				if cmddnr = '1' or (cmd_mntn = '1' and cmd_miss = '1') then
+					--TODO: if mntn=1 and miss=0 then a way to operate on has been located
 					cmd_state <= cmd_restart;
 				else
 					cmd_state <= cmd_readtag;
@@ -159,7 +175,11 @@ begin
 		elsif cmd_state = cmd_invtag then
 			cmd_state <= cmd_invwait;
 		elsif cmd_state = cmd_invwait then
-			cmd_state <= cmd_checkdirty;
+			if cmd_mntn = '1' then
+				cmd_state <= cmd_restart;
+			else
+				cmd_state <= cmd_checkdirty;
+			end if;
 		elsif cmd_state = cmd_checkdirty then
 			cmd_state <= cmd_checkdirty2;
 		elsif cmd_state = cmd_checkdirty2 then
@@ -209,11 +229,16 @@ begin
 		dcout.tag_wr <= '0';
 		if cmd_state = cmd_readtag then
 			dcout.tagadr <= (IM_BITS-1 downto 10 => '1') & cmd_dout(9 downto 6);
-			dcout.tagidx <= std_logic_vector(nextidx);
+			if cmd_mntn = '1' then
+				dcout.tagidx <= cmd_dout(12 downto 10);
+			else
+				dcout.tagidx <= std_logic_vector(nextidx);
+			end if;
 		end if;
 		
 		if cmd_state = cmd_invtag then
 			dcout.tag_wr <= '1';
+			dcout.clean <= '1';
 		end if;
 		
 		if cmd_state = cmd_checkdirty then
@@ -271,9 +296,12 @@ dcout.mcb_data <= muxout.ctl_data(to_integer(unsigned(nextidx(2 downto 1))));
 process(clk)
 begin
 	if clk='1' and clk'Event then
+		dcout.mntn_restart <= '0';
 		restarts <= restarts and not dcin.restarted;
+		dcout.mntn_tid <= cmd_tid;
 		if cmd_state = cmd_restart then
 			restarts(to_integer(unsigned(cmd_tid))) <= '1';
+			dcout.mntn_restart <= cmd_mntn;
 		end if;
 	end if;
 end process;

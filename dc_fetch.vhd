@@ -48,6 +48,11 @@ type tag_type is array(0 to 7) of std_logic_vector(DM_BITS-1 downto 10);
 
 signal tag : tag_type;
 
+signal mntn_restarts : std_logic_vector(7 downto 0) := X"00";
+
+attribute ram_style: string;
+attribute ram_style of mntn_restarts : signal is "distributed";
+
 begin
 
 --8192 byte cache organized as 8 ways of 1024 bytes (9 downto 0)
@@ -64,8 +69,11 @@ tag_fetch6 : entity work.dtag_fetch port map(clk,dcin,"110",owns(6),tag(6));
 tag_fetch7 : entity work.dtag_fetch port map(clk,dcin,"111",owns(7),tag(7));
 
 process(clk)
+	variable restart : std_logic;
 begin
 	if clk='1' and clk'Event then
+		restart := mntn_restarts(to_integer(unsigned(dcin.tid)));
+	
 		dcout.owns <= owns;
 		dcout.adr <= dcin.adr;
 		
@@ -81,7 +89,16 @@ begin
 		dcout.tag <= tag(to_integer(unsigned(dcin.tagidx)));
 		
 		dcout.cacheop <= dcin.cacheop;
-		dcout.dcache_op <= dcin.dcache_op;
+		dcout.dcache_op <= to_std_logic(dcin.dcache_op = '1' and restart = '0');
+		dcout.cache_p <= dcin.cache_p;
+	
+		if dcin.dcache_op = '1' then
+			mntn_restarts(to_integer(unsigned(dcin.tid))) <= '0';
+		end if;
+	
+		if dcin.mntn_restart = '1' then
+			mntn_restarts(to_integer(unsigned(dcin.mntn_tid))) <= '1';
+		end if;
 	end if;
 end process;
 

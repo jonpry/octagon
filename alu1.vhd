@@ -102,6 +102,7 @@ begin
 		aluout.use_immediate <= aluin.rfetch.use_immediate;
 		aluout.cacheop <= aluin.rfetch.cacheop;
 		aluout.dcache_op <= to_std_logic(aluin.rfetch.cache = '1' and aluin.rfetch.inotd = '0' and aluin.rfetch.valid = '1');
+		aluout.cache_p <= aluin.rfetch.cache_p;
 
 		aluout.wbr_complete <= aluin.wbrout.valid;
 		aluout.wbr_data <= aluin.wbrout.data;

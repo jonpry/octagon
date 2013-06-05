@@ -87,8 +87,11 @@ begin
 		
 		--Second port stuffs
 		if dcin.dmemwe = '1' and dcin.dmemidx(2 downto 1) = idx then
-			dirty(to_integer(unsigned(dcin.dmemidx(0) & dcin.dmemadr(7 downto 4)))) <= '0';
 			dram(to_integer(unsigned(dcin.dmemidx(0) & dcin.dmemadr))) <= dcin.dmemval;
+		end if;
+		
+		if dcin.dclean = '1' and dcin.dmemidx(2 downto 1) = idx then
+			dirty(to_integer(unsigned(dcin.dmemidx(0) & dcin.dmemadr(7 downto 4)))) <= '0';
 		end if;
 		
 		dirt <= dirty(to_integer(unsigned(dcin.dmemidx(0) & dcin.dmemadr(7 downto 4))));

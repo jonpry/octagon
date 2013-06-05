@@ -82,6 +82,7 @@ package octagon_types is
 	end record;
 	
 	type dcfetchin_type is record
+		tid				: std_logic_vector(2 downto 0);
 		adr				: std_logic_vector(DM_BITS+1 downto 0);
 		tagidx			: std_logic_vector(2 downto 0);
 		tagadr			: std_logic_vector(3 downto 0);
@@ -89,6 +90,9 @@ package octagon_types is
 		tagwe				: std_logic;
 		cacheop			: cacheop_type;
 		dcache_op		: std_logic;
+		cache_p			: std_logic;
+		mntn_restart	: std_logic;
+		mntn_tid			: std_logic_vector(2 downto 0);
 	end record;
 	
 	type icfetchout_type is record
@@ -108,6 +112,7 @@ package octagon_types is
 		tag				: std_logic_vector(DM_BITS-1 downto 10);
 		cacheop			: cacheop_type;
 		dcache_op		: std_logic;
+		cache_p			: std_logic;
 	end record;
 	
 	type dcmemout_type is record
@@ -119,6 +124,7 @@ package octagon_types is
 		dirty				: std_logic_vector(3 downto 0);
 		ctl_data			: dout_type;
 		cacheop			: cacheop_type;
+		do_op				: std_logic;
 		dcache_op		: std_logic;
 	end record;
 	
@@ -275,6 +281,7 @@ package octagon_types is
 		wbr_data			: std_logic_vector(31 downto 0);
 		cacheop			: cacheop_type;
 		dcache_op		: std_logic;
+		cache_p			: std_logic;
 	end record;
 	
 	type alu2out_type is record
@@ -423,6 +430,7 @@ package octagon_types is
 		dmemadr			: std_logic_vector(7 downto 0);
 		dmemval			: std_logic_vector(31 downto 0);
 		dmemwe			: std_logic;
+		dclean			: std_logic;
 		dcout				: dcfetchout_type;
 		alu2out			: alu2out_type;
 	end record;
@@ -471,6 +479,9 @@ package octagon_types is
 		data				: std_logic_vector(31 downto 0);
 		restarts			: std_logic_vector(7 downto 0);
 		mcb_data			: std_logic_vector(31 downto 0);
+		clean				: std_logic;
+		mntn_restart	: std_logic;
+		mntn_tid			: std_logic_vector(2 downto 0);
 	end record;
 	
 	type dctlin_type is record

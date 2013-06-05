@@ -51,7 +51,7 @@ begin
 --sel <= dcin.dcout.sel;
 owns <= dcin.dcout.owns;
 selin <= dcin.dcout.owns;
---sel(0) <= to_std_logic(selin(1)='1' or selin(3)='1' or selin(5)='1' or selin(7)='1');
+sel(0) <= to_std_logic(selin(1)='1' or selin(3)='1' or selin(5)='1' or selin(7)='1');
 sel(1) <= to_std_logic(selin(2)='1' or selin(3)='1' or selin(6)='1' or selin(7)='1');
 sel(2) <= to_std_logic(selin(4)='1' or selin(5)='1' or selin(6)='1' or selin(7)='1');
 		
@@ -63,14 +63,27 @@ d_fetch3 : entity work.d_fetch port map(clk,dcin,dcout.data(3),"11",sel(2 downto
 
 process(clk)
 	variable miss : std_logic;
+	variable dmiss : std_logic;
 begin
 	if clk='1' and clk'Event then
 		miss := to_std_logic(dcin.dcout.owns = X"00"); --to_std_logic(dcin.dcout.sel = "000" and dcin.dcout.owns(0) = '0');
 		dcout.sel <= sel(2 downto 1);
-		dcout.dmiss <= to_std_logic(miss='1' and (dcin.alu2out.load = '1' or dcin.alu2out.store = '1') and dcin.alu2out.valid='1');
+		dmiss := to_std_logic(miss='1' and (dcin.alu2out.load = '1' or dcin.alu2out.store = '1') and dcin.alu2out.valid='1');
 		dcout.tid <= dcin.alu2out.tid;
 		dcout.adr <= dcin.dcout.adr;
+		if dcin.dcout.dcache_op = '1' and dcin.dcout.cache_p = '0' then
+			--create cache address from hit data. upper bits are dnc			
+			dcout.adr(12 downto 10) <= sel;
+		end if;
 		
+		dcout.dmiss <= dmiss;
+		--Do not report as a miss if the way location is explicit
+		if dcin.dcout.dcache_op = '1' and dcin.dcout.cache_p = '1' then
+			dcout.dmiss <= '0';
+		end if;
+
+
+		dcout.do_op <= to_std_logic(dmiss = '1' or dcin.dcout.dcache_op = '1');
 		dcout.cacheop <= dcin.dcout.cacheop;
 		dcout.dcache_op <= dcin.dcout.dcache_op;
 	end if;

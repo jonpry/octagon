@@ -56,27 +56,32 @@ signal fifo_data : fd_type := (others => (others => '0'));
 signal fifo_tiddata : tid_type := (others => (others => '0'));
 signal fake_data : std_logic_vector(7 downto 0);
 
-signal rdptr : unsigned(2 downto 0) := "000";
-signal wrptr : unsigned(2 downto 0) := "000";
+signal rdptr : unsigned(3 downto 0) := "0000";
+signal wrptr : unsigned(3 downto 0) := "0000";
 
 begin
 
 process(clk)
+	variable rdI : Integer;
+	variable wrI : Integer;
 begin
 	if clk='1' and clk'Event then
 		empty <= to_std_logic(rdptr = wrptr);	
-		dout <= fifo_data(to_integer(rdptr));
-		tido <= fifo_tiddata(to_integer(rdptr));
-		fakeo <= fake_data(to_integer(rdptr));
+		
+		rdI := to_integer(rdptr(2 downto 0));
+		dout <= fifo_data(rdI);
+		tido <= fifo_tiddata(rdI);
+		fakeo <= fake_data(rdI);
 		
 		if rd='1' then
 			rdptr <= rdptr + 1;
 		end if;
 		
 		if wr='1' then
-			fifo_data(to_integer(wrptr)) <= din;
-			fifo_tiddata(to_integer(wrptr)) <= tidi;
-			fake_data(to_integer(wrptr)) <= fakei;
+			wrI := to_integer(wrptr(2 downto 0));
+			fifo_data(wrI) <= din;
+			fifo_tiddata(wrI) <= tidi;
+			fake_data(wrI) <= fakei;
 			wrptr <= wrptr + 1;
 		end if;
 	end if;
