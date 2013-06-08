@@ -72,11 +72,11 @@ begin
 		muxout.store_hi <= jumpout.store_hi;
 		muxout.store_lo <= jumpout.store_lo;
 		muxout.rfe <= jumpout.rfe;
+		muxout.mtmul <= jumpout.mtmul;
 
 		muxout.data <= memout.data(to_integer(unsigned(memout.sel)));
 		muxout.wbr_complete <= jumpout.wbr_complete;
 		muxout.wbr_data <= jumpout.wbr_data;
-
 	end if;
 end process;
 

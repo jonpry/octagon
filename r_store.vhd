@@ -95,11 +95,12 @@ begin
 		end if;
 		
 		rout.cop0_tid <= lmuxout.tid;
-		rout.hi <= lmuxout.lmux;
-		rout.lo <= lmuxout.lmux;
+
+		rout.lmux <= lmuxout.lmux;
 		
 		rout.hi_wr <= lmuxout.store_hi;
 		rout.lo_wr <= lmuxout.store_lo;
+		rout.mtmul <= lmuxout.mtmul;
 	
 	end if;
 end process;

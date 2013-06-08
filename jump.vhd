@@ -67,6 +67,7 @@ begin
 		jumpout.store_hi <= aluin.store_hi;
 		jumpout.store_lo <= aluin.store_lo;
 		jumpout.rfe <= aluin.rfe;
+		jumpout.mtmul <= aluin.mtmul;
 	end if;
 end process;
 

@@ -116,6 +116,7 @@ process(clk)
 	variable mtc0 : std_logic;
 	variable mmul : std_logic;
 	variable mtmul : std_logic;
+	variable mul : std_logic;
 	variable rfe : std_logic;
 	variable cache : std_logic;
 begin
@@ -139,8 +140,10 @@ begin
 	--Multiplier
 		mmul := to_std_logic(opzero='1' and func(5 downto 2) = "0100");
 		mtmul := to_std_logic(mmul = '1' and func(0) = '1');
-		rout.store_hi <= to_std_logic(mmul = '1' and func(1 downto 0) = "01");
-		rout.store_lo <= to_std_logic(mmul = '1' and func(1 downto 0) = "11" );
+		mul := to_std_logic(opzero='1' and func(5 downto 1) = "01100");
+		rout.mtmul <= mtmul;
+		rout.store_hi <= to_std_logic((mmul = '1' and func(1 downto 0) = "01") or mul = '1');
+		rout.store_lo <= to_std_logic((mmul = '1' and func(1 downto 0) = "11") or mul = '1');
 		
 	--link instructions have r_dest = 31
 		if link = '1' then
@@ -234,7 +237,7 @@ begin
 --		rout.long_jump <= to_std_logic(opcode(5 downto 1) = "00001");
 		
 	--This is for slt, add, sub. mul/div 
---		rout.math_unsigned <= to_std_logic((opzero = '1' and func(0)='1') or opcode(0)='1');
+		rout.math_unsigned <= to_std_logic((opzero = '1' and func(0)='1') or opcode(0)='1');
 
 		reg_store := to_std_logic(load='1' or arith='1' or shift_do='1' or
 					opcode(5 downto 0) = "000011" or --jal
@@ -279,12 +282,15 @@ begin
 		end if;
 		
 	--Priority encode for mulmux
-		if func(1) = '1' then
-			rout.mulmux <= mulmux_lo;
+		if mtmul = '1' then
+			rout.mulmux <= mulmux_rs;
 		else
-			rout.mulmux <= mulmux_hi;
+			if func(1) = '1' then
+				rout.mulmux <= mulmux_lo;
+			else
+				rout.mulmux <= mulmux_hi;
+			end if;
 		end if;
-	
 		
 	--Priority encoder for pcmux
 		if opcode(5 downto 1) = "00001" then
@@ -313,13 +319,13 @@ begin
 		end if;
 		
 	--Priority encoder for jmux
-		if arith = '1' or mtmul='1' then
+		if arith = '1' then
 			rout.jmux <= jmux_arith;
 		else
 			if mtc0='1' then
 				rout.jmux <= jmux_rt;
 			else
-				if mmul='1' then
+				if mmul='1' or mtmul='1' then
 					rout.jmux <= jmux_mul;
 				else
 					rout.jmux <= jmux_spec;

@@ -73,6 +73,7 @@ begin
 		aluout.memop <= aluin.load or aluin.store;
 		aluout.lnc <= to_std_logic(aluin.load = '1' and aluin.wbr_complete = '0');
 		aluout.dcache_op <= aluin.dcache_op;
+		aluout.mtmul <= aluin.mtmul;
 	end if;
 end process;
 
@@ -116,6 +117,7 @@ begin
 		case aluin.mulmux is
 				when mulmux_hi		=> aluout.mul <= aluin.hi;
 				when mulmux_lo		=> aluout.mul <= aluin.lo;
+				when mulmux_rs		=> aluout.mul <= aluin.r_s;
 		end case;
 		
 	--PC Mux

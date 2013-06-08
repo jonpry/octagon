@@ -57,6 +57,37 @@ signal ecode : etype := (others => (others => '0'));
 signal exc : std_logic_vector(7 downto 0) := (others => '0');
 signal int : std_logic_vector(7 downto 0) := (others => '0');
 
+signal pproduct1 : std_logic_vector(65 downto 0);
+signal pproduct2 : std_logic_vector(65 downto 0);
+signal pproduct3 : std_logic_vector(65 downto 0);
+signal pproduct4 : std_logic_vector(65 downto 0);
+signal pproduct5 : std_logic_vector(65 downto 0);
+signal pproduct6 : std_logic_vector(65 downto 0);
+signal pproduct7 : std_logic_vector(65 downto 0);
+
+signal lo_wrq : std_logic;
+signal lo_wrqq : std_logic;
+signal hi_wrq : std_logic;
+signal hi_wrqq : std_logic;
+signal mtmulq : std_logic;
+signal mtmulqq : std_logic;
+signal mulidxq : std_logic_vector(2 downto 0);
+signal mulidxqq : std_logic_vector(2 downto 0);
+signal lmuxq : std_logic_vector(31 downto 0);
+signal lmuxqq : std_logic_vector(31 downto 0);
+
+signal foo  : std_logic;
+signal foo1 : std_logic;
+signal foo2 : std_logic;
+signal foo3 : std_logic;
+signal foo4 : std_logic;
+signal foo5 : std_logic;
+signal foo6 : std_logic;
+signal foo7 : std_logic;
+
+signal r_s_ext_cond : std_logic_vector(32 downto 0);
+signal r_t_ext_cond : std_logic_vector(32 downto 0);
+
 begin
 
 --It *was* very difficult to get anything done in this stage because of 
@@ -66,6 +97,7 @@ begin
 process(clk)
 	variable r_s_ext : std_logic_vector(32 downto 0);
 	variable r_t_ext : std_logic_vector(32 downto 0);
+
 	variable sum 	  : std_logic_vector(32 downto 0);
 	variable diff 	  : std_logic_vector(32 downto 0);
 	variable	r_t	  : std_logic_vector(31 downto 0);
@@ -103,6 +135,7 @@ begin
 		aluout.cacheop <= aluin.rfetch.cacheop;
 		aluout.dcache_op <= to_std_logic(aluin.rfetch.cache = '1' and aluin.rfetch.inotd = '0' and aluin.rfetch.valid = '1');
 		aluout.cache_p <= aluin.rfetch.cache_p;
+		aluout.mtmul <= aluin.rfetch.mtmul;
 
 		aluout.wbr_complete <= aluin.wbrout.valid;
 		aluout.wbr_data <= aluin.wbrout.data;
@@ -119,6 +152,27 @@ begin
 
 		r_s_ext := aluin.rfetch.r_s(31) & aluin.rfetch.r_s;
 		r_t_ext := r_t(31) & r_t;
+		
+	--Multiplication stuff. We must do pipelining in this module or the synthesizer can't find it. 
+		r_s_ext_cond <= to_std_logic(aluin.rfetch.r_s(31) = '1' and aluin.rfetch.math_unsigned = '0') & aluin.rfetch.r_s;
+		r_t_ext_cond <= to_std_logic(aluin.rfetch.r_t(31) = '1' and aluin.rfetch.math_unsigned = '0') & aluin.rfetch.r_t;
+		
+		pproduct1 <= std_logic_vector(signed(r_s_ext_cond) * signed(r_t_ext_cond));
+		pproduct2 <= pproduct1;
+		pproduct3 <= pproduct2;
+		pproduct4 <= pproduct3;
+		pproduct5 <= pproduct4;
+		pproduct6 <= pproduct5;
+		pproduct7 <= pproduct6;
+		
+		foo <= aluin.rfetch.store_hi;
+		foo1 <= foo;
+		foo2 <= foo1;
+		foo3 <= foo2;
+		foo4 <= foo3;
+		foo5 <= foo4;
+		foo6 <= foo5;
+		foo7 <= foo6;
 		
 	--Adder
 		sum := std_logic_vector(unsigned(r_s_ext) + unsigned(r_t_ext));
@@ -169,6 +223,7 @@ end process;
 process(clk)
 variable tididx : Integer;
 variable wtididx : Integer;
+variable mulidx : Integer;
 begin
 	if clk='1' and clk'Event then
 		tididx := to_integer(unsigned(aluin.rfetch.tid));
@@ -179,9 +234,6 @@ begin
 		aluout.cop0.int <= int(tididx);
 		aluout.cop0.exc <= exc(tididx);
 		
-		aluout.hi <= hi(tididx);
-		aluout.lo <= lo(tididx);
-
 		wtididx := to_integer(unsigned(aluin.rout.cop0_tid));		
 		if aluin.rout.epc_wr = '1' then
 			epc(wtididx) <= aluin.rout.cop0.epc;
@@ -201,12 +253,53 @@ begin
 			ecode(wtididx) <= aluin.rout.cop0.ecode;
 		end if;
 		
-		if aluin.rout.hi_wr = '1' then
-			hi(wtididx) <= aluin.rout.hi;
+		--Multiplier writes are delayed by 2 cycles
+		hi_wrq <= aluin.rout.hi_wr;
+		hi_wrqq <= hi_wrq;
+		lo_wrq <= aluin.rout.lo_wr;
+		lo_wrqq <= lo_wrq;
+		mtmulq <= aluin.rout.mtmul;
+		mtmulqq <= mtmulq;
+		mulidxq <= aluin.rout.cop0_tid;		
+		mulidxqq <= mulidxq;
+		lmuxq <= aluin.rout.lmux;
+		lmuxqq <= lmuxq;
+		mulidx := to_integer(unsigned(mulidxqq));
+		
+		if hi_wrqq = '1' then
+			if mtmulqq = '1' then
+				aluout.hi <= lmuxqq;
+			else
+				aluout.hi <= pproduct7(63 downto 32);
+			end if;
+		else
+			aluout.hi <= hi(tididx);
 		end if;
 		
-		if aluin.rout.lo_wr = '1' then
-			lo(wtididx) <= aluin.rout.lo;
+		if lo_wrqq = '1' then
+			if mtmulqq = '1' then
+				aluout.lo <= lmuxqq;
+			else
+				aluout.lo <= pproduct7(31 downto 0);
+			end if;
+		else
+			aluout.lo <= lo(tididx);
+		end if;
+					
+		if hi_wrqq = '1' then
+			if mtmulqq = '1' then
+				hi(mulidx) <= lmuxqq;
+			else
+				hi(mulidx) <= pproduct7(63 downto 32);
+			end if;
+		end if;
+		
+		if lo_wrqq = '1' then
+			if mtmulqq = '1' then
+				lo(mulidx) <= lmuxqq;
+			else
+				lo(mulidx) <= pproduct7(31 downto 0);
+			end if;
 		end if;
 		
 	end if;

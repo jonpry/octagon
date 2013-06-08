@@ -43,7 +43,7 @@ package octagon_types is
 	type arithmux_type is (arithmux_add, arithmux_sub, arithmux_lui, arithmux_logic);
 	type cond_type is (cond_none, cond_eq, cond_lt, cond_gt, cond_lte, cond_gte, cond_neq);
 	type specmux_type is (specmux_pc, specmux_epc, specmux_cause, specmux_status);
-	type mulmux_type is (mulmux_hi, mulmux_lo);
+	type mulmux_type is (mulmux_hi, mulmux_lo, mulmux_rs);
 	type jmux_type is (jmux_arith, jmux_spec, jmux_mul, jmux_rt);
 	type lmux_type is (lmux_shift, lmux_slt, lmux_jmux);
 	type pcmux_type is (pcmux_reg, pcmux_imm26, pcmux_imm16, pcmux_rfe);
@@ -161,6 +161,7 @@ package octagon_types is
 		rfe				: std_logic;
 		wbr_complete 	: std_logic;
 		wbr_data			: std_logic_vector(31 downto 0);
+		mtmul				: std_logic;
 	end record;
 	
 	type shift_type is record
@@ -213,6 +214,7 @@ package octagon_types is
 		load				: std_logic;
 		memsize			: std_logic_vector(1 downto 0);
 		load_unsigned	: std_logic;
+		math_unsigned	: std_logic;
 		store				: std_logic;
 		store_cop0		: std_logic;
 		mulmux			: mulmux_type;
@@ -223,6 +225,7 @@ package octagon_types is
 		inotd				: std_logic;
 		cacheop			: cacheop_type;
 		cache_p			: std_logic;
+		mtmul				: std_logic;
 	end record;
 	
 	type cop0_type is record
@@ -282,6 +285,7 @@ package octagon_types is
 		cacheop			: cacheop_type;
 		dcache_op		: std_logic;
 		cache_p			: std_logic;
+		mtmul				: std_logic;
 	end record;
 	
 	type alu2out_type is record
@@ -324,6 +328,7 @@ package octagon_types is
 		memop				: std_logic;
 		lnc				: std_logic;
 		dcache_op		: std_logic;
+		mtmul				: std_logic;
 	end record;
 	
 	type wbmoutsig_type is record
@@ -388,6 +393,7 @@ package octagon_types is
 		rfe				: std_logic;
 		wbr_complete 	: std_logic;
 		wbr_data			: std_logic_vector(31 downto 0);
+		mtmul				: std_logic;
 	end record;
 	
 	type rstoreout_type is record
@@ -401,10 +407,10 @@ package octagon_types is
 		exc_wr			: std_logic;
 		int_wr			: std_logic;
 		cop0_tid			: std_logic_vector(2 downto 0);
-		hi					: std_logic_vector(31 downto 0);
-		lo					: std_logic_vector(31 downto 0);
+		lmux				: std_logic_vector(31 downto 0);
 		hi_wr				: std_logic;
 		lo_wr				: std_logic;
+		mtmul				: std_logic;
 	end record;
 	
 	type lmuxout_type is record
@@ -423,6 +429,7 @@ package octagon_types is
 		rfe				: std_logic;
 		wbr_complete 	: std_logic;
 		wbr_data			: std_logic_vector(31 downto 0);
+		mtmul				: std_logic;
 	end record;
 	
 	type dcmemin_type is record
