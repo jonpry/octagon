@@ -43,12 +43,12 @@ end icontrol;
 
 architecture Behavioral of icontrol is
 
-type ictl_type is (ictl_wfr, ictl_tagcheck, ictl_noreq, ictl_req, ictl_delay, ictl_delay2);
-type cmd_type is (cmd_wait, cmd_restart, cmd_waitfordata, cmd_transfer_data, cmd_update_tag,
+type ictl_type is (ictl_boot, ictl_wfr, ictl_tagcheck, ictl_noreq, ictl_req, ictl_delay, ictl_delay2);
+type cmd_type is (cmd_boot, cmd_wait, cmd_restart, cmd_waitfordata, cmd_transfer_data, cmd_update_tag,
 						cmd_delay1, cmd_delay2);
 
-signal cmd_state : cmd_type := cmd_wait;
-signal state : ictl_type := ictl_wfr;
+signal cmd_state : cmd_type := cmd_boot;
+signal state : ictl_type := ictl_boot;
 signal prevcmdstate : cmd_type := cmd_wait;
 
 signal nextidx : unsigned(2 downto 0) := "000";
@@ -98,7 +98,9 @@ begin
 		ilookahead_wr <= '0';
 		cmd_wr <= '0';
 		
-		if state = ictl_wfr then
+		if state = ictl_boot then
+			state <= ictl_wfr;
+		elsif state = ictl_wfr then
 			if icfifo_empty = '0' and iin.mcb_cmd_full = '0' then
 				state <= ictl_tagcheck;
 			end if;
@@ -135,7 +137,9 @@ begin
 		iout.mcb_rden <= '0';
 		prevcmdstate <= cmd_state;
 	
-		if cmd_state = cmd_wait then
+		if cmd_state = cmd_boot then
+			cmd_state <= cmd_wait;
+		elsif cmd_state = cmd_wait then
 			if cmd_empty = '0' then
 				if cmddnr = '1' then
 					cmd_state <= cmd_restart;

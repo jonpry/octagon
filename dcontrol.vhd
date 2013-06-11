@@ -43,14 +43,14 @@ end dcontrol;
 
 architecture Behavioral of dcontrol is
 
-type ictl_type is (ictl_wfr, ictl_tagcheck, ictl_noreq, ictl_req, ictl_delay, ictl_delay2,
+type ictl_type is (ictl_boot, ictl_wfr, ictl_tagcheck, ictl_noreq, ictl_req, ictl_delay, ictl_delay2,
 						 ictl_wait_for_req);
-type cmd_type is (cmd_wait, cmd_restart, cmd_waitfordata, cmd_transfer_data, cmd_update_tag,
+type cmd_type is (cmd_boot, cmd_wait, cmd_restart, cmd_waitfordata, cmd_transfer_data, cmd_update_tag,
 						cmd_delay1, cmd_delay2, cmd_readtag, cmd_invtag, cmd_checkdirty, cmd_invwait, cmd_checkdirty2,
 						cmd_write, cmd_write_done, cmd_write_done2);
 
-signal cmd_state : cmd_type := cmd_wait;
-signal state : ictl_type := ictl_wfr;
+signal cmd_state : cmd_type := cmd_boot;
+signal state : ictl_type := ictl_boot;
 signal prevcmdstate : cmd_type := cmd_wait;
 
 signal nextidx : unsigned(2 downto 0) := "000";
@@ -90,6 +90,8 @@ signal cmd_mcb_req_done : std_logic;
 
 signal oldtag : std_logic_vector(DM_BITS-1 downto 10);
 
+signal mcb_wren : std_logic;
+
 begin
 
 dcout.restarts <= restarts;
@@ -114,7 +116,9 @@ begin
 		ilookahead_wr <= '0';
 		cmd_wr <= '0';
 		
-		if state = ictl_wfr then
+		if state = ictl_boot then
+			state <= ictl_wfr;
+		elsif state = ictl_wfr then
 			if icfifo_empty = '0' and dcin.mcb_cmd_full = '0' then
 				if muxout.dcache_op = '1' then
 					state <= ictl_noreq; --Flush and invalidate handled by second state machine
@@ -157,11 +161,13 @@ begin
 	if clk='1' and clk'Event then
 		cmd_rd <= '0';
 		dcout.mcb_rden <= '0';
-		dcout.mcb_wren <= '0';
+		mcb_wren <= '0';
 		dcout.clean <= '0';
 		prevcmdstate <= cmd_state;
 	
-		if cmd_state = cmd_wait then
+		if cmd_state = cmd_boot then
+			cmd_state <= cmd_wait;
+		elsif cmd_state = cmd_wait then
 			if cmd_empty = '0' then
 				if cmddnr = '1' or (cmd_mntn = '1' and cmd_miss = '1') then
 					--TODO: if mntn=1 and miss=0 then a way to operate on has been located
@@ -190,13 +196,13 @@ begin
 			end if;
 		elsif cmd_state = cmd_write then
 			if wcount /= "0000" then
-				dcout.mcb_wren <= '1';
+				mcb_wren <= '1';
 			end if;
 			if wcount = "1111" then
 				cmd_state <= cmd_write_done; 
 			end if;
 		elsif cmd_state = cmd_write_done then
-			dcout.mcb_wren <= '1';
+			mcb_wren <= '1';
 			cmd_state <= cmd_write_done2;
 		elsif cmd_state = cmd_write_done2 then
 			if cmd_mcb_req_done = '1' then
@@ -278,7 +284,6 @@ begin
 			end if;
 			
 			if dcin.mcb_empty = '0' then
-				dcout.data <= dcin.mcb_data;
 				dcout.memwe <= '1';
 			end if;
 		end if;
@@ -292,10 +297,12 @@ begin
 				end if;
 			end if;
 		end if;
+		
+		dcout.data <= dcin.mcb_data;
+		dcout.mcb_data <= muxout.ctl_data(to_integer(unsigned(nextidx(2 downto 1))));
+		dcout.mcb_wren <= mcb_wren;
 	end if;
 end process;
-
-dcout.mcb_data <= muxout.ctl_data(to_integer(unsigned(nextidx(2 downto 1))));
 
 
 --Restart

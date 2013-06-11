@@ -57,7 +57,8 @@ entity octagon is
 		dmcb_empty		: in std_logic;
 		dmcb_cmd_full	: in std_logic;
 		dmcb_dout		: out std_logic_vector(31 downto 0);
-		dmcb_wren		: out std_logic
+		dmcb_wren		: out std_logic;
+		cpu_dbg_vector : out std_logic_vector(63 downto 0)
 	);
 end octagon;
 
@@ -92,6 +93,21 @@ signal wbrout : wbrout_type;
 signal wbrin : wbrin_type;
 
 begin
+
+cpu_dbg_vector(31) <= int(0);
+cpu_dbg_vector(30) <= running(0);
+cpu_dbg_vector(29) <= pcout.valid;
+process(clk)
+begin
+	if clk='1' and clk'Event then
+		if pcout.valid = '1' then
+			cpu_dbg_vector(IM_BITS-1 downto 0) <= pcout.pc;
+		end if;
+		if decout.valid = '1' then
+			cpu_dbg_vector(63 downto 32) <= decout.instr;
+		end if;
+	end if;
+end process;
 
 --1 PC
 --2 Tag

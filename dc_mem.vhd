@@ -83,7 +83,7 @@ begin
 		end if;
 
 
-		dcout.do_op <= to_std_logic(dmiss = '1' or dcin.dcout.dcache_op = '1');
+		dcout.do_op <= to_std_logic((dmiss = '1' and dcin.dcout.nc = '0') or dcin.dcout.dcache_op = '1');
 		dcout.cacheop <= dcin.dcout.cacheop;
 		dcout.dcache_op <= dcin.dcout.dcache_op;
 	end if;
