@@ -239,7 +239,7 @@ begin
 	--This is for slt, add, sub. mul/div 
 		rout.math_unsigned <= to_std_logic((opzero = '1' and func(0)='1') or opcode(0)='1');
 
-		reg_store := to_std_logic(load='1' or arith='1' or shift_do='1' or
+		reg_store := to_std_logic(load='1' or arith='1' or shift_do='1' or slt = '1' or
 					opcode(5 downto 0) = "000011" or --jal
 					(opzero='1' and func(5 downto 0) = "001001") or --jalr
 					(cop0='1' and instr(25 downto 21) = "00000") or --mfc0

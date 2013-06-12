@@ -32,17 +32,18 @@ use IEEE.STD_LOGIC_1164.ALL;
 use work.octagon_types.all;
 use work.octagon_funcs.all;
 
-entity ilookahead is
+entity dlookahead is
 	Port ( 
 		clk : in  std_logic;
 		wr : in std_logic;
 		din : in std_logic_vector(IM_BITS-1 downto 6);
 		valid : in std_logic;
+		invalidate : in std_logic_vector(7 downto 0);
 		match : out std_logic_vector(7 downto 0)
 	);
-end ilookahead;
+end dlookahead;
 
-architecture Behavioral of ilookahead is
+architecture Behavioral of dlookahead is
 
 type ram_type is array(0 to 7) of std_logic_vector(IM_BITS-1 downto 6);
 --Initialize to the invalid tag
@@ -64,13 +65,13 @@ begin
 			shiftreg(1) <= shiftreg(0);
 			shiftreg(0) <= din;
 
-			validshift(7) <= validshift(6);
-			validshift(6) <= validshift(5);
-			validshift(5) <= validshift(4);
-			validshift(4) <= validshift(3);
-			validshift(3) <= validshift(2);
-			validshift(2) <= validshift(1);			
-			validshift(1) <= validshift(0);
+			validshift(7) <= to_std_logic(validshift(6)='1' and invalidate(6)='0');
+			validshift(6) <= to_std_logic(validshift(5)='1' and invalidate(5)='0');
+			validshift(5) <= to_std_logic(validshift(4)='1' and invalidate(4)='0');
+			validshift(4) <= to_std_logic(validshift(3)='1' and invalidate(3)='0');
+			validshift(3) <= to_std_logic(validshift(2)='1' and invalidate(2)='0');
+			validshift(2) <= to_std_logic(validshift(1)='1' and invalidate(1)='0');			
+			validshift(1) <= to_std_logic(validshift(0)='1' and invalidate(0)='0');
 			validshift(0) <= valid;
 		end if;
 		

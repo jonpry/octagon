@@ -66,8 +66,10 @@ signal icfifo_cacheop : cacheop_type;
 signal wcount : unsigned(3 downto 0);
 signal rcount : unsigned(3 downto 0);
 
-signal ilookahead_cmp : std_logic_vector(7 downto 0);
-signal ilookahead_wr : std_logic;
+signal dlookahead_cmp : std_logic_vector(7 downto 0);
+signal dlookahead_wr : std_logic;
+signal dlookahead_valid : std_logic;
+signal dlookahead_inv : std_logic_vector(7 downto 0);
 
 signal dnr : std_logic;
 signal cmddnr : std_logic;
@@ -92,6 +94,8 @@ signal oldtag : std_logic_vector(DM_BITS-1 downto 10);
 
 signal mcb_wren : std_logic;
 
+signal dirtyidx : unsigned(1 downto 0);
+
 begin
 
 dcout.restarts <= restarts;
@@ -105,7 +109,7 @@ dc_fifo : entity work.dc_fifo port map(clk, icfifo_rd, muxout.do_op, muxout.tid,
 					muxout.adr(IM_BITS-1 downto 6), muxout.dmiss, muxout.dcache_op,
 					muxout.cacheop, icfifo_dout, icfifo_tid, icfifo_miss, icfifo_mntn, 
 					icfifo_cacheop, icfifo_empty);
-ilookahead : entity work.ilookahead port map(clk, ilookahead_wr, icfifo_dout, ilookahead_cmp);
+dlookahead : entity work.dlookahead port map(clk, dlookahead_wr, icfifo_dout, dlookahead_valid, dlookahead_inv, dlookahead_cmp);
 
 
 --Primary state machine
@@ -113,36 +117,46 @@ process(clk)
 begin
 	if clk='1' and clk'Event then
 		icfifo_rd <= '0';
-		ilookahead_wr <= '0';
+		dlookahead_wr <= '0';
+		dlookahead_valid <= '0';
 		cmd_wr <= '0';
 		
 		if state = ictl_boot then
 			state <= ictl_wfr;
 		elsif state = ictl_wfr then
 			if icfifo_empty = '0' and dcin.mcb_cmd_full = '0' then
-				if muxout.dcache_op = '1' then
+				if icfifo_mntn = '1' and icfifo_cacheop = cacheop_clean then
 					state <= ictl_noreq; --Flush and invalidate handled by second state machine
 				else
 					state <= ictl_tagcheck;
 				end if;
 			end if;
 		elsif state = ictl_tagcheck then	
-			if ilookahead_cmp /= X"00" then
+			if icfifo_mntn = '1' then
+				--This is an invalidate op
+				dlookahead_inv <= dlookahead_cmp;
 				state <= ictl_noreq;
 			else
-				state <= ictl_req;
+				dlookahead_inv <= X"00";
+				if dlookahead_cmp /= X"00" then
+					state <= ictl_noreq;
+				else
+					state <= ictl_req;
+				end if;
 			end if;
 		elsif state = ictl_req then
 				if mcb_req_done = '1' then
 					state <= ictl_wait_for_req;
 				end if;
 		elsif state = ictl_wait_for_req then
-				ilookahead_wr <= '1';
+				dlookahead_wr <= '1';
+				dlookahead_valid <= '1';
 				dnr <= '0';
 				icfifo_rd <= '1';
 				cmd_wr <= '1';
 				state <= ictl_delay;
 		elsif state = ictl_noreq then
+				dlookahead_wr <= '1';
 				dnr <= '1';
 				state <= ictl_delay;
 				icfifo_rd <= '1';
@@ -165,11 +179,11 @@ begin
 		dcout.clean <= '0';
 		prevcmdstate <= cmd_state;
 	
-		if cmd_state = cmd_boot then
+		if cmd_state = cmd_boot then	
 			cmd_state <= cmd_wait;
 		elsif cmd_state = cmd_wait then
 			if cmd_empty = '0' then
-				if cmddnr = '1' or (cmd_mntn = '1' and cmd_miss = '1') then
+				if (cmd_mntn = '0' and cmddnr = '1') or (cmd_mntn = '1' and cmd_miss = '1') then
 					--TODO: if mntn=1 and miss=0 then a way to operate on has been located
 					cmd_state <= cmd_restart;
 				else
@@ -192,7 +206,11 @@ begin
 			if dirty = '1' then
 				cmd_state <= cmd_write;
 			else
-				cmd_state <= cmd_waitfordata;
+				if cmd_mntn = '1' then
+					cmd_state <= cmd_restart;
+				else
+					cmd_state <= cmd_waitfordata;
+				end if;
 			end if;
 		elsif cmd_state = cmd_write then
 			if wcount /= "0000" then
@@ -258,8 +276,14 @@ begin
 		end if;
 		
 		--TODO: probably need one more wait cycle here
+		if cmd_mntn = '1' then
+			dirtyidx <= unsigned(cmd_dout(12 downto 11));
+		else
+			dirtyidx <= nextidx(2 downto 1);
+		end if;
+		
 		if cmd_state = cmd_checkdirty then
-			dirty <= muxout.dirty(to_integer(nextidx(2 downto 1)));
+			dirty <= muxout.dirty(to_integer(dirtyidx));
 		end if;
 		
 		if cmd_state = cmd_update_tag then
@@ -299,7 +323,7 @@ begin
 		end if;
 		
 		dcout.data <= dcin.mcb_data;
-		dcout.mcb_data <= muxout.ctl_data(to_integer(unsigned(nextidx(2 downto 1))));
+		dcout.mcb_data <= muxout.ctl_data(to_integer(dirtyidx));
 		dcout.mcb_wren <= mcb_wren;
 	end if;
 end process;

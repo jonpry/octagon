@@ -87,7 +87,7 @@ icmd_fifo : entity work.icmd_fifo port map(clk, cmd_rd, cmd_wr, icfifo_tid,
 					dnr, icfifo_dout, cmd_dout, cmd_tid, cmddnr, cmd_empty);
 ic_fifo : entity work.ic_fifo port map(clk, icfifo_rd, muxout.imiss, muxout.tid, 
 					muxout.pc(IM_BITS-1 downto 6), icfifo_dout, icfifo_tid, icfifo_empty);
-ilookahead : entity work.ilookahead port map(clk, ilookahead_wr, icfifo_dout, ilookahead_cmp);
+ilookahead : entity work.ilookahead port map(clk, ilookahead_wr, icfifo_dout, '1', ilookahead_cmp);
 
 
 --Primary state machine
