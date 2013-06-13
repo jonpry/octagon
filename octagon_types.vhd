@@ -199,6 +199,7 @@ package octagon_types is
 		r_dest			: std_logic_vector(4 downto 0);
 		use_immediate	: std_logic;
 		shift				: shift_type;
+		shift_arith		: std_logic;
 		logicop			: logicop_type;
 		add				: std_logic;
 		arithmux			: arithmux_type;
@@ -212,6 +213,7 @@ package octagon_types is
 		pcmux				: pcmux_type;
 		do_jump			: std_logic;
 		load				: std_logic;
+		ls_left			: std_logic;
 		memsize			: std_logic_vector(1 downto 0);
 		load_unsigned	: std_logic;
 		math_unsigned	: std_logic;
@@ -261,6 +263,7 @@ package octagon_types is
 		pcadd				: std_logic_vector(IM_BITS-1 downto 0);
 		do_jump			: std_logic;
 		load				: std_logic;
+		ls_left			: std_logic;
 		memsize			: std_logic_vector(1 downto 0);
 		load_unsigned	: std_logic;
 		store				: std_logic;

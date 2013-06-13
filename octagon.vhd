@@ -92,19 +92,23 @@ signal wbmin : wbmin_type;
 signal wbrout : wbrout_type;
 signal wbrin : wbrin_type;
 
+signal cpu_dbg_vector_i : std_logic_vector(63 downto 0);
+
 begin
 
-cpu_dbg_vector(31) <= int(0);
-cpu_dbg_vector(30) <= running(0);
-cpu_dbg_vector(29) <= pcout.valid;
+--cpu_dbg_vector <= cpu_dbg_vector_i;
+
+cpu_dbg_vector_i(31) <= int(0);
+cpu_dbg_vector_i(30) <= running(0);
+cpu_dbg_vector_i(29) <= pcout.valid;
 process(clk)
 begin
 	if clk='1' and clk'Event then
 		if pcout.valid = '1' then
-			cpu_dbg_vector(IM_BITS-1 downto 0) <= pcout.pc;
+			cpu_dbg_vector_i(IM_BITS-1 downto 0) <= pcout.pc;
 		end if;
 		if decout.valid = '1' then
-			cpu_dbg_vector(63 downto 32) <= decout.instr;
+			cpu_dbg_vector_i(63 downto 32) <= decout.instr;
 		end if;
 	end if;
 end process;

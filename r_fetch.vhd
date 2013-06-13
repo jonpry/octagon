@@ -162,6 +162,7 @@ begin
 	--Load instructions
 		load := to_std_logic(instr(31 downto 29)="100");
 		rout.load <= load;
+		rout.ls_left <= to_std_logic(instr(31 downto 30) = "10" and instr(28 downto 26) = "010");
 		
 	-- Decode store operations
 		store := to_std_logic(instr(31 downto 29)="101" and instr(28 downto 26) /= "111");
@@ -214,6 +215,7 @@ begin
 		rout.shift.reg <= func(2);
 		shift_right := func(1);
 		shift_arith := func(0);
+		rout.shift_arith <= shift_arith;
 		shift_do := to_std_logic(opzero='1' and func(5 downto 3) = "000");
 
 		rout.shift.do <= shift_do;

@@ -81,6 +81,7 @@ end process;
 process(clk)
 	variable logic   : std_logic_vector(31 downto 0);
 	variable	be		  : std_logic_vector(3 downto 0);
+	variable be_shift : std_logic_vector(3 downto 0);
 begin
 	if clk='1' and clk'Event then
 		
@@ -130,28 +131,13 @@ begin
 		end case;
 		
 	--shifter for stores goes in this stage
-		aluout.store_data(7 downto 0) <= aluin.r_t(7 downto 0);
-		if aluin.memadr(1 downto 0) = "01" then
-			aluout.store_data(15 downto 8) <= aluin.r_t(7 downto 0);
-		else
-			aluout.store_data(15 downto 8) <= aluin.r_t(15 downto 8);
-		end if;
+		case aluin.memadr(1 downto 0) is
+			when "00" => aluout.store_data <= aluin.r_t;
+			when "01" => aluout.store_data <= aluin.r_t(23 downto 0) & aluin.r_t(31 downto 24); 
+			when "10" => aluout.store_data <= aluin.r_t(15 downto 0) & aluin.r_t(31 downto 16); 
+			when others => aluout.store_data <= aluin.r_t(7 downto 0) & aluin.r_t(31 downto 8); 
+		end case;
 	
-		if aluin.memadr(1 downto 0) = "10" then
-			aluout.store_data(23 downto 16) <= aluin.r_t(7 downto 0);
-		else
-			aluout.store_data(23 downto 16) <= aluin.r_t(23 downto 16);
-		end if;
-	
-		if aluin.memadr(1 downto 0) = "11" then
-			aluout.store_data(31 downto 24) <= aluin.r_t(7 downto 0);
-		else
-			if aluin.memadr(1 downto 0) = "10" then
-				aluout.store_data(31 downto 24) <= aluin.r_t(15 downto 8);
-			else
-				aluout.store_data(31 downto 24) <= aluin.r_t(31 downto 24);
-			end if;
-		end if;
 	--generate the byte enables	
 		case aluin.memsize is
 			when "00"	=> be := "0001";	
@@ -160,11 +146,17 @@ begin
 		end case;
 		
 		case aluin.memadr(1 downto 0) is
-			when "00"	=> aluout.be <= be;
-			when "01"	=> aluout.be <= be(2 downto 0) & "0";
-			when "10"	=> aluout.be <= be(1 downto 0) & "00";
-			when others => aluout.be <= be(0) & "000";
+			when "00"	=> be_shift := be;
+			when "01"	=> be_shift := be(2 downto 0) & "0";
+			when "10"	=> be_shift := be(1 downto 0) & "00";
+			when others => be_shift := be(0) & "000";
 		end case;
+		
+		if aluin.ls_left = '1' then
+			aluout.be <= not be_shift;
+		else
+			aluout.be <= be_shift;
+		end if;
 		
 		aluout.dcwren <= aluin.valid and aluin.store;
 		aluout.dcrden <= aluin.valid and aluin.load;
