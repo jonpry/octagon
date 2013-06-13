@@ -102,17 +102,17 @@ begin
 			signvec := (others => '0');
 		end if;
 		
-		case dmuxout.memsize is
-			when "00"   => data := signvec & signvec & signvec & dmuxout.data(7 downto 0);
-			when "01"   => data := signvec & signvec & dmuxout.data(15 downto 0);
-			when others => data := dmuxout.data;
-		end case;
-	
 		case dmuxout.memadr is
-			when "00"	=> lout.loadv <= data;
-			when "01"	=> lout.loadv <= data(7 downto 0) & data(31 downto 8);
-			when "10"	=> lout.loadv <= data(15 downto 0) & data(31 downto 16);
-			when others	=> lout.loadv <= data(23 downto 0) & data(31 downto 24);		
+			when "00"	=> data := dmuxout.data;
+			when "01"	=> data := dmuxout.data(7 downto 0) & dmuxout.data(31 downto 8);
+			when "10"	=> data := dmuxout.data(15 downto 0) & dmuxout.data(31 downto 16);
+			when others	=> data := dmuxout.data(23 downto 0) & dmuxout.data(31 downto 24);		
+		end case;
+		
+		case dmuxout.memsize is
+			when "00"   => lout.loadv <= signvec & signvec & signvec & data(7 downto 0);
+			when "01"   => lout.loadv <= signvec & signvec & data(15 downto 0);
+			when others => lout.loadv <= data;
 		end case;
 		
 		case dmuxout.memadr is
