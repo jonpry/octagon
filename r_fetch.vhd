@@ -82,10 +82,26 @@ begin
 			r_tq <= r_t;
 		end if;
 		
-		if rin.reg_we = '1' then
-			regram1(to_integer(unsigned(rin.reg_adr))) <= rin.reg_val;
-			regram2(to_integer(unsigned(rin.reg_adr))) <= rin.reg_val;		
+		if rin.reg_we = '1' and rin.reg_be(0) = '1' then
+			regram1(to_integer(unsigned(rin.reg_adr)))(7 downto 0) <= rin.reg_val(7 downto 0);
+			regram2(to_integer(unsigned(rin.reg_adr)))(7 downto 0) <= rin.reg_val(7 downto 0);		
 		end if;
+
+		if rin.reg_we = '1' and rin.reg_be(1) = '1' then
+			regram1(to_integer(unsigned(rin.reg_adr)))(15 downto 8) <= rin.reg_val(15 downto 8);
+			regram2(to_integer(unsigned(rin.reg_adr)))(15 downto 8) <= rin.reg_val(15 downto 8);		
+		end if;
+
+		if rin.reg_we = '1' and rin.reg_be(2) = '1' then
+			regram1(to_integer(unsigned(rin.reg_adr)))(23 downto 16) <= rin.reg_val(23 downto 16);
+			regram2(to_integer(unsigned(rin.reg_adr)))(23 downto 16) <= rin.reg_val(23 downto 16);		
+		end if;
+
+		if rin.reg_we = '1' and rin.reg_be(3) = '1' then
+			regram1(to_integer(unsigned(rin.reg_adr)))(31 downto 24) <= rin.reg_val(31 downto 24);
+			regram2(to_integer(unsigned(rin.reg_adr)))(31 downto 24) <= rin.reg_val(31 downto 24);		
+		end if;
+
 	end if;
 end process;
 
@@ -163,6 +179,7 @@ begin
 		load := to_std_logic(instr(31 downto 29)="100");
 		rout.load <= load;
 		rout.ls_left <= to_std_logic(instr(31 downto 30) = "10" and instr(28 downto 26) = "010");
+		rout.ls_right <= to_std_logic(instr(31 downto 30) = "10" and instr(28 downto 26) = "110");
 		
 	-- Decode store operations
 		store := to_std_logic(instr(31 downto 29)="101" and instr(28 downto 26) /= "111");

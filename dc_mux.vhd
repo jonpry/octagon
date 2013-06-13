@@ -64,6 +64,8 @@ begin
 		muxout.memsize <= jumpout.memsize;
 		muxout.memadr <= jumpout.memadr;
 		muxout.load <= jumpout.load;
+		muxout.ls_left <= jumpout.ls_left;
+		muxout.ls_right <= jumpout.ls_right;
 		muxout.load_unsigned <= jumpout.load_unsigned;
 		muxout.store_cop0 <= jumpout.store_cop0;
 		muxout.do_int <= to_std_logic(jumpout.do_int = '1' and jumpout.cvalid='1' and jumpout.abort = '0');

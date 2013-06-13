@@ -54,6 +54,7 @@ rout.valid <= lmuxout.valid;
 --Smux
 loadv <= lmuxout.wbr_data when lmuxout.wbr_complete = '1' else lmuxout.loadv;
 rout.smux <= loadv when lmuxout.load = '1' else lmuxout.lmux;
+rout.be <= lmuxout.be when lmuxout.load = '1' else "1111";
 
 process(clk)
 	variable status_wr : std_logic;

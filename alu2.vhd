@@ -74,6 +74,8 @@ begin
 		aluout.lnc <= to_std_logic(aluin.load = '1' and aluin.wbr_complete = '0');
 		aluout.dcache_op <= aluin.dcache_op;
 		aluout.mtmul <= aluin.mtmul;
+		aluout.ls_left <= aluin.ls_left;
+		aluout.ls_right <= aluin.ls_right;
 	end if;
 end process;
 

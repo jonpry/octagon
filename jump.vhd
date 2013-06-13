@@ -60,6 +60,8 @@ begin
 		jumpout.store_cond <= aluin.store_cond;
 		jumpout.met <= aluin.met;
 		jumpout.load <= aluin.load;
+		jumpout.ls_left <= aluin.ls_left;
+		jumpout.ls_right <= aluin.ls_right;
 		jumpout.memadr <= aluin.memadr;
 		jumpout.memsize <= aluin.memsize;
 		jumpout.load_unsigned <= aluin.load_unsigned;

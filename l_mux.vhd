@@ -75,6 +75,7 @@ process(clk)
 	variable data 	  : std_logic_vector(31 downto 0);
 	variable signbit : std_logic;
 	variable signvec : std_logic_vector(7 downto 0);
+	variable be		  : std_logic_vector(3 downto 0);
 begin
 	if clk='1' and clk'Event then
 		case dmuxout.lmux is
@@ -90,9 +91,9 @@ begin
 		
 	--Barrel shifter sign extender thingy for loads
 		case dmuxout.memsize is
-			when "00"	=> signbit := data(7);
-			when "01"	=> signbit := data(15);
-			when others => signbit := data(31);
+			when "00"	=> signbit := dmuxout.data(7);
+			when "01"	=> signbit := dmuxout.data(15);
+			when others => signbit := dmuxout.data(31);
 		end case;
 		
 		if signbit = '1' and dmuxout.load_unsigned = '0' then
@@ -100,35 +101,35 @@ begin
 		else
 			signvec := (others => '0');
 		end if;
+		
+		case dmuxout.memsize is
+			when "00"   => data := signvec & signvec & signvec & dmuxout.data(7 downto 0);
+			when "01"   => data := signvec & signvec & dmuxout.data(15 downto 0);
+			when others => data := dmuxout.data;
+		end case;
 	
 		case dmuxout.memadr is
-			when "00"	=> lout.loadv(7 downto 0) <= data(7 downto 0);
-			when "01"	=> lout.loadv(7 downto 0) <= data(15 downto 8);
-			when "10"	=> lout.loadv(7 downto 0) <= data(23 downto 16);
-			when "11"	=> lout.loadv(7 downto 0) <= data(31 downto 24);		
-			when others => lout.loadv(7 downto 0) <= (others => 'X');
+			when "00"	=> lout.loadv <= data;
+			when "01"	=> lout.loadv <= data(7 downto 0) & data(31 downto 8);
+			when "10"	=> lout.loadv <= data(15 downto 0) & data(31 downto 16);
+			when others	=> lout.loadv <= data(23 downto 0) & data(31 downto 24);		
 		end case;
+		
+		case dmuxout.memadr is
+			when "00"	=> be := "1111";
+			when "01"	=> be := "0111";
+			when "10"	=> be := "0011";
+			when others	=> be := "0001";		
+		end case;
+		
+		if dmuxout.ls_left = '1' then
+			lout.be <= not be;
+		elsif dmuxout.ls_right = '1' then
+			lout.be <= be;
+		else
+			lout.be <= "1111";
+		end if;
 
-		--sz = "00", then data <= signvec
-		--sz = "01", if adr 00, data <= data, else data <= data >> 16
-		--sz = "XX", data <= data.
-		
-		if dmuxout.memsize = "00" then
-			lout.loadv(15 downto 8) <= signvec;
-		else
-			if dmuxout.memadr = "10" then
-				lout.loadv(15 downto 8) <= data(31 downto 24);
-			else
-				lout.loadv(15 downto 8) <= data(15 downto 8);
-			end if;
-		end if;
-		
-		if dmuxout.memsize(1) = '1' then
-			lout.loadv(31 downto 16) <= data(31 downto 16);
-		else
-			lout.loadv(31 downto 16) <= signvec & signvec;
-		end if;
-	
 		lout.load <= dmuxout.load;
 	end if;
 end process;

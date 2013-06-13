@@ -191,6 +191,7 @@ rin.decout <= decout;
 rin.reg_val <= rstoreout.smux;
 rin.reg_adr <= rstoreout.tid & rstoreout.r_dest;
 rin.reg_we <= rstoreout.valid;
+rin.reg_be <= rstoreout.be;
 
 alu1in.rfetch <= rout;
 alu1in.rout <= rstoreout;

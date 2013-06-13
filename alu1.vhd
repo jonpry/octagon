@@ -137,6 +137,7 @@ begin
 		aluout.cache_p <= aluin.rfetch.cache_p;
 		aluout.mtmul <= aluin.rfetch.mtmul;
 		aluout.ls_left <= aluin.rfetch.ls_left;
+		aluout.ls_right <= aluin.rfetch.ls_right;
 
 		aluout.wbr_complete <= aluin.wbrout.valid;
 		aluout.wbr_data <= aluin.wbrout.data;

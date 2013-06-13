@@ -152,6 +152,8 @@ package octagon_types is
 		memadr			: std_logic_vector(1 downto 0);
 		load_unsigned 	: std_logic;
 		load				: std_logic;
+		ls_left			: std_logic;
+		ls_right			: std_logic;
 		store_cop0		: std_logic;
 		do_int			: std_logic;
 		epc				: std_logic_vector(IM_BITS-1 downto 0);
@@ -185,6 +187,7 @@ package octagon_types is
 	type rfetchin_type is record
 		decout			: decout_type;
 		reg_we			: std_logic;
+		reg_be			: std_logic_vector(3 downto 0);
 		reg_adr			: std_logic_vector(7 downto 0);
 		reg_val			: std_logic_vector(31 downto 0);
 	end record;
@@ -214,6 +217,7 @@ package octagon_types is
 		do_jump			: std_logic;
 		load				: std_logic;
 		ls_left			: std_logic;
+		ls_right			: std_logic;
 		memsize			: std_logic_vector(1 downto 0);
 		load_unsigned	: std_logic;
 		math_unsigned	: std_logic;
@@ -264,6 +268,7 @@ package octagon_types is
 		do_jump			: std_logic;
 		load				: std_logic;
 		ls_left			: std_logic;
+		ls_right			: std_logic;
 		memsize			: std_logic_vector(1 downto 0);
 		load_unsigned	: std_logic;
 		store				: std_logic;
@@ -310,6 +315,8 @@ package octagon_types is
 		do_jump			: std_logic;
 		load				: std_logic;
 		store				: std_logic;
+		ls_left			: std_logic;
+		ls_right			: std_logic;
 		memadr			: std_logic_vector(1 downto 0);
 		memsize			: std_logic_vector(1 downto 0);
 		load_unsigned	: std_logic;
@@ -384,6 +391,8 @@ package octagon_types is
 		reg_store		: std_logic;
 		store_cond		: std_logic;
 		load				: std_logic;
+		ls_left			: std_logic;
+		ls_right			: std_logic;
 		memadr			: std_logic_vector(1 downto 0);
 		memsize			: std_logic_vector(1 downto 0);
 		load_unsigned	: std_logic;
@@ -404,6 +413,7 @@ package octagon_types is
 		valid				: std_logic;
 		r_dest			: std_logic_vector(4 downto 0);
 		smux				: std_logic_vector(31 downto 0);
+		be					: std_logic_vector(3 downto 0);
 		cop0				: cop0_type;
 		epc_wr			: std_logic;
 		cause_wr			: std_logic;
@@ -433,6 +443,7 @@ package octagon_types is
 		wbr_complete 	: std_logic;
 		wbr_data			: std_logic_vector(31 downto 0);
 		mtmul				: std_logic;
+		be					: std_logic_vector(3 downto 0);
 	end record;
 	
 	type dcmemin_type is record
