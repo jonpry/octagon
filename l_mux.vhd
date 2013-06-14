@@ -90,17 +90,7 @@ begin
 		data := dmuxout.data;
 		
 	--Barrel shifter sign extender thingy for loads
-		case dmuxout.memsize is
-			when "00"	=> signbit := dmuxout.data(7);
-			when "01"	=> signbit := dmuxout.data(15);
-			when others => signbit := dmuxout.data(31);
-		end case;
-		
-		if signbit = '1' and dmuxout.load_unsigned = '0' then
-			signvec := (others => '1');
-		else
-			signvec := (others => '0');
-		end if;
+
 		
 		case dmuxout.memadr is
 			when "00"	=> data := dmuxout.data;
@@ -108,6 +98,18 @@ begin
 			when "10"	=> data := dmuxout.data(15 downto 0) & dmuxout.data(31 downto 16);
 			when others	=> data := dmuxout.data(23 downto 0) & dmuxout.data(31 downto 24);		
 		end case;
+		
+		case dmuxout.memsize is
+			when "00"	=> signbit := data(7);
+			when "01"	=> signbit := data(15);
+			when others => signbit := data(31);
+		end case;
+		
+		if signbit = '1' and dmuxout.load_unsigned = '0' then
+			signvec := (others => '1');
+		else
+			signvec := (others => '0');
+		end if;
 		
 		case dmuxout.memsize is
 			when "00"   => lout.loadv <= signvec & signvec & signvec & data(7 downto 0);
