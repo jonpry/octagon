@@ -69,6 +69,7 @@ begin
 		muxout.load_unsigned <= jumpout.load_unsigned;
 		muxout.store_cop0 <= jumpout.store_cop0;
 		muxout.do_int <= to_std_logic(jumpout.do_int = '1' and jumpout.cvalid='1' and jumpout.abort = '0');
+		muxout.invalid_op <= to_std_logic(jumpout.invalid_op = '1' and jumpout.cvalid='1' and jumpout.abort = '0');
 		muxout.epc <= jumpout.epc;
 		muxout.ipend <= jumpout.ipend;
 		muxout.store_hi <= jumpout.store_hi;

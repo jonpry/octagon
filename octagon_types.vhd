@@ -156,6 +156,7 @@ package octagon_types is
 		ls_right			: std_logic;
 		store_cop0		: std_logic;
 		do_int			: std_logic;
+		invalid_op		: std_logic;
 		epc				: std_logic_vector(IM_BITS-1 downto 0);
 		ipend				: std_logic_vector(7 downto 0);
 		store_hi			: std_logic;
@@ -232,6 +233,7 @@ package octagon_types is
 		cacheop			: cacheop_type;
 		cache_p			: std_logic;
 		mtmul				: std_logic;
+		invalid_op		: std_logic;
 	end record;
 	
 	type cop0_type is record
@@ -294,6 +296,7 @@ package octagon_types is
 		dcache_op		: std_logic;
 		cache_p			: std_logic;
 		mtmul				: std_logic;
+		invalid_op		: std_logic;
 	end record;
 	
 	type alu2out_type is record
@@ -339,6 +342,7 @@ package octagon_types is
 		lnc				: std_logic;
 		dcache_op		: std_logic;
 		mtmul				: std_logic;
+		invalid_op		: std_logic;
 	end record;
 	
 	type wbmoutsig_type is record
@@ -398,6 +402,7 @@ package octagon_types is
 		load_unsigned	: std_logic;
 		store_cop0		: std_logic;
 		do_int			: std_logic;
+		invalid_op		: std_logic;
 		epc				: std_logic_vector(IM_BITS-1 downto 0);
 		ipend				: std_logic_vector(7 downto 0);
 		store_hi			: std_logic;
@@ -435,6 +440,7 @@ package octagon_types is
 		load				: std_logic;
 		store_cop0		: std_logic;
 		do_int			: std_logic;
+		invalid_op		: std_logic;
 		epc				: std_logic_vector(IM_BITS-1 downto 0);
 		ipend				: std_logic_vector(7 downto 0);
 		store_hi			: std_logic;

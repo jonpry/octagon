@@ -111,10 +111,13 @@ begin
 		ipend := ints and (not aluin.imask);
 				
 		--TODO: handle ovf
-		if ipend /= X"00" then
-			jumpout.do_int <= '1';
+		if ipend /= X"00" or aluin.invalid_op = '1' then
+			--TODO: handle OVF
+			jumpout.invalid_op <= aluin.invalid_op;
+			jumpout.do_int <= not aluin.invalid_op;
 			jumpout.jump_target <= (others => '0');
 		else
+			jumpout.invalid_op <= '0';
 			jumpout.do_int <= '0'; 
 			jumpout.jump_target <= jump_target;
 		end if;

@@ -76,6 +76,7 @@ begin
 		aluout.mtmul <= aluin.mtmul;
 		aluout.ls_left <= aluin.ls_left;
 		aluout.ls_right <= aluin.ls_right;
+		aluout.invalid_op <= aluin.invalid_op;
 	end if;
 end process;
 

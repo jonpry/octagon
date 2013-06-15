@@ -135,6 +135,7 @@ process(clk)
 	variable mul : std_logic;
 	variable rfe : std_logic;
 	variable cache : std_logic;
+	variable div : std_logic;
 begin
 	if clk='1' and clk'Event then
 		opcode := rin.decout.instr(31 downto 26);
@@ -160,6 +161,9 @@ begin
 		rout.mtmul <= mtmul;
 		rout.store_hi <= to_std_logic((mmul = '1' and func(1 downto 0) = "01") or mul = '1');
 		rout.store_lo <= to_std_logic((mmul = '1' and func(1 downto 0) = "11") or mul = '1');
+		
+	--Divide
+		div := to_std_logic(opzero='1' and func(5 downto 1) = "01101");
 		
 	--link instructions have r_dest = 31
 		if link = '1' then
@@ -274,6 +278,9 @@ begin
 		else
 			rout.immediate(31 downto 16) <= X"FFFF";
 		end if;
+		
+	--Invalid opcode detection
+		rout.invalid_op <= div;
 
 	--Branch instructions do comparison on the 2 registers, so we prevent the mux into the alu
 	--from operating. jump pc is calculate elseware anyways
