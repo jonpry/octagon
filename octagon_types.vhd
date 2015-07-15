@@ -32,10 +32,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 package octagon_types is
 	 	 	 
-	constant DM_BITS : integer := 26;
-	constant IM_BITS : integer := 26;
+	constant DM_BITS : integer := 32;
+	constant IM_BITS : integer := 32;
 
-	type tag_type is array(0 to 15) of std_logic_vector(IM_BITS-1 downto 10);
+	type tag_type is array(0 to 15) of std_logic_vector(IM_BITS-1+4 downto 10); --Extra 4 for ASID 
+	type ptag_type is array(0 to 15) of std_logic_vector(IM_BITS-1 downto 12);
+	type ptago_type is array(0 to 7) of std_logic_vector(IM_BITS-1 downto 12);
 	type iout_type is array(0 to 7) of std_logic_vector(31 downto 0);
 	type dout_type is array(0 to 3) of std_logic_vector(31 downto 0);
 	type shiftop_type is (shiftop_none, shiftop_left, shiftop_right, shiftop_right_neg);
@@ -66,6 +68,7 @@ package octagon_types is
 		pc_next			: std_logic_vector(IM_BITS-1 downto 0);
 		valid				: std_logic;
 		tid				: std_logic_vector(2 downto 0);
+		asid				: std_logic_vector(3 downto 0);
 		restarted		: std_logic_vector(7 downto 0);
 	end record;
 	
@@ -73,7 +76,8 @@ package octagon_types is
 		pcout				: pcout_type;
 		tagidx			: std_logic_vector(2 downto 0);
 		tagadr			: std_logic_vector(3 downto 0);
-		tagval			: std_logic_vector(IM_BITS-1 downto 10);
+		tagval			: std_logic_vector(IM_BITS-1+4 downto 10); --ASID
+		ptagval			: std_logic_vector(IM_BITS-1 downto 12);
 		tagwe				: std_logic;
 		imemidx			: std_logic_vector(2 downto 0);
 		imemadr			: std_logic_vector(7 downto 0);
@@ -83,10 +87,12 @@ package octagon_types is
 	
 	type dcfetchin_type is record
 		tid				: std_logic_vector(2 downto 0);
-		adr				: std_logic_vector(DM_BITS+1 downto 0);
+		asid				: std_logic_vector(3 downto 0);
+		adr				: std_logic_vector(DM_BITS-1 downto 0);
 		tagidx			: std_logic_vector(2 downto 0);
 		tagadr			: std_logic_vector(3 downto 0);
-		tagval			: std_logic_vector(IM_BITS-1 downto 10);
+		tagval			: std_logic_vector(IM_BITS-1+4 downto 10);
+		ptagval			: std_logic_vector(IM_BITS-1 downto 12);
 		tagwe				: std_logic;
 		cacheop			: cacheop_type;
 		dcache_op		: std_logic;
@@ -97,19 +103,26 @@ package octagon_types is
 	
 	type icfetchout_type is record
 		owns				: std_logic_vector(7 downto 0);
+		ownst				: std_logic_vector(7 downto 0);
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		tid				: std_logic_vector(2 downto 0);
 		valid				: std_logic;
 		instr				: iout_type;
+		asid				: std_logic_vector(3 downto 0);
+		ptag				: ptago_type;
 	end record;
 	
 	type dcfetchout_type is record
 		owns				: std_logic_vector(7 downto 0);
+		ownst				: std_logic_vector(7 downto 0);
+		phys				: std_logic_vector(7 downto 0);
 		sel				: std_logic_vector(2 downto 0);
 --		miss				: std_logic;
-		nc					: std_logic;
-		adr				: std_logic_vector(DM_BITS+1 downto 0);
-		tag				: std_logic_vector(DM_BITS-1 downto 10);
+--		nc					: std_logic;
+		adr				: std_logic_vector(DM_BITS-1 downto 0);
+		tag				: std_logic_vector(DM_BITS-1+4 downto 10); --ASID
+		ptag				: ptago_type;
+		tagdemux			: tag_type;
 		cacheop			: cacheop_type;
 		dcache_op		: std_logic;
 		cache_p			: std_logic;
@@ -120,12 +133,16 @@ package octagon_types is
 		sel				: std_logic_vector(1 downto 0);
 		dmiss				: std_logic;
 		tid				: std_logic_vector(2 downto 0);
-		adr				: std_logic_vector(DM_BITS+1 downto 0);
+		asid				: std_logic_vector(3 downto 0);
+		tagm				: std_logic_vector(IM_BITS-1+4 downto 10);
+		ptag				: std_logic_vector(IM_BITS-1 downto 12);
+		adr				: std_logic_vector(DM_BITS-1 downto 0);
 		dirty				: std_logic_vector(3 downto 0);
 		ctl_data			: dout_type;
 		cacheop			: cacheop_type;
 		do_op				: std_logic;
 		dcache_op		: std_logic;
+		ll				   : std_logic;
 	end record;
 	
 	type icmuxout_type is record
@@ -133,6 +150,8 @@ package octagon_types is
 		tid				: std_logic_vector(2 downto 0);
 		valid				: std_logic;
 		instr				: std_logic_vector(31 downto 0);
+		ptag			   : std_logic_vector(IM_BITS-1 downto 12);
+		asid				: std_logic_vector(3 downto 0);
 		imiss				: std_logic;
 	end record;
 	
@@ -178,6 +197,7 @@ package octagon_types is
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		tid				: std_logic_vector(2 downto 0);
 		ftid				: std_logic_vector(2 downto 0);
+		asid				: std_logic_vector(3 downto 0);
 		valid				: std_logic;
 		r_s				: std_logic_vector(4 downto 0);
 		r_t				: std_logic_vector(4 downto 0);
@@ -196,6 +216,7 @@ package octagon_types is
 	type rfetchout_type is record
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		tid				: std_logic_vector(2 downto 0);
+		asid				: std_logic_vector(3 downto 0);
 		valid				: std_logic;
 		r_s				: std_logic_vector(31 downto 0);
 		r_t				: std_logic_vector(31 downto 0);
@@ -234,6 +255,8 @@ package octagon_types is
 		cache_p			: std_logic;
 		mtmul				: std_logic;
 		invalid_op		: std_logic;
+		sc				   : std_logic; --mips store-conditional operation
+		ll					: std_logic;
 	end record;
 	
 	type cop0_type is record
@@ -242,18 +265,21 @@ package octagon_types is
 		ipend				: std_logic_vector(7 downto 0);
 		exc				: std_logic;
 		int				: std_logic;
+		tlb				: std_logic;
+		asid				: std_logic_vector(3 downto 0);
 		ecode				: std_logic_vector(3 downto 0);
 	end record;
 	
 	type alu1out_type is record
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		tid				: std_logic_vector(2 downto 0);
+		asid				: std_logic_vector(3 downto 0);
 		valid				: std_logic;	
 		shift				: shift_type;
 		r_s				: std_logic_vector(31 downto 0);
 		r_t				: std_logic_vector(31 downto 0);
 		immediate		: std_logic_vector(31 downto 0);
-		memadr			: std_logic_vector(DM_BITS+1 downto 0);
+		memadr			: std_logic_vector(DM_BITS-1 downto 0);
 		r_dest			: std_logic_vector(4 downto 0);
 		logicop			: logicop_type;
 		add				: std_logic;
@@ -297,12 +323,14 @@ package octagon_types is
 		cache_p			: std_logic;
 		mtmul				: std_logic;
 		invalid_op		: std_logic;
+		ll					: std_logic;
 	end record;
 	
 	type alu2out_type is record
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		pcjump			: std_logic_vector(IM_BITS-1 downto 0);
 		tid				: std_logic_vector(2 downto 0);
+		asid				: std_logic_vector(3 downto 0);
 		valid				: std_logic;	
 		shift_part		: std_logic_vector(31 downto 0);
 		shift				: shift_type;
@@ -343,6 +371,7 @@ package octagon_types is
 		dcache_op		: std_logic;
 		mtmul				: std_logic;
 		invalid_op		: std_logic;
+		ll				   : std_logic;
 	end record;
 	
 	type wbmoutsig_type is record
@@ -471,7 +500,7 @@ package octagon_types is
 	type ictlout_type is record
 		memadr			: std_logic_vector(9 downto 0);
 		memwe				: std_logic;
-		tagadr			: std_logic_vector(IM_BITS-1 downto 6);
+		tagadr			: std_logic_vector(IM_BITS-1+4 downto 6); --ASID
 		tag_wr			: std_logic;
 		tagidx			: std_logic_vector(2 downto 0);
 		mcb_en			: std_logic;
@@ -488,13 +517,14 @@ package octagon_types is
 		mcb_empty		: std_logic;
 		mcb_cmd_full	: std_logic;
 		restarted		: std_logic_vector(7 downto 0);
+		ownst				: std_logic_vector(7 downto 0);
 	end record;
 	
 	
 	type dctlout_type is record
 		memadr			: std_logic_vector(9 downto 0);
 		memwe				: std_logic;
-		tagadr			: std_logic_vector(IM_BITS-1 downto 6);
+		tagadr			: std_logic_vector(IM_BITS-1+4 downto 6); --ASID
 		tag_wr			: std_logic;
 		tagidx			: std_logic_vector(2 downto 0);
 		mcb_en			: std_logic;
@@ -516,7 +546,8 @@ package octagon_types is
 		mcb_empty		: std_logic;
 		mcb_cmd_full	: std_logic;
 		restarted		: std_logic_vector(7 downto 0);
-		tag				: std_logic_vector(DM_BITS-1 downto 10);
+		tag				: std_logic_vector(DM_BITS-1+4 downto 10); --ASID
+		ownst				: std_logic_vector(7 downto 0);
 	end record;
 	
 end package;

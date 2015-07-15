@@ -135,7 +135,7 @@ pcin.abort <= jumpout.abort;
 pcin.restarts <= ictlout.restarts or dctlout.restarts or wbmout.restarts or wbrout.restarts;
 
 icin.pcout <= pcout;
-icin.tagval <= ictlout.tagadr(IM_BITS-1 downto 10);
+icin.tagval <= ictlout.tagadr(IM_BITS-1+4 downto 10); --ASID
 icin.tagadr <= ictlout.tagadr(9 downto 6);
 icin.tagidx <= ictlout.tagidx;
 icin.tagwe <= ictlout.tag_wr;
@@ -153,6 +153,7 @@ ictlin.mcb_data <= mcb_data;
 ictlin.mcb_empty <= mcb_empty;
 ictlin.mcb_cmd_full <= mcb_cmd_full;
 ictlin.restarted <= pcout.restarted;
+ictlin.ownst <= icout.ownst;
 
 dmcb_cmd <= dctlout.mcb_cmd;
 dmcb_bl <= dctlout.mcb_bl;
@@ -166,13 +167,15 @@ dctlin.mcb_empty <= dmcb_empty;
 dctlin.mcb_cmd_full <= dmcb_cmd_full;
 dctlin.restarted <= pcout.restarted;
 dctlin.tag <= dcout.tag;
+dctlin.ownst <= dcout.ownst;
 
 dcin.adr <= alu1out.memadr;
 dcin.tid <= alu1out.tid;
+dcin.asid <= alu1out.asid;
 dcin.dcache_op <= alu1out.dcache_op;
 dcin.cacheop <= alu1out.cacheop;
 dcin.cache_p <= alu1out.cache_p;
-dcin.tagval <= dctlout.tagadr(IM_BITS-1 downto 10);
+dcin.tagval <= dctlout.tagadr(IM_BITS-1+4 downto 10); --ASID
 dcin.tagadr <= dctlout.tagadr(9 downto 6);
 dcin.tagidx <= dctlout.tagidx;
 dcin.tagwe <= dctlout.tag_wr;

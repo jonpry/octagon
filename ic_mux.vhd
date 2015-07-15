@@ -87,7 +87,8 @@ begin
 		sel(2) := to_std_logic(selin(4)='1' or selin(5)='1' or selin(6)='1' or selin(7)='1');
 		
 		muxout.instr <= fetchout.instr(to_integer(unsigned(sel)));
-	
+		muxout.ptag  <= fetchout.ptag(to_integer(unsigned(sel)));
+	   muxout.asid  <= fetchout.asid;
 	
 		--TODO: this is a miss, need to handle it
 		if fetchout.owns = "00000000" then

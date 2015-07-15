@@ -37,7 +37,7 @@ use work.octagon_types.all;
 ENTITY octagon_test IS
 END octagon_test;
  
-ARCHITECTURE behavior OF octagon_test IS 
+	ARCHITECTURE behavior OF octagon_test IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
  
@@ -395,7 +395,7 @@ BEGIN
 		wait for 7 us;
 		
 		--TODO: interrupts need some kind of latching system
-		int <= X"01";
+		--int <= X"01";
 		
 		wait for clk_period * 100;
 		

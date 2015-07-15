@@ -41,10 +41,11 @@ end pc_module;
 
 architecture Behavioral of pc_module is
 
---Ram to store PC's
-type pc_type is array(0 to 7) of std_logic_vector(IM_BITS-1 downto 0);
-signal pc : pc_type := (others => (others => '0'));
 signal valid_od : std_logic := '0';
+
+--Ram for ASID
+type asid_type is array(0 to 7) of std_logic_vector(3 downto 0);
+signal asid : asid_type := (others => (others => '0'));
 
 signal count : unsigned(2 downto 0) := "000";
 signal countq : unsigned(2 downto 0) := "000";
@@ -110,6 +111,7 @@ begin
 		count <= count2;
 		pcout.valid <= valid;
 		pcout.pc <= pc_next;
+		pcout.asid <= asid(to_integer(count));
 	end if;
 end process;
 

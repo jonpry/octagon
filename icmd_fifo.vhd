@@ -39,8 +39,8 @@ entity icmd_fifo is
 		wr : in std_logic;
 		tidi : in std_logic_vector(2 downto 0);
 		fakei : in std_logic;
-		din : in std_logic_vector(IM_BITS-1 downto 6);
-		dout : out std_logic_vector(IM_BITS-1 downto 6);
+		din : in std_logic_vector(IM_BITS-1+4 downto 6); --ASID
+		dout : out std_logic_vector(IM_BITS-1+4 downto 6); --ASID
 		tido : out std_logic_vector(2 downto 0);
 		fakeo : out std_logic;
 		empty : out std_logic
@@ -49,7 +49,7 @@ end icmd_fifo;
 
 architecture Behavioral of icmd_fifo is
 
-type fd_type is array(0 to 7) of std_logic_vector(IM_BITS-1 downto 6);
+type fd_type is array(0 to 7) of std_logic_vector(IM_BITS-1+4 downto 6);
 type tid_type is array(0 to 7) of std_logic_vector(2 downto 0);
 
 signal fifo_data : fd_type := (others => (others => '0'));

@@ -50,6 +50,7 @@ begin
 	if clk='1' and clk'Event then
 		aluout.pc <= aluin.pc;
 		aluout.tid <= aluin.tid;
+		aluout.asid <= aluin.asid;
 		aluout.valid <= aluin.valid;
 		aluout.jmux <= aluin.jmux;
 		aluout.lmux <= aluin.lmux;
@@ -77,6 +78,7 @@ begin
 		aluout.ls_left <= aluin.ls_left;
 		aluout.ls_right <= aluin.ls_right;
 		aluout.invalid_op <= aluin.invalid_op;
+		aluout.ll <= aluin.ll;
 	end if;
 end process;
 
@@ -113,7 +115,8 @@ begin
 		case aluin.specmux is
 				when specmux_pc		=> aluout.spec <= (31 downto IM_BITS => '0') & std_logic_vector(unsigned(aluin.pc)+4);
 				when specmux_epc 		=> aluout.spec <= aluin.cop0.epc;
-				when specmux_status	=> aluout.spec <= (31 downto 19 => '0') & aluin.tid & aluin.cop0.imask & "000000" & aluin.cop0.exc & aluin.cop0.int;
+				--TODO: tlb not in cop0 but shift register not implemented yet
+				when specmux_status	=> aluout.spec <= (31 downto 19 => '0') & aluin.tid & aluin.cop0.imask & "0" & aluin.asid & aluin.cop0.tlb & aluin.cop0.exc & aluin.cop0.int;
 				when specmux_cause	=> aluout.spec <= (31 downto 16 => '0') & aluin.cop0.ipend & "00" & aluin.cop0.ecode & "00";
 		end case;
 		
@@ -129,7 +132,7 @@ begin
 				when pcmux_imm16	=> aluout.pcjump <= aluin.pcadd;
 				when pcmux_reg		=> aluout.pcjump <= aluin.r_s(IM_BITS-1 downto 0);
 				--TODO: this is not compatible with changing IM_BITS
-				when pcmux_imm26	=> aluout.pcjump <= aluin.immediate(23 downto 0) & "00";
+				when pcmux_imm26	=> aluout.pcjump <= aluin.pc(IM_BITS-1 downto IM_BITS-4) & aluin.immediate(25 downto 0) & "00";
 				when pcmux_rfe 	=> aluout.pcjump <= aluin.cop0.epc(IM_BITS-1 downto 0);
 		end case;
 		

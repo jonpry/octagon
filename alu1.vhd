@@ -108,6 +108,7 @@ begin
 	if clk='1' and clk'Event then
 		aluout.pc <= aluin.rfetch.pc;
 		aluout.tid <= aluin.rfetch.tid;
+		aluout.asid <= aluin.rfetch.asid;
 		aluout.valid <= aluin.rfetch.valid;
 
 		aluout.logicop <= aluin.rfetch.logicop;
@@ -139,6 +140,7 @@ begin
 		aluout.ls_left <= aluin.rfetch.ls_left;
 		aluout.ls_right <= aluin.rfetch.ls_right;
 		aluout.invalid_op <= aluin.rfetch.invalid_op;
+		aluout.ll <= aluin.rfetch.ll;
 
 		aluout.wbr_complete <= aluin.wbrout.valid;
 		aluout.wbr_data <= aluin.wbrout.data;
@@ -158,7 +160,7 @@ begin
 		if aluin.rfetch.ls_left = '1' then
 			unaligned := "100";
 		end if;
-		aluout.memadr <= std_logic_vector(unsigned(aluin.rfetch.r_s(DM_BITS+1 downto 0)) + unsigned(aluin.rfetch.immediate(DM_BITS+1 downto 0)) + unaligned);
+		aluout.memadr <= std_logic_vector(unsigned(aluin.rfetch.r_s(DM_BITS-1 downto 0)) + unsigned(aluin.rfetch.immediate(DM_BITS-1 downto 0)) + unaligned);
 
 	--Short circuit unaligned left if already aligned
 		is_aligned := to_std_logic(std_logic_vector(unsigned(aluin.rfetch.r_s(1 downto 0)) + unsigned(aluin.rfetch.immediate(1 downto 0))) = "00");

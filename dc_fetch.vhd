@@ -44,8 +44,6 @@ architecture Behavioral of dc_fetch is
 
 signal owns : std_logic_vector(7 downto 0);
 
-type tag_type is array(0 to 7) of std_logic_vector(DM_BITS-1 downto 10);
-
 signal tag : tag_type;
 
 signal mntn_restarts : std_logic_vector(7 downto 0) := X"00";
@@ -59,14 +57,20 @@ begin
 --Lines are 64bytes, (5 downto 0)
 --16 lines per way
 
-tag_fetch0 : entity work.dtag_fetch port map(clk,dcin,"000",owns(0),tag(0));
-tag_fetch1 : entity work.dtag_fetch port map(clk,dcin,"001",owns(1),tag(1));
-tag_fetch2 : entity work.dtag_fetch port map(clk,dcin,"010",owns(2),tag(2));
-tag_fetch3 : entity work.dtag_fetch port map(clk,dcin,"011",owns(3),tag(3));
-tag_fetch4 : entity work.dtag_fetch port map(clk,dcin,"100",owns(4),tag(4));
-tag_fetch5 : entity work.dtag_fetch port map(clk,dcin,"101",owns(5),tag(5));
-tag_fetch6 : entity work.dtag_fetch port map(clk,dcin,"110",owns(6),tag(6));
-tag_fetch7 : entity work.dtag_fetch port map(clk,dcin,"111",owns(7),tag(7));
+tag_fetch0 : entity work.dtag_fetch port map(clk,dcin,"000",owns(0),tag(0),dcout.ptag(0),dcout.ownst(0),dcout.phys(0));
+tag_fetch1 : entity work.dtag_fetch port map(clk,dcin,"001",owns(1),tag(1),dcout.ptag(1),dcout.ownst(1),dcout.phys(1));
+tag_fetch2 : entity work.dtag_fetch port map(clk,dcin,"010",owns(2),tag(2),dcout.ptag(2),dcout.ownst(2),dcout.phys(2));
+tag_fetch3 : entity work.dtag_fetch port map(clk,dcin,"011",owns(3),tag(3),dcout.ptag(3),dcout.ownst(3),dcout.phys(3));
+tag_fetch4 : entity work.dtag_fetch port map(clk,dcin,"100",owns(4),tag(4),dcout.ptag(4),dcout.ownst(4),dcout.phys(4));
+tag_fetch5 : entity work.dtag_fetch port map(clk,dcin,"101",owns(5),tag(5),dcout.ptag(5),dcout.ownst(5),dcout.phys(5));
+tag_fetch6 : entity work.dtag_fetch port map(clk,dcin,"110",owns(6),tag(6),dcout.ptag(6),dcout.ownst(6),dcout.phys(6));
+tag_fetch7 : entity work.dtag_fetch port map(clk,dcin,"111",owns(7),tag(7),dcout.ptag(7),dcout.ownst(7),dcout.phys(7));
+
+dcout.tagdemux <= tag;
+dcout.sel(0) <= to_std_logic(owns(1)='1' or owns(3)='1' or owns(5)='1' or owns(7)='1');
+dcout.sel(1) <= to_std_logic(owns(2)='1' or owns(3)='1' or owns(6)='1' or owns(7)='1');
+dcout.sel(2) <= to_std_logic(owns(4)='1' or owns(5)='1' or owns(6)='1' or owns(7)='1');
+dcout.owns <= owns;
 
 process(clk)
 	variable restart : std_logic;
@@ -74,17 +78,13 @@ begin
 	if clk='1' and clk'Event then
 		restart := mntn_restarts(to_integer(unsigned(dcin.tid)));
 	
-		dcout.owns <= owns;
 		dcout.adr <= dcin.adr;
 		
-		dcout.sel(0) <= to_std_logic(owns(1)='1' or owns(3)='1' or owns(5)='1' or owns(7)='1');
-		dcout.sel(1) <= to_std_logic(owns(2)='1' or owns(3)='1' or owns(6)='1' or owns(7)='1');
-		dcout.sel(2) <= to_std_logic(owns(4)='1' or owns(5)='1' or owns(6)='1' or owns(7)='1');
 		
 		--dcout.miss <= to_std_logic(owns = X"00");
 
 	--Catch accesses to non cached memory
-		dcout.nc <= to_std_logic(dcin.adr(DM_BITS+1 downto DM_BITS) /= "00");
+		--dcout.nc <= to_std_logic(dcin.adr(DM_BITS-1 downto DM_BITS-2) /= "00");
 		
 		dcout.tag <= tag(to_integer(unsigned(dcin.tagidx)));
 		

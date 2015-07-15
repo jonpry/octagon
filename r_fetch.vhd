@@ -69,6 +69,7 @@ begin
 		rout.pc <= rin.decout.pc;
 		rout.tid <= rin.decout.tid;
 		rout.valid <= rin.decout.valid;
+		rout.asid <= rin.decout.asid;
 		
 		adr := rin.decout.ftid & rin.decout.r_s;
 		adr2 := rin.decout.ftid & rin.decout.r_t;
@@ -136,6 +137,8 @@ process(clk)
 	variable rfe : std_logic;
 	variable cache : std_logic;
 	variable div : std_logic;
+	variable sc : std_logic;
+	variable ll : std_logic;
 begin
 	if clk='1' and clk'Event then
 		opcode := rin.decout.instr(31 downto 26);
@@ -180,16 +183,24 @@ begin
 		rout.rfe <= rfe;
 		
 	--Load instructions
-		load := to_std_logic(instr(31 downto 29)="100");
+	   ll := to_std_logic(opcode="110000");
+		load := to_std_logic(instr(31 downto 29)="100" or ll='1');
 		rout.load <= load;
+		rout.ll <= ll;
 		rout.ls_left <= to_std_logic(instr(31 downto 30) = "10" and instr(28 downto 26) = "010");
 		rout.ls_right <= to_std_logic(instr(31 downto 30) = "10" and instr(28 downto 26) = "110");
 		
 	-- Decode store operations
-		store := to_std_logic(instr(31 downto 29)="101" and instr(28 downto 26) /= "111");
+		sc := to_std_logic(opcode="111000");
+		store := to_std_logic((instr(31 downto 29)="101" and instr(28 downto 26) /= "111") or sc='1');
 		rout.store <= store;
 		
-		rout.memsize <= instr(27 downto 26);
+		rout.sc <= sc;
+		if sc = '0' then
+		    rout.memsize <= instr(27 downto 26);
+		else
+			 rout.memsize <= "11";
+		end if;	 
 		rout.load_unsigned <= instr(28);    -- sign extend vs. zero extend
 
 	--Add,Sub

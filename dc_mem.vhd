@@ -22,7 +22,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -64,13 +64,17 @@ d_fetch3 : entity work.d_fetch port map(clk,dcin,dcout.data(3),"11",sel(2 downto
 process(clk)
 	variable miss : std_logic;
 	variable dmiss : std_logic;
+	variable tagm : std_logic_vector(IM_BITS-1+4 downto 10); --ASID
+	variable ptagm : std_logic_vector(IM_BITS-1 downto 12);
 begin
 	if clk='1' and clk'Event then
 		miss := to_std_logic(dcin.dcout.owns = X"00"); --to_std_logic(dcin.dcout.sel = "000" and dcin.dcout.owns(0) = '0');
 		dcout.sel <= sel(2 downto 1);
-		dmiss := to_std_logic(miss='1' and (dcin.alu2out.load = '1' or dcin.alu2out.store = '1') and dcin.alu2out.valid='1');
+		dmiss := to_std_logic(miss='1' and (dcin.alu2out.load = '1' or dcin.alu2out.store = '1'));
 		dcout.tid <= dcin.alu2out.tid;
 		dcout.adr <= dcin.dcout.adr;
+		dcout.asid <= dcin.alu2out.asid;
+		dcout.ll <= dcin.alu2out.ll;
 		if dcin.dcout.dcache_op = '1' and dcin.dcout.cache_p = '0' then
 			--create cache address from hit data. upper bits are dnc			
 			dcout.adr(12 downto 10) <= sel;
@@ -83,7 +87,12 @@ begin
 		end if;
 
 
-		dcout.do_op <= to_std_logic((dmiss = '1' and dcin.dcout.nc = '0') or dcin.dcout.dcache_op = '1');
+		ptagm := dcin.dcout.ptag(to_integer(unsigned(dcin.dcout.sel)));
+		tagm := dcin.dcout.tagdemux(to_integer(unsigned(dcin.dcout.sel)));
+
+      dcout.ptag <= ptagm;
+		dcout.tagm <= tagm;
+		dcout.do_op <= to_std_logic((dmiss = '1' or dcin.dcout.dcache_op = '1') and dcin.alu2out.valid='1');
 		dcout.cacheop <= dcin.dcout.cacheop;
 		dcout.dcache_op <= dcin.dcout.dcache_op;
 	end if;

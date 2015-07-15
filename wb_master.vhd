@@ -68,13 +68,17 @@ wbout.wbrin.valid <= read_done;
 
 process(clk)
 	variable wren : std_logic;
+	variable nc : std_logic;
 begin
 	if clk='1' and clk'Event then
 		restarts <= restarts and not wbin.restarted;
 
 		--Stall is a signal to parallel stage, so we predict if the next 
 		stall <= to_std_logic((wrptr + 2 = rdptr) or (wrptr + 1 = rdptr));
-		if dcin.dcout.nc = '1' and dcin.alu2out.valid = '1' and dcin.alu2out.dcop = '1' and dcin.alu2out.wbr_complete = '0' then
+	
+		nc := to_std_logic((dcin.dcout.phys and dcin.dcout.owns) /= X"00");
+
+		if nc = '1' and dcin.alu2out.valid = '1' and dcin.alu2out.dcop = '1' and dcin.alu2out.wbr_complete = '0' then
 			wren := dcin.alu2out.dcwren;
 			--TODO: read operations stall on fifo full and unconditionally without restart
 			if stall = '1' then
@@ -82,7 +86,7 @@ begin
 				restarts(to_integer(unsigned(dcin.alu2out.tid))) <= '1';
 			else
 				wrptr <= wrptr + 1;
-				adrmem(to_integer(wrptr)) <= dcin.alu2out.dcwradr;
+				adrmem(to_integer(wrptr)) <= dcin.dcout.ptag(to_integer(unsigned(dcin.dcout.sel)))(DM_BITS-1 downto 12) & dcin.alu2out.dcwradr(11 downto 0);
 				datmem(to_integer(wrptr)) <= dcin.alu2out.store_data;
 				tidmem(to_integer(wrptr)) <= dcin.alu2out.tid;
 				wrmem(to_integer(wrptr)) <= wren;

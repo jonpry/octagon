@@ -38,15 +38,19 @@ entity dc_fifo is
 		rd	: in std_logic;
 		wr : in std_logic;
 		tidi : in std_logic_vector(2 downto 0);
+		asidi : in std_logic_vector(3 downto 0);
 		din : in std_logic_vector(IM_BITS-1 downto 6);
 		missi : in std_logic;
 		mntni : in std_logic;
 		opi : in cacheop_type;
+		lli : in std_logic;
 		dout : out std_logic_vector(IM_BITS-1 downto 6);
 		tido : out std_logic_vector(2 downto 0);
+		asido : out std_logic_vector(3 downto 0);
 		misso : out std_logic;
 		mntno : out std_logic;
 		opo : out cacheop_type;
+		llo : out std_logic;
 		empty : out std_logic
 	);
 end dc_fifo;
@@ -57,12 +61,15 @@ architecture Behavioral of dc_fifo is
 
 type fd_type is array(0 to 7) of std_logic_vector(IM_BITS-1 downto 6);
 type tid_type is array(0 to 7) of std_logic_vector(2 downto 0);
+type asid_type is array(0 to 7) of std_logic_vector(3 downto 0);
 type cop_type is array(0 to 7) of cacheop_type;
 
 
 signal fifo_data : fd_type := (others => (others => '0'));
 signal fifo_tiddata : tid_type := (others => (others => '0'));
+signal fifo_asiddata : asid_type := (others => (others => '0'));
 signal fifo_copdata : cop_type;
+signal fifo_lldata : std_logic_vector(7 downto 0);
 signal fifo_missdata : std_logic_vector(7 downto 0);
 signal fifo_mntndata : std_logic_vector(7 downto 0);
 
@@ -81,9 +88,11 @@ begin
 		rdI := to_integer(rdptr(2 downto 0));
 		dout <= fifo_data(rdI);
 		tido <= fifo_tiddata(rdI);
+		asido <= fifo_asiddata(rdI);
 		opo <= fifo_copdata(rdI);
 		mntno <= fifo_mntndata(rdI);
 		misso <= fifo_missdata(rdI);
+		llo <= fifo_lldata(rdI);
 		
 		if rd='1' then
 			rdptr <= rdptr + 1;
@@ -93,9 +102,11 @@ begin
 			wrI := to_integer(wrptr(2 downto 0));
 			fifo_data(wrI) <= din;
 			fifo_tiddata(wrI) <= tidi;
+			fifo_asiddata(wrI) <= asidi;
 			fifo_copdata(wrI) <= opi;
 			fifo_mntndata(wrI) <= mntni;
 			fifo_missdata(wrI) <= missi;
+			fifo_lldata(wrI) <= lli;
 			wrptr <= wrptr + 1;
 		end if;
 	end if;

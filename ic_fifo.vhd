@@ -38,8 +38,9 @@ entity ic_fifo is
 		rd	: in std_logic;
 		wr : in std_logic;
 		tidi : in std_logic_vector(2 downto 0);
+		asidi : in std_logic_vector(3 downto 0);
 		din : in std_logic_vector(IM_BITS-1 downto 6);
-		dout : out std_logic_vector(IM_BITS-1 downto 6);
+		dout : out std_logic_vector(IM_BITS-1+4 downto 6); --ASID
 		tido : out std_logic_vector(2 downto 0);
 		empty : out std_logic
 	);
@@ -49,9 +50,11 @@ architecture Behavioral of ic_fifo is
 
 type fd_type is array(0 to 7) of std_logic_vector(IM_BITS-1 downto 6);
 type tid_type is array(0 to 7) of std_logic_vector(2 downto 0);
+type asid_type is array(0 to 7) of std_logic_vector(3 downto 0);
 
 signal fifo_data : fd_type := (others => (others => '0'));
 signal fifo_tiddata : tid_type := (others => (others => '0'));
+signal fifo_asiddata : asid_type := (others => (others => '0'));
 
 signal rdptr : unsigned(3 downto 0) := "0000";
 signal wrptr : unsigned(3 downto 0) := "0000";
@@ -66,7 +69,7 @@ begin
 		empty <= to_std_logic(rdptr = wrptr);
 
 		rdI := to_integer(rdptr(2 downto 0));
-		dout <= fifo_data(rdI);
+		dout <= fifo_asiddata(rdI) & fifo_data(rdI);
 		tido <= fifo_tiddata(rdI);
 		
 		if rd='1' then
@@ -77,6 +80,7 @@ begin
 			wrI := to_integer(wrptr(2 downto 0));
 			fifo_data(wrI) <= din;
 			fifo_tiddata(wrI) <= tidi;
+			fifo_asiddata(wrI) <= asidi;
 			wrptr <= wrptr + 1;
 		end if;
 	end if;

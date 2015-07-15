@@ -89,8 +89,9 @@ begin
 			rout.epc_wr <= to_std_logic(lmuxout.r_dest = "01110" and lmuxout.store_cop0 = '1');
 
 			rout.cop0.imask <= lmuxout.lmux(15 downto 8);
-
+			rout.cop0.tlb <= lmuxout.lmux(2);
 			rout.cop0.int <= lmuxout.lmux(0);
+			rout.cop0.asid <= lmuxout.lmux(6 downto 3);
 			rout.int_wr <= status_wr;
 
 			rout.cop0.ecode <= lmuxout.lmux(5 downto 2);

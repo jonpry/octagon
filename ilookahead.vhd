@@ -36,7 +36,7 @@ entity ilookahead is
 	Port ( 
 		clk : in  std_logic;
 		wr : in std_logic;
-		din : in std_logic_vector(IM_BITS-1 downto 6);
+		din : in std_logic_vector(IM_BITS-1+4 downto 6); --ASID
 		valid : in std_logic;
 		match : out std_logic_vector(7 downto 0)
 	);
@@ -44,7 +44,7 @@ end ilookahead;
 
 architecture Behavioral of ilookahead is
 
-type ram_type is array(0 to 7) of std_logic_vector(IM_BITS-1 downto 6);
+type ram_type is array(0 to 7) of std_logic_vector(IM_BITS-1+4 downto 6); --ASID
 --Initialize to the invalid tag
 signal shiftreg : ram_type := (others => (others => '1'));
 signal validshift : std_logic_vector(7 downto 0) := X"00";
