@@ -101,7 +101,7 @@ begin
 		prevcmdstate <= cmd_state;
 		
 		--TODO: Cludge until MMU
-		nc <= to_std_logic(icfifo_dout(IM_BITS-1 downto IM_BITS-2) /= "00");	
+		nc <= to_std_logic(icfifo_dout(IM_BITS-1) = '1');	
 			
 		if cmd_state = cmd_boot then	
 			cmd_state <= cmd_wait;

@@ -47,6 +47,7 @@ signal valid_od : std_logic := '0';
 --Ram for ASID
 type asid_type is array(0 to 7) of std_logic_vector(3 downto 0);
 signal asid : asid_type := (others => (others => '0'));
+signal tlb : std_logic_vector(7 downto 0) := (others => '0');
 
 signal count : unsigned(2 downto 0) := "000";
 signal countq : unsigned(2 downto 0) := "000";
@@ -114,6 +115,17 @@ begin
 		pcout.abort <= to_std_logic(pcin.lnc='1' and pcin.nc='1');
 		pcout.pc <= pc_next;
 		pcout.asid <= asid(to_integer(count));
+		pcout.tlb <= tlb(to_integer(count));
+	end if;
+end process;
+
+process(clk)
+begin
+	if clk='1' and clk'Event then
+		if pcin.rout.int_wr = '1' then
+			tlb(to_integer(unsigned(pcin.rout.tid))) <= pcin.rout.cop0.tlb;
+			asid(to_integer(unsigned(pcin.rout.tid))) <= pcin.rout.cop0.asid;
+		end if;
 	end if;
 end process;
 

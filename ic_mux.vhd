@@ -52,33 +52,6 @@ begin
 		muxout.pc <= fetchout.pc;
 		muxout.tid <= fetchout.tid;
 		
---		present := '0';
---		if fetchout.owns(0) = '1' then
---			muxout.instr <= fetchout.instr0;
---			present := fetchout.present(0);
---		elsif fetchout.owns(1) = '1' then
---			muxout.instr <= fetchout.instr1;
---			present := fetchout.present(1);
---		elsif fetchout.owns(2) = '1' then
---			muxout.instr <= fetchout.instr2;
---			present := fetchout.present(2);
---		elsif fetchout.owns(3) = '1' then
---			muxout.instr <= fetchout.instr3;
---			present := fetchout.present(3);
---		elsif fetchout.owns(4) = '1' then
---			muxout.instr <= fetchout.instr4;
---			present := fetchout.present(4);
---		elsif fetchout.owns(5) = '1' then
---			muxout.instr <= fetchout.instr5;
---			present := fetchout.present(5);
---		elsif fetchout.owns(6) = '1' then
---			muxout.instr <= fetchout.instr6;
---			present := fetchout.present(6);
---		else
---			muxout.instr <= fetchout.instr7;
---			present := fetchout.present(7);
---		end if;
-
 		--Second attempt. by using one hot decoder. XST predicts slower speed. But synth is faster. 
 
 		selin := fetchout.owns;
@@ -89,6 +62,7 @@ begin
 		muxout.instr <= fetchout.instr(to_integer(unsigned(sel)));
 		muxout.ptag  <= fetchout.ptag(to_integer(unsigned(sel)));
 	   muxout.asid  <= fetchout.asid;
+		muxout.tlb	 <= fetchout.tlb;
 	
 		--TODO: this is a miss, need to handle it
 		if fetchout.owns = "00000000" then

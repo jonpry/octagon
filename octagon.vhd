@@ -134,6 +134,7 @@ pcin.jump <= jumpout.do_jump;
 pcin.cvalid <= jumpout.cvalid;
 pcin.abort <= jumpout.abort;
 pcin.lnc <= jumpout.lnc;
+pcin.rout <= rstoreout;
 pcin.restarts <= ictlout.restarts or dctlout.restarts or wbmout.restarts or wbrout.restarts;
 
 icin.pcout <= pcout;

@@ -51,6 +51,35 @@ package octagon_types is
 	type pcmux_type is (pcmux_reg, pcmux_imm26, pcmux_imm16, pcmux_rfe);
 	type cacheop_type is (cacheop_inv, cacheop_clean, cacheop_cinv, cacheop_unk);
 	
+	type cop0_type is record
+		epc				: std_logic_vector(31 downto 0);
+		imask				: std_logic_vector(7 downto 0);
+		ipend				: std_logic_vector(7 downto 0);
+		exc				: std_logic;
+		int				: std_logic;
+		tlb				: std_logic;
+		asid				: std_logic_vector(3 downto 0);
+		ecode				: std_logic_vector(3 downto 0);
+	end record;
+	
+	type rstoreout_type is record
+		tid				: std_logic_vector(2 downto 0);
+		valid				: std_logic;
+		r_dest			: std_logic_vector(4 downto 0);
+		smux				: std_logic_vector(31 downto 0);
+		be					: std_logic_vector(3 downto 0);
+		cop0				: cop0_type;
+		epc_wr			: std_logic;
+		cause_wr			: std_logic;
+		exc_wr			: std_logic;
+		int_wr			: std_logic;
+		cop0_tid			: std_logic_vector(2 downto 0);
+		lmux				: std_logic_vector(31 downto 0);
+		hi_wr				: std_logic;
+		lo_wr				: std_logic;
+		mtmul				: std_logic;
+	end record;
+	
 	type pcin_type is record
 		jump_target 	: std_logic_vector(IM_BITS-1 downto 0);
 		pc				 	: std_logic_vector(IM_BITS-1 downto 0);
@@ -63,6 +92,7 @@ package octagon_types is
 		lnc				: std_logic;
 		nc					: std_logic;
 		restarts			: std_logic_vector(7 downto 0);
+		rout				: rstoreout_type;
 	end record;
 	
 	type pcout_type is record
@@ -73,6 +103,7 @@ package octagon_types is
 		tid				: std_logic_vector(2 downto 0);
 		asid				: std_logic_vector(3 downto 0);
 		restarted		: std_logic_vector(7 downto 0);
+		tlb				: std_logic;
 	end record;
 	
 	type icfetchin_type is record
@@ -112,6 +143,7 @@ package octagon_types is
 		valid				: std_logic;
 		instr				: iout_type;
 		asid				: std_logic_vector(3 downto 0);
+		tlb				: std_logic;
 		ptag				: ptago_type;
 	end record;
 	
@@ -155,6 +187,7 @@ package octagon_types is
 		instr				: std_logic_vector(31 downto 0);
 		ptag			   : std_logic_vector(IM_BITS-1 downto 12);
 		asid				: std_logic_vector(3 downto 0);
+		tlb				: std_logic;
 		imiss				: std_logic;
 	end record;
 	
@@ -261,18 +294,7 @@ package octagon_types is
 		sc				   : std_logic; --mips store-conditional operation
 		ll					: std_logic;
 	end record;
-	
-	type cop0_type is record
-		epc				: std_logic_vector(31 downto 0);
-		imask				: std_logic_vector(7 downto 0);
-		ipend				: std_logic_vector(7 downto 0);
-		exc				: std_logic;
-		int				: std_logic;
-		tlb				: std_logic;
-		asid				: std_logic_vector(3 downto 0);
-		ecode				: std_logic_vector(3 downto 0);
-	end record;
-	
+		
 	type alu1out_type is record
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		tid				: std_logic_vector(2 downto 0);
@@ -444,24 +466,6 @@ package octagon_types is
 		rfe				: std_logic;
 		wbr_complete 	: std_logic;
 		wbr_data			: std_logic_vector(31 downto 0);
-		mtmul				: std_logic;
-	end record;
-	
-	type rstoreout_type is record
-		tid				: std_logic_vector(2 downto 0);
-		valid				: std_logic;
-		r_dest			: std_logic_vector(4 downto 0);
-		smux				: std_logic_vector(31 downto 0);
-		be					: std_logic_vector(3 downto 0);
-		cop0				: cop0_type;
-		epc_wr			: std_logic;
-		cause_wr			: std_logic;
-		exc_wr			: std_logic;
-		int_wr			: std_logic;
-		cop0_tid			: std_logic_vector(2 downto 0);
-		lmux				: std_logic_vector(31 downto 0);
-		hi_wr				: std_logic;
-		lo_wr				: std_logic;
 		mtmul				: std_logic;
 	end record;
 	
