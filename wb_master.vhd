@@ -60,6 +60,19 @@ signal restarts : std_logic_vector(7 downto 0) := X"00";
 
 signal read_done : std_logic := '0';
 
+signal ptag : ptago_type;
+signal sel : std_logic_vector(2 downto 0);
+signal wradr : std_logic_vector(11 downto 0);
+signal wren : std_logic;
+signal tid : std_logic_vector(2 downto 0);
+signal store_data : std_logic_vector(31 downto 0);
+
+signal valid : std_logic := '0';
+signal dcop : std_logic := '0';
+signal wbr_complete : std_logic;
+signal phys : std_logic_vector(7 downto 0);
+signal owns : std_logic_vector(7 downto 0);
+
 begin
 
 wbout.stall <= stall;
@@ -67,7 +80,6 @@ wbout.restarts <= restarts;
 wbout.wbrin.valid <= read_done;
 
 process(clk)
-	variable wren : std_logic;
 	variable nc : std_logic;
 begin
 	if clk='1' and clk'Event then
@@ -76,22 +88,38 @@ begin
 		--Stall is a signal to parallel stage, so we predict if the next 
 		stall <= to_std_logic((wrptr + 2 = rdptr) or (wrptr + 1 = rdptr));
 	
-		nc := to_std_logic((dcin.dcout.phys and dcin.dcout.owns) /= X"00");
+	   phys <= dcin.dcout.phys;
+		owns <= dcin.dcout.owns;
+		valid <= dcin.alu2out.valid;
+		dcop <= dcin.alu2out.dcop;
+		wbr_complete <= dcin.alu2out.wbr_complete;	
+	
+		nc := to_std_logic((phys and owns) /= X"00");
 
-		if nc = '1' and dcin.alu2out.valid = '1' and dcin.alu2out.dcop = '1' and dcin.alu2out.wbr_complete = '0' then
-			wren := dcin.alu2out.dcwren;
-			--TODO: read operations stall on fifo full and unconditionally without restart
+		
+		--TODO: read operations stall on fifo full and unconditionally without restart
+		if nc = '1' and valid = '1' and dcop = '1' and wbr_complete = '0' then
 			if stall = '1' then
 				--Jump unit will stall but we immediately cause restart
 				restarts(to_integer(unsigned(dcin.alu2out.tid))) <= '1';
 			else
 				wrptr <= wrptr + 1;
-				adrmem(to_integer(wrptr)) <= dcin.dcout.ptag(to_integer(unsigned(dcin.dcout.sel)))(DM_BITS-1 downto 12) & dcin.alu2out.dcwradr(11 downto 0);
-				datmem(to_integer(wrptr)) <= dcin.alu2out.store_data;
-				tidmem(to_integer(wrptr)) <= dcin.alu2out.tid;
-				wrmem(to_integer(wrptr)) <= wren;
 			end if;
 		end if;
+
+		
+		store_data <= dcin.alu2out.store_data;
+		tid <= dcin.alu2out.tid;
+		wren <= dcin.alu2out.dcwren;
+
+		ptag <= dcin.dcout.ptag;
+		sel <= dcin.dcout.sel;
+		wradr <= dcin.alu2out.dcwradr(11 downto 0);
+
+		datmem(to_integer(wrptr)) <= store_data;
+		tidmem(to_integer(wrptr)) <= tid;
+		wrmem(to_integer(wrptr)) <= wren;
+	   adrmem(to_integer(wrptr)) <= ptag(to_integer(unsigned(sel)))(IM_BITS-1 downto 12) & wradr;
 	end if;
 end process;
 
