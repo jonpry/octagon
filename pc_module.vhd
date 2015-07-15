@@ -30,6 +30,7 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 use work.octagon_types.all;
+use work.octagon_funcs.all;
 
 entity pc_module is
 	port  (
@@ -110,6 +111,7 @@ begin
 
 		count <= count2;
 		pcout.valid <= valid;
+		pcout.abort <= to_std_logic(pcin.lnc='1' and pcin.nc='1');
 		pcout.pc <= pc_next;
 		pcout.asid <= asid(to_integer(count));
 	end if;

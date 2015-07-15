@@ -30,6 +30,7 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 use work.octagon_types.all;
+use work.octagon_funcs.all;
 
 entity ic_fetch is
 	Port ( 
@@ -69,7 +70,7 @@ begin
 	if clk='1' and clk'Event then
 		icout.pc <= icin.pcout.pc;
 		icout.tid <= icin.pcout.tid;
-		icout.valid <= icin.pcout.valid;
+		icout.valid <= to_std_logic(icin.pcout.valid='1' and icin.pcout.abort='0');
 		icout.asid <= icin.pcout.asid;
 	end if;
 end process;

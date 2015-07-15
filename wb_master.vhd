@@ -95,10 +95,12 @@ begin
 		wbr_complete <= dcin.alu2out.wbr_complete;	
 	
 		nc := to_std_logic((phys and owns) /= X"00");
-
 		
+		wbout.nc <= '0';
+
 		--TODO: read operations stall on fifo full and unconditionally without restart
 		if nc = '1' and valid = '1' and dcop = '1' and wbr_complete = '0' then
+			wbout.nc <= '1';
 			if stall = '1' then
 				--Jump unit will stall but we immediately cause restart
 				restarts(to_integer(unsigned(dcin.alu2out.tid))) <= '1';

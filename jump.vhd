@@ -99,7 +99,8 @@ begin
 
 		jumpout.cvalid  <= to_std_logic(aluin.valid = '1' and wbout.stall = '0' 
 									  and dcout.dcache_op = '0'); --TODO: not aluin.lnc = '1'
-		jumpout.abort <= to_std_logic(miss = '1' and aluin.memop = '1');							 
+		jumpout.abort <= to_std_logic(miss = '1' and aluin.memop = '1');		
+		jumpout.lnc <= aluin.lnc;
 --	0 if	1 1 0							 
 --	0 if  1 1 1
 		

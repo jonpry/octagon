@@ -60,6 +60,8 @@ package octagon_types is
 		jump 				: std_logic;
 		cvalid 			: std_logic;
 		abort				: std_logic;
+		lnc				: std_logic;
+		nc					: std_logic;
 		restarts			: std_logic_vector(7 downto 0);
 	end record;
 	
@@ -67,6 +69,7 @@ package octagon_types is
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		pc_next			: std_logic_vector(IM_BITS-1 downto 0);
 		valid				: std_logic;
+		abort				: std_logic;
 		tid				: std_logic_vector(2 downto 0);
 		asid				: std_logic_vector(3 downto 0);
 		restarted		: std_logic_vector(7 downto 0);
@@ -397,6 +400,7 @@ package octagon_types is
 	type wbmout_type is record
 		sigs				: wbmoutsig_type;
 		wbrin				: wbrin_type;
+		nc					: std_logic;
 		stall				: std_logic;
 		restarts			: std_logic_vector(7 downto 0);
 	end record;
@@ -415,6 +419,7 @@ package octagon_types is
 		tid				: std_logic_vector(2 downto 0);
 		cvalid			: std_logic;	
 		abort				: std_logic;
+		lnc				: std_logic;
 		met				: std_logic;
 		mux				: std_logic_vector(31 downto 0);
 		shiftout			: std_logic_vector(31 downto 0);
