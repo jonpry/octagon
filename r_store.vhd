@@ -97,7 +97,18 @@ begin
 			rout.cop0.ecode <= lmuxout.lmux(5 downto 2);
 			rout.cop0.ipend <= lmuxout.lmux(15 downto 8);
 			rout.cause_wr <= to_std_logic(lmuxout.r_dest = "01101" and lmuxout.store_cop0 = '1');
-
+			
+			if lmuxout.r_dest = "01010" and lmuxout.store_cop0 = '1' then
+				rout.entryhi <= lmuxout.lmux;
+			end if;
+			
+			if lmuxout.r_dest = "00010" and lmuxout.store_cop0 = '1' then
+				rout.entrylo <= lmuxout.lmux;
+			end if;
+			
+			if lmuxout.r_dest = "00000" and lmuxout.store_cop0 = '1' then
+				rout.tlbidx <= lmuxout.lmux;
+			end if;
 
 		end if;
 		

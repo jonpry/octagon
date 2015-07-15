@@ -44,17 +44,68 @@ package octagon_types is
 	type logicop_type is (logicop_and, logicop_or, logicop_xor, logicop_nor);
 	type arithmux_type is (arithmux_add, arithmux_sub, arithmux_lui, arithmux_logic);
 	type cond_type is (cond_none, cond_eq, cond_lt, cond_gt, cond_lte, cond_gte, cond_neq);
-	type specmux_type is (specmux_pc, specmux_epc, specmux_cause, specmux_status);
+	type specmux_type is (specmux_pc, specmux_epc, specmux_cause, specmux_status, specmux_badva);
 	type mulmux_type is (mulmux_hi, mulmux_lo, mulmux_rs);
 	type jmux_type is (jmux_arith, jmux_spec, jmux_mul, jmux_rt);
 	type lmux_type is (lmux_shift, lmux_slt, lmux_jmux);
 	type pcmux_type is (pcmux_reg, pcmux_imm26, pcmux_imm16, pcmux_rfe);
 	type cacheop_type is (cacheop_inv, cacheop_clean, cacheop_cinv, cacheop_unk);
 	
+	type tlbout_type is record
+		hit				: std_logic;
+		iack				: std_logic;
+		dack				: std_logic;
+		perm 				: std_logic_vector(2 downto 0);
+		phys 				: std_logic_vector(IM_BITS-1 downto 12);
+	end record;
+
+	type tlbin_type is record
+		dvaddr 			: std_logic_vector(IM_BITS-1 downto 0);
+		ivaddr 			: std_logic_vector(IM_BITS-1 downto 0);
+		dreq				: std_logic;
+		ireq				: std_logic;
+		dwnr				: std_logic;
+		dtid				: std_logic_vector(2 downto 0);
+		itid				: std_logic_vector(2 downto 0);
+		dasid				: std_logic_vector(3 downto 0);
+		iasid				: std_logic_vector(3 downto 0);
+		
+		perm 				: std_logic_vector(2 downto 0);
+		asid 				: std_logic_vector(3 downto 0);
+		phys 				: std_logic_vector(IM_BITS-1 downto 12);
+		virt 				: std_logic_vector(IM_BITS-1 downto 12);
+		size				: std_logic;
+		wren 				: std_logic;
+		wridx 			: std_logic_vector(1 downto 0);
+		wradr 			: std_logic_vector(4 downto 0);
+	end record;
+	
+	type tlbfetchin_type is record
+		vpage 			: std_logic_vector(IM_BITS-1 downto 12);
+		vasid 			: std_logic_vector(3 downto 0);
+
+		perm 				: std_logic_vector(2 downto 0);
+		asid 				: std_logic_vector(3 downto 0);
+		phys 				: std_logic_vector(IM_BITS-1 downto 12);
+		virt 				: std_logic_vector(IM_BITS-1 downto 12);
+		size				: std_logic;
+		wren 				: std_logic;
+		wridx 			: std_logic_vector(1 downto 0);
+		wradr 			: std_logic_vector(4 downto 0);
+	end record;
+	
+	type tlbfetchout_type is record
+		owns 				: std_logic;
+		perm 				: std_logic_vector(2 downto 0);
+		asid 				: std_logic_vector(3 downto 0);
+		phys 				: std_logic_vector(IM_BITS-1 downto 12);
+	end record;
+	
 	type cop0_type is record
 		epc				: std_logic_vector(31 downto 0);
 		imask				: std_logic_vector(7 downto 0);
 		ipend				: std_logic_vector(7 downto 0);
+		badva				: std_logic_vector(31 downto 0);
 		exc				: std_logic;
 		int				: std_logic;
 		tlb				: std_logic;
@@ -78,6 +129,9 @@ package octagon_types is
 		hi_wr				: std_logic;
 		lo_wr				: std_logic;
 		mtmul				: std_logic;
+		entrylo			: std_logic_vector(31 downto 0);
+		entryhi			: std_logic_vector(31 downto 0);
+		tlbidx			: std_logic_vector(31 downto 0);
 	end record;
 	
 	type pcin_type is record
@@ -234,6 +288,7 @@ package octagon_types is
 		tid				: std_logic_vector(2 downto 0);
 		ftid				: std_logic_vector(2 downto 0);
 		asid				: std_logic_vector(3 downto 0);
+		tlb				: std_logic;
 		valid				: std_logic;
 		r_s				: std_logic_vector(4 downto 0);
 		r_t				: std_logic_vector(4 downto 0);
@@ -285,12 +340,14 @@ package octagon_types is
 		store_hi			: std_logic;
 		store_lo			: std_logic;
 		rfe				: std_logic;
+		tlbwi				: std_logic;
 		cache				: std_logic;
 		inotd				: std_logic;
 		cacheop			: cacheop_type;
 		cache_p			: std_logic;
 		mtmul				: std_logic;
 		invalid_op		: std_logic;
+		tlb				: std_logic;
 		sc				   : std_logic; --mips store-conditional operation
 		ll					: std_logic;
 	end record;
@@ -349,6 +406,7 @@ package octagon_types is
 		mtmul				: std_logic;
 		invalid_op		: std_logic;
 		ll					: std_logic;
+		tlb				: std_logic;
 	end record;
 	
 	type alu2out_type is record

@@ -60,6 +60,7 @@ begin
 		decout.valid <= muxout.valid;
 		decout.tid <= muxout.tid;
 		decout.asid <= muxout.asid;
+		decout.tlb <= muxout.tlb;
 		decout.instr <= muxout.instr;
 		decout.r_tz <= to_std_logic(muxout.instr(31 downto 26) = "000001"); 
 	end if;

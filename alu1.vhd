@@ -46,6 +46,7 @@ type reg_type is array(0 to 7) of std_logic_vector(31 downto 0);
 signal epc : reg_type := (others => (others => '0'));
 signal hi : reg_type := (others => (others => '0'));
 signal lo : reg_type := (others => (others => '0'));
+signal badva : reg_type := (others => (others => '0'));
 
 type itype is array(0 to 7) of std_logic_vector(7 downto 0);
 signal imask : itype := (others => (others => '0'));
@@ -109,6 +110,7 @@ begin
 		aluout.pc <= aluin.rfetch.pc;
 		aluout.tid <= aluin.rfetch.tid;
 		aluout.asid <= aluin.rfetch.asid;
+		aluout.tlb <= aluin.rfetch.tlb;
 		aluout.valid <= aluin.rfetch.valid;
 
 		aluout.logicop <= aluin.rfetch.logicop;
@@ -250,6 +252,7 @@ begin
 		aluout.cop0.ipend <= ipend(tididx);
 		aluout.cop0.imask <= imask(tididx);
 		aluout.cop0.ecode <= ecode(tididx);
+		aluout.cop0.badva <= badva(tididx);
 		aluout.cop0.int <= int(tididx);
 		aluout.cop0.exc <= exc(tididx);
 		
@@ -270,6 +273,7 @@ begin
 		if aluin.rout.cause_wr = '1' then
 			ipend(wtididx) <= aluin.rout.cop0.ipend;		
 			ecode(wtididx) <= aluin.rout.cop0.ecode;
+			badva(wtididx) <= aluin.rout.cop0.badva;
 		end if;
 		
 		--Multiplier writes are delayed by 2 cycles

@@ -70,6 +70,7 @@ begin
 		rout.tid <= rin.decout.tid;
 		rout.valid <= rin.decout.valid;
 		rout.asid <= rin.decout.asid;
+		rout.tlb <= rin.decout.tlb;
 		
 		adr := rin.decout.ftid & rin.decout.r_s;
 		adr2 := rin.decout.ftid & rin.decout.r_t;
@@ -181,6 +182,9 @@ begin
 	-- Decode RFE instruction 
 		rfe := to_std_logic(instr(31 downto 21)="01000010000" and func ="010000");
 		rout.rfe <= rfe;
+		
+	-- Decode TLBWI instruction
+		rout.tlbwi <= to_std_logic(instr(31 downto 21)="01000010000" and func ="000010");
 		
 	--Load instructions
 	   ll := to_std_logic(opcode="110000");
