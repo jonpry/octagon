@@ -183,10 +183,12 @@ package octagon_types is
 	type dcfetchin_type is record
 		tid				: std_logic_vector(2 downto 0);
 		asid				: std_logic_vector(3 downto 0);
+		sv					: std_logic;
 		adr				: std_logic_vector(DM_BITS-1 downto 0);
 		tagidx			: std_logic_vector(2 downto 0);
 		tagadr			: std_logic_vector(3 downto 0);
 		tagval			: std_logic_vector(IM_BITS-1+4 downto 10);
+		tagsv				: std_logic;
 		ptagval			: std_logic_vector(IM_BITS-1 downto 12);
 		tagwe				: std_logic;
 		cacheop			: cacheop_type;
@@ -612,6 +614,7 @@ package octagon_types is
 		tagadr			: std_logic_vector(IM_BITS-1+4 downto 6); --ASID
 		tag_wr			: std_logic;
 		tagidx			: std_logic_vector(2 downto 0);
+		sv					: std_logic;
 		mcb_en			: std_logic;
 		mcb_cmd			: std_logic_vector(2 downto 0);
 		mcb_bl			: std_logic_vector(5 downto 0);

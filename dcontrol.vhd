@@ -61,6 +61,7 @@ signal icfifo_miss : std_logic;
 signal icfifo_mntn : std_logic;
 signal icfifo_cacheop : cacheop_type;
 signal icfifo_ll : std_logic;
+signal icfifo_sv : std_logic;
 
 signal nc : std_logic;
 
@@ -87,8 +88,8 @@ dcout.restarts <= restarts;
 
 dc_fifo : entity work.dc_fifo port map(clk, icfifo_rd, muxout.do_op, muxout.tid, 
 					muxout.asid, muxout.adr(IM_BITS-1 downto 6), muxout.dmiss, 
-					muxout.dcache_op, muxout.cacheop, muxout.ll, icfifo_dout, icfifo_tid, 
-					icfifo_asid, icfifo_miss, icfifo_mntn, icfifo_cacheop, icfifo_ll, icfifo_empty);
+					muxout.dcache_op, muxout.cacheop, muxout.ll, icfifo_sv, icfifo_dout, icfifo_tid, 
+					icfifo_asid, icfifo_miss, icfifo_mntn, icfifo_cacheop, icfifo_ll, icfifo_sv, icfifo_empty);
 
 --State machine for completed requests
 process(clk)
@@ -201,6 +202,7 @@ begin
 		
 		if cmd_state = cmd_tagwait then
 			dcout.tagadr <= icfifo_asid & icfifo_dout;
+			dcout.sv <= icfifo_sv;
 		end if;
 	
 		dcout.tag_wr <= '0';

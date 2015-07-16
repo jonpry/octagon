@@ -48,6 +48,7 @@ architecture Behavioral of tag_fetch is
 --Ram to store Tags
 signal tagram : tag_type := (others => (others => '1'));
 signal ptagram : ptag_type := (others => (others => '1'));
+signal kram : std_logic_vector(15 downto 0) := (others => '0');
 signal tagadr : std_logic_vector(3 downto 0);
 
 begin
@@ -56,11 +57,13 @@ tagadr <= icin.pcout.pc(9 downto 6);
 
 process(clk)
 	variable this_tag : std_logic_vector(IM_BITS-1+4 downto 10);
+	variable this_k : std_logic;
 begin
 	if clk='1' and clk'Event then
 		this_tag := tagram(to_integer(unsigned(tagadr)));
+		this_k := kram(to_integer(unsigned(tagadr)));
 		if (this_tag(IM_BITS-1+4 downto IM_BITS) = icin.pcout.asid or 
-		   (this_tag(IM_BITS-1+4 downto IM_BITS) = "1000" and icin.pcout.sv = '1')) and 
+		   (this_k = '1' and icin.pcout.sv = '1')) and 
 			 this_tag(IM_BITS-1 downto 10) = icin.pcout.pc(IM_BITS-1 downto 10) then
 			own <= '1';
 		else
@@ -71,11 +74,12 @@ begin
 		ownt <= '0';
 		if icin.tagwe = '1' and icin.tagidx = idx then
 			tagram(to_integer(unsigned(icin.tagadr))) <= icin.tagval;
+			kram(to_integer(unsigned(icin.tagadr))) <= to_std_logic(icin.tagval(IM_BITS-1+4 downto IM_BITS) = "1000");
 --			ptagram(to_integer(unsigned(icin.tagadr))) <= icin.ptagval;
 		else
-			if tagram(to_integer(unsigned(icin.tagadr))) = icin.tagval or 
-					(icin.sv = '1' and tagram(to_integer(unsigned(icin.tagadr)))(IM_BITS-1+4 downto IM_BITS)="1000"
-					and tagram(to_integer(unsigned(icin.tagadr)))(IM_BITS-1 downto 10) = icin.tagval(IM_BITS-1 downto 10)) then
+			if tagram(to_integer(unsigned(icin.tagadr)))(IM_BITS-1 downto 10) = icin.tagval(IM_BITS-1 downto 10) and
+					((icin.sv = '1' and kram(to_integer(unsigned(icin.tagadr))) = '1') or
+					tagram(to_integer(unsigned(icin.tagadr)))(IM_BITS-1+4 downto IM_BITS) = icin.tagval(IM_BITS-1+4 downto IM_BITS)) then
 				ownt <= '1';
 			end if;
 		end if;

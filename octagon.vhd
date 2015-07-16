@@ -178,6 +178,7 @@ dctlin.ownst <= dcout.ownst;
 dcin.adr <= alu1out.memadr;
 dcin.tid <= alu1out.tid;
 dcin.asid <= alu1out.asid;
+dcin.sv <= alu1out.cop0.ksu or alu1out.cop0.exc;
 dcin.dcache_op <= alu1out.dcache_op;
 dcin.cacheop <= alu1out.cacheop;
 dcin.cache_p <= alu1out.cache_p;
@@ -185,6 +186,7 @@ dcin.tagval <= dctlout.tagadr(IM_BITS-1+4 downto 10); --ASID
 dcin.tagadr <= dctlout.tagadr(9 downto 6);
 dcin.tagidx <= dctlout.tagidx;
 dcin.tagwe <= dctlout.tag_wr;
+dcin.tagsv <= dctlout.sv;
 dcin.mntn_restart <= dctlout.mntn_restart;
 dcin.mntn_tid <= dctlout.mntn_tid;
 
