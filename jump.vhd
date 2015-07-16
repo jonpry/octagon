@@ -39,6 +39,7 @@ entity jump is
 		ints : in std_logic_vector(7 downto 0);
 		dcout : in dcfetchout_type;
 		wbout : in wbmout_type;
+		rout : in rstoreout_type;
 		jumpout : out jumpout_type
 	);
 end jump;
@@ -117,7 +118,7 @@ begin
 			--TODO: handle OVF
 			jumpout.invalid_op <= aluin.invalid_op;
 			jumpout.do_int <= not aluin.invalid_op;
-			jumpout.jump_target <= (others => '0');
+			jumpout.jump_target <= rout.excv;
 		else
 			jumpout.invalid_op <= '0';
 			jumpout.do_int <= '0'; 

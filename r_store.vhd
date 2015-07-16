@@ -43,8 +43,11 @@ end r_store;
 architecture Behavioral of r_store is
 
 signal loadv : std_logic_vector(31 downto 0);
+signal excv : std_logic_vector(31 downto 0) := (others => '0');
 
 begin
+
+rout.excv <= excv;
 
 --Control signals
 rout.tid <= lmuxout.tid;
@@ -109,6 +112,10 @@ begin
 			
 			if lmuxout.r_dest = "00000" and lmuxout.store_cop0 = '1' then
 				rout.tlbidx <= lmuxout.lmux;
+			end if;
+
+			if lmuxout.r_dest = "10000" and lmuxout.store_cop0 = '1' then
+				excv <= lmuxout.lmux;
 			end if;
 
 		end if;

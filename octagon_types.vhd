@@ -137,6 +137,7 @@ package octagon_types is
 		entrylo			: std_logic_vector(31 downto 0);
 		entryhi			: std_logic_vector(31 downto 0);
 		tlbidx			: std_logic_vector(31 downto 0);
+		excv				: std_logic_vector(31 downto 0);
 	end record;
 	
 	type pcin_type is record
