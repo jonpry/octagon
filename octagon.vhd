@@ -201,6 +201,7 @@ dctlin.tlback <= tlbout.dack;
 dctlin.tlbhit <= tlbout.hit;
 dctlin.tlbasid <= tlbout.asid;
 dctlin.tlbperm <= tlbout.perm;
+dctlin.ireqtlb <= ictlout.ireqtlb;
 
 dcin.adr <= alu1out.memadr;
 dcin.tid <= alu1out.tid;

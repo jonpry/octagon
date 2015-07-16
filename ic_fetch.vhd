@@ -41,6 +41,11 @@ entity ic_fetch is
 end ic_fetch;
 
 architecture Behavioral of ic_fetch is
+
+type pc_type is array(0 to 7) of std_logic_vector(IM_BITS-1 downto 0);
+
+signal pcsave : pc_type := (others => (others => '1'));
+
 begin
 
 --8192 byte cache organized as 8 ways of 1024 bytes (9 downto 0)
@@ -76,6 +81,12 @@ begin
 		icout.exc <= icin.pcout.exc;
 		icout.ksu <= icin.pcout.ksu;
 		icout.sv <= icin.pcout.sv;
+		
+		icout.ibuf_match <= '0';
+		pcsave(to_integer(unsigned(icin.pcout.tid))) <= icin.pcout.pc;
+		if pcsave(to_integer(unsigned(icin.pcout.tid))) = icin.pcout.pc then
+			icout.ibuf_match <= '1';
+		end if;
 	end if;
 end process;
 

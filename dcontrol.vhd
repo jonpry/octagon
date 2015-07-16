@@ -53,6 +53,7 @@ signal prevcmdstate : cmd_type := cmd_wait;
 signal nextidx : unsigned(2 downto 0) := "000";
 
 signal icfifo_rd : std_logic := '0';
+signal icfifo_wr : std_logic;
 signal icfifo_empty : std_logic;
 signal icfifo_dout : std_logic_vector(IM_BITS-1 downto 6);
 signal icfifo_tid : std_logic_vector(2 downto 0);
@@ -94,7 +95,9 @@ dcout.restarts <= restarts;
 
 dcout.dreqtlb <= muxout.do_op;
 
-dc_fifo : entity work.dc_fifo port map(clk, icfifo_rd, muxout.do_op, muxout.tid, 
+icfifo_wr <= to_std_logic(muxout.do_op = '1' and dcin.ireqtlb = '0');
+
+dc_fifo : entity work.dc_fifo port map(clk, icfifo_rd, icfifo_wr, muxout.tid, 
 					muxout.asid, muxout.adr(IM_BITS-1 downto 6), muxout.dmiss, 
 					muxout.dcache_op, muxout.cacheop, muxout.ll, icfifo_sv, icfifo_dout, icfifo_tid, 
 					icfifo_asid, icfifo_miss, icfifo_mntn, icfifo_cacheop, icfifo_ll, icfifo_sv, icfifo_empty);
@@ -306,6 +309,9 @@ begin
 		if cmd_state = cmd_restart then
 			restarts(to_integer(unsigned(icfifo_tid))) <= '1';
 			dcout.mntn_restart <= icfifo_mntn;
+		end if;
+		if muxout.do_op = '1' and dcin.ireqtlb = '1' then
+			restarts(to_integer(unsigned(muxout.tid))) <= '1';		
 		end if;
 	end if;
 end process;

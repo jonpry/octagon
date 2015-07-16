@@ -42,15 +42,22 @@ end ic_mux;
 
 architecture Behavioral of ic_mux is
 
+type instr_type is array (0 to 7) of std_logic_vector(31 downto 0);
+
+signal instr_save : instr_type := (others => (others => '0'));
+signal instr_valid : std_logic_vector(7 downto 0) := (others => '0');
+
 begin
 
 process(clk)
 	variable sel : std_logic_vector(2 downto 0);
 	variable selin : std_logic_vector(7 downto 0);
+	variable instr : std_logic_vector(31 downto 0);
 begin
 	if clk='1' and clk'Event then
 		muxout.pc <= fetchout.pc;
 		muxout.tid <= fetchout.tid;
+		muxout.ibuf_match <= fetchout.ibuf_match and instr_valid(to_integer(unsigned(fetchout.tid)));
 		
 		--Second attempt. by using one hot decoder. XST predicts slower speed. But synth is faster. 
 
@@ -59,7 +66,20 @@ begin
 		sel(1) := to_std_logic(selin(2)='1' or selin(3)='1' or selin(6)='1' or selin(7)='1');
 		sel(2) := to_std_logic(selin(4)='1' or selin(5)='1' or selin(6)='1' or selin(7)='1');
 		
-		muxout.instr <= fetchout.instr(to_integer(unsigned(sel)));
+		instr := fetchout.instr(to_integer(unsigned(sel)));
+		muxout.instr <= instr;
+		if fetchout.ibuf_match = '1' and instr_valid(to_integer(unsigned(fetchout.tid))) = '1' then
+			muxout.instr <= instr_save(to_integer(unsigned(fetchout.tid)));
+		else
+			instr_save(to_integer(unsigned(fetchout.tid))) <= instr;
+		end if;
+		
+		if selin /= "00000000" then
+			instr_valid(to_integer(unsigned(fetchout.tid))) <= '1';
+		elsif fetchout.ibuf_match = '0' then
+			instr_valid(to_integer(unsigned(fetchout.tid))) <= '0';
+		end if;
+		
 	   muxout.asid  <= fetchout.asid;
 		muxout.tlb	 <= fetchout.tlb;
 		muxout.ksu	 <= fetchout.ksu;
@@ -67,7 +87,7 @@ begin
 		muxout.sv	 <= fetchout.sv;
 	
 		--TODO: this is a miss, need to handle it
-		if fetchout.owns = "00000000" then
+		if selin = "00000000" then
 			muxout.valid <= '0';
 			muxout.imiss <= fetchout.valid;
 		else

@@ -82,7 +82,7 @@ signal phys_sel : std_logic_vector(2 downto 0);
 begin
 
 iout.restarts <= restarts;
-icfifo_wr <= to_std_logic(muxout.imiss='1' and iin.mcb_cmd_full = '0');
+icfifo_wr <= to_std_logic(muxout.imiss='1' and iin.mcb_cmd_full = '0' and muxout.ibuf_match = '0');
 iout.ireqtlb <= icfifo_wr;
 
 ic_fifo : entity work.ic_fifo port map(clk, icfifo_rd, icfifo_wr, muxout.tlb, muxout.tid, muxout.asid, muxout.sv,

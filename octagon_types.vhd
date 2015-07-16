@@ -215,6 +215,7 @@ package octagon_types is
 		ksu				: std_logic;
 		exc				: std_logic;
 		sv					: std_logic;
+		ibuf_match		: std_logic;
 	end record;
 	
 	type dcfetchout_type is record
@@ -261,6 +262,7 @@ package octagon_types is
 		ksu				: std_logic;
 		sv					: std_logic;
 		imiss				: std_logic;
+		ibuf_match		: std_logic;
 	end record;
 	
 	type dcmuxout_type is record
@@ -653,6 +655,7 @@ package octagon_types is
 		tlbasid			: std_logic_vector(3 downto 0);
 		tlbperm			: std_logic_vector(2 downto 0);
 		tlbphys			: std_logic_vector(IM_BITS-1 downto 12);
+		ireqtlb			: std_logic;
 	end record;
 	
 end package;
