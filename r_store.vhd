@@ -92,6 +92,7 @@ begin
 			rout.cop0.tlb <= lmuxout.lmux(2);
 			rout.cop0.int <= lmuxout.lmux(0);
 			rout.cop0.asid <= lmuxout.lmux(6 downto 3);
+			rout.cop0.ksu <= lmuxout.lmux(7);
 			rout.int_wr <= status_wr;
 
 			rout.cop0.ecode <= lmuxout.lmux(5 downto 2);

@@ -125,6 +125,8 @@ end process;
 --11 store
 
 pcin.jump_target <= jumpout.jump_target;
+pcin.rfe <= jumpout.rfe;
+pcin.invalid_op <= jumpout.invalid_op;
 pcin.do_int <= jumpout.do_int;
 pcin.pc <= jumpout.pc;
 pcin.running <= running;
@@ -142,6 +144,7 @@ icin.tagval <= ictlout.tagadr(IM_BITS-1+4 downto 10); --ASID
 icin.tagadr <= ictlout.tagadr(9 downto 6);
 icin.tagidx <= ictlout.tagidx;
 icin.tagwe <= ictlout.tag_wr;
+icin.sv <= ictlout.sv;
 icin.imemval <= ictlout.data;
 icin.imemadr <= ictlout.memadr(9 downto 2);
 icin.imemidx <= ictlout.tagidx;

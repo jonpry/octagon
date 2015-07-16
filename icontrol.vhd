@@ -56,6 +56,7 @@ signal icfifo_wr : std_logic := '0';
 signal icfifo_empty : std_logic;
 signal icfifo_dout : std_logic_vector(IM_BITS-1+4 downto 6); --ASID
 signal icfifo_tid : std_logic_vector(2 downto 0);
+signal icfifo_sv : std_logic;
 
 signal wcount : unsigned(3 downto 0);
 
@@ -76,8 +77,8 @@ begin
 iout.restarts <= restarts;
 icfifo_wr <= to_std_logic(muxout.imiss='1' and iin.mcb_cmd_full = '0');
 
-ic_fifo : entity work.ic_fifo port map(clk, icfifo_rd, icfifo_wr, muxout.tid, muxout.asid,
-					muxout.pc(IM_BITS-1 downto 6), icfifo_dout, icfifo_tid, icfifo_empty);
+ic_fifo : entity work.ic_fifo port map(clk, icfifo_rd, icfifo_wr, muxout.tid, muxout.asid, muxout.sv,
+					muxout.pc(IM_BITS-1 downto 6), icfifo_dout, icfifo_tid, icfifo_sv, icfifo_empty);
 
 
 --State machine for completed requests
@@ -87,13 +88,14 @@ begin
 		icfifo_rd <= '0';
 		iout.mcb_rden <= '0';
 		prevcmdstate <= cmd_state;
-	
+			
 		if cmd_state = cmd_boot then
 			cmd_state <= cmd_wait;
 		elsif cmd_state = cmd_wait then
 			if icfifo_empty = '0' then
 				cmd_state <= cmd_tagwait;
 				iout.tagadr <= icfifo_dout(IM_BITS-1+4 downto 6);
+				iout.sv <= icfifo_sv;
 			end if;
 		elsif cmd_state = cmd_tagwait then
 			cmd_state <= cmd_tagcheck;

@@ -64,13 +64,14 @@ process(clk)
 begin
 	if clk='1' and clk'Event then
 		dout <= dram(to_integer(unsigned(way & dcin.alu2out.dcwradr(9 downto 2))));
-		
-		nc := to_std_logic((dcin.dcout.phys and dcin.dcout.owns) /= X"00");
+	
+		--Dirty is ignored on non cached memory
+--		nc := to_std_logic((dcin.dcout.phys and dcin.dcout.owns) /= X"00");
 
 		wren := to_std_logic(dcin.alu2out.dcwren='1' and 
 					dcin.dcout.owns(to_integer(unsigned(idx & way)))='1');
 					
-		if wren = '1'  and nc='0' then
+		if wren = '1' then
 			dirty(to_integer(unsigned(way & dcin.alu2out.dcwradr(9 downto 6)))) <= '1';
 		end if;
 		

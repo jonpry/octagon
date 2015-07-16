@@ -63,6 +63,9 @@ begin
 		muxout.ptag  <= fetchout.ptag(to_integer(unsigned(sel)));
 	   muxout.asid  <= fetchout.asid;
 		muxout.tlb	 <= fetchout.tlb;
+		muxout.ksu	 <= fetchout.ksu;
+		muxout.exc	 <= fetchout.exc;
+		muxout.sv	 <= fetchout.sv;
 	
 		--TODO: this is a miss, need to handle it
 		if fetchout.owns = "00000000" then

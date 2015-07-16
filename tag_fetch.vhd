@@ -59,18 +59,25 @@ process(clk)
 begin
 	if clk='1' and clk'Event then
 		this_tag := tagram(to_integer(unsigned(tagadr)));
-		if this_tag(IM_BITS-1+4 downto IM_BITS) = icin.pcout.asid and this_tag(IM_BITS-1 downto 10) = icin.pcout.pc(IM_BITS-1 downto 10) then
+		if (this_tag(IM_BITS-1+4 downto IM_BITS) = icin.pcout.asid or 
+		   (this_tag(IM_BITS-1+4 downto IM_BITS) = "1000" and icin.pcout.sv = '1')) and 
+			 this_tag(IM_BITS-1 downto 10) = icin.pcout.pc(IM_BITS-1 downto 10) then
 			own <= '1';
 		else
 			own <= '0';
 		end if;
 --		ptag <= ptagram(to_integer(unsigned(tagadr)));
 		
+		ownt <= '0';
 		if icin.tagwe = '1' and icin.tagidx = idx then
 			tagram(to_integer(unsigned(icin.tagadr))) <= icin.tagval;
 --			ptagram(to_integer(unsigned(icin.tagadr))) <= icin.ptagval;
 		else
-			ownt <= to_std_logic(tagram(to_integer(unsigned(icin.tagadr))) = icin.tagval);
+			if tagram(to_integer(unsigned(icin.tagadr))) = icin.tagval or 
+					(icin.sv = '1' and tagram(to_integer(unsigned(icin.tagadr)))(IM_BITS-1+4 downto IM_BITS)="1000"
+					and tagram(to_integer(unsigned(icin.tagadr)))(IM_BITS-1 downto 10) = icin.tagval(IM_BITS-1 downto 10)) then
+				ownt <= '1';
+			end if;
 		end if;
 	end if;
 end process;

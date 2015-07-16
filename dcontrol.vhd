@@ -140,7 +140,7 @@ begin
 		elsif cmd_state = cmd_checkdirty then
 			cmd_state <= cmd_checkdirty2;
 		elsif cmd_state = cmd_checkdirty2 then
-			if dirty = '1' then
+			if dirty = '1' and oldtag(IM_BITS-1) = '0' then
 				cmd_state <= cmd_write;
 			else
 				if icfifo_mntn = '1' then
@@ -312,7 +312,8 @@ begin
 			dcout.mcb_cmd <= "001";
 			dcout.mcb_en <= '1';
 			mcb_req_done <= '1'; 
-		elsif cmd_state = cmd_write_done2 and cmd_mcb_req_done = '0' then
+		--TODO: this involves checking the phys of old tag
+		elsif cmd_state = cmd_write_done2 and cmd_mcb_req_done = '0' and oldtag(IM_BITS-1) = '0' then
 			dcout.mcb_cmd <= "000";
 			dcout.mcb_en <= '1';
 			cmd_mcb_req_done <= '1';

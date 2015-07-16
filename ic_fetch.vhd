@@ -73,6 +73,9 @@ begin
 		icout.valid <= to_std_logic(icin.pcout.valid='1' and icin.pcout.abort='0');
 		icout.asid <= icin.pcout.asid;
 		icout.tlb <= icin.pcout.tlb;
+		icout.exc <= icin.pcout.exc;
+		icout.ksu <= icin.pcout.ksu;
+		icout.sv <= icin.pcout.sv;
 	end if;
 end process;
 

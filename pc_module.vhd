@@ -48,6 +48,8 @@ signal valid_od : std_logic := '0';
 type asid_type is array(0 to 7) of std_logic_vector(3 downto 0);
 signal asid : asid_type := (others => (others => '0'));
 signal tlb : std_logic_vector(7 downto 0) := (others => '0');
+signal ksu : std_logic_vector(7 downto 0) := (others => '0');
+signal exc : std_logic_vector(7 downto 0) := (others => '1'); --Boot in exc
 
 signal count : unsigned(2 downto 0) := "000";
 signal countq : unsigned(2 downto 0) := "000";
@@ -116,6 +118,12 @@ begin
 		pcout.pc <= pc_next;
 		pcout.asid <= asid(to_integer(count));
 		pcout.tlb <= tlb(to_integer(count));
+		pcout.exc <= to_std_logic((exc(to_integer(count))='1' and pcin.rfe = '0') or
+							pcin.invalid_op = '1' or pcin.do_int = '1');
+		pcout.ksu <= ksu(to_integer(count));
+		pcout.sv <= to_std_logic((exc(to_integer(count))='1' and pcin.rfe = '0') or
+							pcin.invalid_op = '1' or pcin.do_int = '1' or ksu(to_integer(count)) = '1');
+
 	end if;
 end process;
 
@@ -125,6 +133,10 @@ begin
 		if pcin.rout.int_wr = '1' then
 			tlb(to_integer(unsigned(pcin.rout.tid))) <= pcin.rout.cop0.tlb;
 			asid(to_integer(unsigned(pcin.rout.tid))) <= pcin.rout.cop0.asid;
+			ksu(to_integer(unsigned(pcin.rout.tid))) <= pcin.rout.cop0.ksu;
+		end if;
+		if pcin.rout.exc_wr = '1' then
+			exc(to_integer(unsigned(pcin.rout.tid))) <= pcin.rout.cop0.exc;
 		end if;
 	end if;
 end process;

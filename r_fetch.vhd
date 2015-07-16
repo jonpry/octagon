@@ -71,6 +71,8 @@ begin
 		rout.valid <= rin.decout.valid;
 		rout.asid <= rin.decout.asid;
 		rout.tlb <= rin.decout.tlb;
+		rout.ksu <= rin.decout.ksu;
+		rout.exc <= rin.decout.exc;
 		
 		adr := rin.decout.ftid & rin.decout.r_s;
 		adr2 := rin.decout.ftid & rin.decout.r_t;

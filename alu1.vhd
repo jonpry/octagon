@@ -55,7 +55,6 @@ signal ipend : itype := (others => (others => '0'));
 type etype is array(0 to 7) of std_logic_vector(3 downto 0);
 signal ecode : etype := (others => (others => '0'));
 
-signal exc : std_logic_vector(7 downto 0) := (others => '0');
 signal int : std_logic_vector(7 downto 0) := (others => '0');
 
 signal pproduct1 : std_logic_vector(65 downto 0);
@@ -111,6 +110,9 @@ begin
 		aluout.tid <= aluin.rfetch.tid;
 		aluout.asid <= aluin.rfetch.asid;
 		aluout.tlb <= aluin.rfetch.tlb;
+		aluout.cop0.exc <= aluin.rfetch.exc;
+		aluout.cop0.ksu <= aluin.rfetch.ksu;
+
 		aluout.valid <= aluin.rfetch.valid;
 
 		aluout.logicop <= aluin.rfetch.logicop;
@@ -254,7 +256,6 @@ begin
 		aluout.cop0.ecode <= ecode(tididx);
 		aluout.cop0.badva <= badva(tididx);
 		aluout.cop0.int <= int(tididx);
-		aluout.cop0.exc <= exc(tididx);
 		
 		wtididx := to_integer(unsigned(aluin.rout.cop0_tid));		
 		if aluin.rout.epc_wr = '1' then
@@ -264,10 +265,6 @@ begin
 		if aluin.rout.int_wr = '1' then
 			imask(wtididx) <= aluin.rout.cop0.imask;
 			int(wtididx) <= aluin.rout.cop0.int;
-		end if;
-
-		if aluin.rout.exc_wr = '1' then
-			exc(wtididx) <= aluin.rout.cop0.exc;
 		end if;
 		
 		if aluin.rout.cause_wr = '1' then

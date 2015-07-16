@@ -109,6 +109,7 @@ package octagon_types is
 		exc				: std_logic;
 		int				: std_logic;
 		tlb				: std_logic;
+		ksu				: std_logic;
 		asid				: std_logic_vector(3 downto 0);
 		ecode				: std_logic_vector(3 downto 0);
 	end record;
@@ -146,6 +147,8 @@ package octagon_types is
 		lnc				: std_logic;
 		nc					: std_logic;
 		restarts			: std_logic_vector(7 downto 0);
+		rfe				: std_logic;
+		invalid_op		: std_logic;
 		rout				: rstoreout_type;
 	end record;
 	
@@ -158,6 +161,9 @@ package octagon_types is
 		asid				: std_logic_vector(3 downto 0);
 		restarted		: std_logic_vector(7 downto 0);
 		tlb				: std_logic;
+		exc				: std_logic;
+		ksu				: std_logic;
+		sv					: std_logic;
 	end record;
 	
 	type icfetchin_type is record
@@ -166,6 +172,7 @@ package octagon_types is
 		tagadr			: std_logic_vector(3 downto 0);
 		tagval			: std_logic_vector(IM_BITS-1+4 downto 10); --ASID
 		ptagval			: std_logic_vector(IM_BITS-1 downto 12);
+		sv					: std_logic;
 		tagwe				: std_logic;
 		imemidx			: std_logic_vector(2 downto 0);
 		imemadr			: std_logic_vector(7 downto 0);
@@ -198,6 +205,9 @@ package octagon_types is
 		instr				: iout_type;
 		asid				: std_logic_vector(3 downto 0);
 		tlb				: std_logic;
+		ksu				: std_logic;
+		exc				: std_logic;
+		sv					: std_logic;
 		ptag				: ptago_type;
 	end record;
 	
@@ -242,6 +252,9 @@ package octagon_types is
 		ptag			   : std_logic_vector(IM_BITS-1 downto 12);
 		asid				: std_logic_vector(3 downto 0);
 		tlb				: std_logic;
+		exc				: std_logic;
+		ksu				: std_logic;
+		sv					: std_logic;
 		imiss				: std_logic;
 	end record;
 	
@@ -289,6 +302,8 @@ package octagon_types is
 		ftid				: std_logic_vector(2 downto 0);
 		asid				: std_logic_vector(3 downto 0);
 		tlb				: std_logic;
+		ksu				: std_logic;
+		exc				: std_logic;
 		valid				: std_logic;
 		r_s				: std_logic_vector(4 downto 0);
 		r_t				: std_logic_vector(4 downto 0);
@@ -348,6 +363,8 @@ package octagon_types is
 		mtmul				: std_logic;
 		invalid_op		: std_logic;
 		tlb				: std_logic;
+		exc				: std_logic;
+		ksu				: std_logic;
 		sc				   : std_logic; --mips store-conditional operation
 		ll					: std_logic;
 	end record;
@@ -570,6 +587,7 @@ package octagon_types is
 		tagadr			: std_logic_vector(IM_BITS-1+4 downto 6); --ASID
 		tag_wr			: std_logic;
 		tagidx			: std_logic_vector(2 downto 0);
+		sv					: std_logic;
 		mcb_en			: std_logic;
 		mcb_cmd			: std_logic_vector(2 downto 0);
 		mcb_bl			: std_logic_vector(5 downto 0);
