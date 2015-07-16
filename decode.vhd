@@ -57,7 +57,7 @@ variable opzero : std_logic;
 begin
 	if clk='1' and clk'Event then
 		decout.pc <= muxout.pc;
-		decout.valid <= muxout.valid;
+		decout.valid <= muxout.valid or muxout.ibuf_match;
 		decout.tid <= muxout.tid;
 		decout.asid <= muxout.asid;
 		decout.tlb <= muxout.tlb;

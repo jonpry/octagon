@@ -57,7 +57,7 @@ begin
 	if clk='1' and clk'Event then
 		muxout.pc <= fetchout.pc;
 		muxout.tid <= fetchout.tid;
-		muxout.ibuf_match <= fetchout.ibuf_match and instr_valid(to_integer(unsigned(fetchout.tid)));
+		muxout.ibuf_match <= fetchout.ibuf_match and instr_valid(to_integer(unsigned(fetchout.tid))) and fetchout.valid;
 		
 		--Second attempt. by using one hot decoder. XST predicts slower speed. But synth is faster. 
 
@@ -75,9 +75,11 @@ begin
 		end if;
 		
 		if selin /= "00000000" then
-			instr_valid(to_integer(unsigned(fetchout.tid))) <= '1';
-		elsif fetchout.ibuf_match = '0' then
-			instr_valid(to_integer(unsigned(fetchout.tid))) <= '0';
+			instr_valid(to_integer(unsigned(fetchout.tid))) <= fetchout.valid;
+		else
+			if fetchout.ibuf_match = '0' and fetchout.valid = '1' then
+				instr_valid(to_integer(unsigned(fetchout.tid))) <= '0';
+			end if;
 		end if;
 		
 	   muxout.asid  <= fetchout.asid;
@@ -86,7 +88,7 @@ begin
 		muxout.exc	 <= fetchout.exc;
 		muxout.sv	 <= fetchout.sv;
 	
-		--TODO: this is a miss, need to handle it
+		--this is a miss, need to handle it
 		if selin = "00000000" then
 			muxout.valid <= '0';
 			muxout.imiss <= fetchout.valid;

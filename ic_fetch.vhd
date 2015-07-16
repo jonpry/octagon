@@ -83,7 +83,9 @@ begin
 		icout.sv <= icin.pcout.sv;
 		
 		icout.ibuf_match <= '0';
-		pcsave(to_integer(unsigned(icin.pcout.tid))) <= icin.pcout.pc;
+		if icin.pcout.valid = '1' then
+			pcsave(to_integer(unsigned(icin.pcout.tid))) <= icin.pcout.pc;
+		end if;
 		if pcsave(to_integer(unsigned(icin.pcout.tid))) = icin.pcout.pc then
 			icout.ibuf_match <= '1';
 		end if;
