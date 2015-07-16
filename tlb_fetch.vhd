@@ -56,6 +56,8 @@ signal perms : perms_type := (others => (others => '1'));
 
 signal mpage : std_logic_vector(IM_BITS-1 downto 12);
 signal vpage : std_logic_vector(IM_BITS-1 downto 12);
+signal vasid : std_logic_vector(3 downto 0);
+signal vsv : std_logic;
 signal msize : std_logic;
 signal masid : std_logic_vector(3 downto 0);
 
@@ -75,12 +77,15 @@ begin
 		lrdptr := to_integer(unsigned(vpage(16 downto 12)));
 
 		vpage <= tlbin.vpage;
+		vasid <= tlbin.vasid;
+		vsv <= tlbin.vsv;
 		mpage <= vtags(rdptr);
 		msize <= huge_page(rdptr);
 		masid <= asid(rdptr);
 
 		tlbout.perm <= perms(lrdptr);
 		tlbout.phys <= ptags(lrdptr);
+		tlbout.asid <= masid;
 
 		if msize='1' then
 			owns := to_std_logic(mpage(IM_BITS-1 downto 24) = vpage(IM_BITS-1 downto 24));
@@ -88,7 +93,7 @@ begin
 			owns := to_std_logic(mpage = vpage);
 		end if;
 		
-		owns := to_std_logic(owns = '1' and masid = tlbin.vasid);
+		owns := to_std_logic(owns = '1' and ((masid = "1000" and vsv='1') or masid = vasid));
 		tlbout.owns <= owns;
 
 		wrptr := to_integer(unsigned(tlbin.wradr));		

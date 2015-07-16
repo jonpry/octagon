@@ -58,7 +58,7 @@ entity octagon is
 		dmcb_cmd_full	: in std_logic;
 		dmcb_dout		: out std_logic_vector(31 downto 0);
 		dmcb_wren		: out std_logic;
-		cpu_dbg_vector : out std_logic_vector(63 downto 0)
+		cpu_dbg_vector : out std_logic_vector(3 downto 0)
 	);
 end octagon;
 
@@ -66,6 +66,8 @@ architecture Behavioral of octagon is
 
 signal pcin : pcin_type;
 signal pcout : pcout_type;
+signal tlbin : tlbin_type;
+signal tlbout : tlbout_type;
 signal icin : icfetchin_type;
 signal icout : icfetchout_type;
 signal dcin : dcfetchin_type;
@@ -98,18 +100,19 @@ begin
 
 --cpu_dbg_vector <= cpu_dbg_vector_i;
 
-cpu_dbg_vector_i(31) <= int(0);
-cpu_dbg_vector_i(30) <= running(0);
-cpu_dbg_vector_i(29) <= pcout.valid;
+cpu_dbg_vector(3) <= int(0);
+cpu_dbg_vector(2) <= running(0);
+cpu_dbg_vector(1) <= pcout.valid;
+cpu_dbg_vector(0) <= tlbout.hit;
 process(clk)
 begin
 	if clk='1' and clk'Event then
-		if pcout.valid = '1' then
-			cpu_dbg_vector_i(IM_BITS-1 downto 0) <= pcout.pc;
-		end if;
-		if decout.valid = '1' then
-			cpu_dbg_vector_i(63 downto 32) <= decout.instr;
-		end if;
+--		if pcout.valid = '1' then
+--			cpu_dbg_vector_i(IM_BITS-1 downto 0) <= pcout.pc;
+--		end if;
+--		if decout.valid = '1' then
+--			cpu_dbg_vector_i(63 downto 32) <= decout.instr;
+--		end if;
 	end if;
 end process;
 
@@ -160,6 +163,23 @@ ictlin.mcb_empty <= mcb_empty;
 ictlin.mcb_cmd_full <= mcb_cmd_full;
 ictlin.restarted <= pcout.restarted;
 ictlin.ownst <= icout.ownst;
+ictlin.tlback <= tlbout.iack;
+ictlin.tlbhit <= tlbout.hit;
+ictlin.tlbasid <= tlbout.asid;
+ictlin.tlbperm <= tlbout.perm;
+
+tlbin.ireq <= ictlout.ireqtlb;
+tlbin.isv <= imuxout.sv;
+tlbin.iasid <= imuxout.asid;
+tlbin.ivaddr <= imuxout.pc;
+tlbin.phys <= rstoreout.entrylo(25 downto 6);
+tlbin.size <= rstoreout.entrylo(3);
+tlbin.perm <= rstoreout.entrylo(2 downto 0);
+tlbin.virt <= rstoreout.entryhi(31 downto 12);
+tlbin.asid <= rstoreout.entryhi(3 downto 0);
+tlbin.wradr <= rstoreout.tlbidx(4 downto 0);
+tlbin.wridx <= rstoreout.tlbidx(6 downto 5);
+tlbin.wren <= rout.tlbwi;
 
 dmcb_cmd <= dctlout.mcb_cmd;
 dmcb_bl <= dctlout.mcb_bl;
@@ -227,6 +247,7 @@ ic_mux : entity work.ic_mux port map(clk,icout,imuxout);		--3
 
 decode : entity work.decode port map(clk,imuxout,decout);	--4
 icontrol : entity work.icontrol port map(clk,imuxout,ictlin,ictlout);
+tlb : entity work.tlb port map(clk,tlbin,tlbout);
 
 r_fetch : entity work.r_fetch port map(clk,rin,rout);			--5
 wbreader : entity work.wbreader port map(clk,wbrin,decout,wbrout);

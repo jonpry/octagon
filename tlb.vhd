@@ -85,6 +85,7 @@ begin
 		tlbout.hit <= to_std_logic(selin /= "0000");
 		tlbout.phys <= fetchout(muxadr).phys;
 		tlbout.perm <= fetchout(muxadr).perm;
+		tlbout.asid <= fetchout(muxadr).asid;
 		
 		iack <= tlbin.ireq;
 		dack <= to_std_logic(tlbin.dreq = '1' and tlbin.ireq='0');
@@ -100,9 +101,11 @@ begin
 		
 		for i in 0 to 3 loop
 			if tlbin.ireq = '1' then
+			   fetchin(i).vsv <= tlbin.isv;
 				fetchin(i).vasid <= tlbin.iasid;
 				fetchin(i).vpage <= tlbin.ivaddr(IM_BITS-1 downto 12);
 			else
+			   fetchin(i).vsv <= tlbin.dsv;
 				fetchin(i).vasid <= tlbin.dasid;
 				fetchin(i).vpage <= tlbin.dvaddr(IM_BITS-1 downto 12);			
 			end if;

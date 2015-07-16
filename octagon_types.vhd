@@ -56,6 +56,7 @@ package octagon_types is
 		iack				: std_logic;
 		dack				: std_logic;
 		perm 				: std_logic_vector(2 downto 0);
+		asid				: std_logic_vector(3 downto 0);
 		phys 				: std_logic_vector(IM_BITS-1 downto 12);
 	end record;
 
@@ -65,6 +66,8 @@ package octagon_types is
 		dreq				: std_logic;
 		ireq				: std_logic;
 		dwnr				: std_logic;
+		isv				: std_logic;
+		dsv				: std_logic;
 		dtid				: std_logic_vector(2 downto 0);
 		itid				: std_logic_vector(2 downto 0);
 		dasid				: std_logic_vector(3 downto 0);
@@ -83,6 +86,7 @@ package octagon_types is
 	type tlbfetchin_type is record
 		vpage 			: std_logic_vector(IM_BITS-1 downto 12);
 		vasid 			: std_logic_vector(3 downto 0);
+		vsv				: std_logic;
 
 		perm 				: std_logic_vector(2 downto 0);
 		asid 				: std_logic_vector(3 downto 0);
@@ -597,6 +601,7 @@ package octagon_types is
 		mcb_rden			: std_logic;
 		data				: std_logic_vector(31 downto 0);
 		restarts			: std_logic_vector(7 downto 0);
+		ireqtlb			: std_logic;
 	end record;
 	
 	type ictlin_type is record
@@ -605,6 +610,11 @@ package octagon_types is
 		mcb_cmd_full	: std_logic;
 		restarted		: std_logic_vector(7 downto 0);
 		ownst				: std_logic_vector(7 downto 0);
+		tlback			: std_logic;
+		tlbhit			: std_logic;
+		tlbasid			: std_logic_vector(3 downto 0);
+		tlbperm			: std_logic_vector(2 downto 0);
+		tlbphys			: std_logic_vector(IM_BITS-1 downto 12);
 	end record;
 	
 	

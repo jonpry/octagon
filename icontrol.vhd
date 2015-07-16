@@ -57,6 +57,13 @@ signal icfifo_empty : std_logic;
 signal icfifo_dout : std_logic_vector(IM_BITS-1+4 downto 6); --ASID
 signal icfifo_tid : std_logic_vector(2 downto 0);
 signal icfifo_sv : std_logic;
+signal icfifo_tlb : std_logic;
+
+signal tlb_asid : std_logic_vector(3 downto 0);
+signal tlb_perm : std_logic_vector(2 downto 0);
+signal tlb_phys : std_logic_vector(IM_BITS-1 downto 12);
+signal tlb_hit : std_logic;
+signal tlb_empty : std_logic;
 
 signal wcount : unsigned(3 downto 0);
 
@@ -76,9 +83,13 @@ begin
 
 iout.restarts <= restarts;
 icfifo_wr <= to_std_logic(muxout.imiss='1' and iin.mcb_cmd_full = '0');
+iout.ireqtlb <= icfifo_wr;
 
-ic_fifo : entity work.ic_fifo port map(clk, icfifo_rd, icfifo_wr, muxout.tid, muxout.asid, muxout.sv,
-					muxout.pc(IM_BITS-1 downto 6), icfifo_dout, icfifo_tid, icfifo_sv, icfifo_empty);
+ic_fifo : entity work.ic_fifo port map(clk, icfifo_rd, icfifo_wr, muxout.tlb, muxout.tid, muxout.asid, muxout.sv,
+					muxout.pc(IM_BITS-1 downto 6), icfifo_tlb, icfifo_dout, icfifo_tid, icfifo_sv, icfifo_empty);
+					
+ic_tlbfifo : entity work.ic_tlbfifo port map(clk, icfifo_rd, iin.tlback, iin.tlbasid, iin.tlbperm, iin.tlbphys, 
+					iin.tlbhit, tlb_asid, tlb_perm, tlb_phys, tlb_hit, tlb_empty);
 
 
 --State machine for completed requests
@@ -92,7 +103,7 @@ begin
 		if cmd_state = cmd_boot then
 			cmd_state <= cmd_wait;
 		elsif cmd_state = cmd_wait then
-			if icfifo_empty = '0' then
+			if icfifo_empty = '0' and tlb_empty = '0' then
 				cmd_state <= cmd_tagwait;
 				iout.tagadr <= icfifo_dout(IM_BITS-1+4 downto 6);
 				iout.sv <= icfifo_sv;
@@ -138,6 +149,10 @@ begin
 		
 		if cmd_state = cmd_update_tag and tag_found = '0' then
 			iout.tagadr <= icfifo_dout;
+			--This little gem ensures "1000" gets loaded as ASID even if SR says something else
+			if icfifo_tlb='1' then
+				iout.tagadr(IM_BITS-1+4 downto IM_BITS) <= tlb_asid;
+			end if;
 			iout.tagidx <= std_logic_vector(nextidx);
 			iout.tag_wr <= '1';
 			nextidx <= nextidx + 1;	

@@ -110,9 +110,8 @@ END octagon_test;
 	constant file_name : string := "/home/jon/mips/main.bin";
 	
 		-- the data ram
-	constant nwords : integer := 2 ** 14;
+	constant nwords : integer := 2 ** 18;
 	type ram_type is array(0 to nwords-1) of std_logic_vector(31 downto 0);
-	signal dm : ram_type := (others => (others => '0'));
 	
 	type IMEM_STATE_T is (RESET,WAIT_FOR_REQ,TRANSFER_WRITE,TRANSFER);
 	signal state : IMEM_STATE_T := WAIT_FOR_REQ;
@@ -142,6 +141,8 @@ END octagon_test;
 	signal cmdrden : std_logic := '0';
 	signal cmdblout : std_logic_vector(5 downto 0);
 	signal cmdadrout : std_logic_vector(29 downto 0);	
+	
+	signal start : std_logic := '0';
 	
 	--DM pump
 	signal index : integer range 0 to 64000;
@@ -216,13 +217,40 @@ BEGIN
 	end process;
 	
 	--DC write machine
-	process(clk)
+	process(clk,index)
+		variable dm : ram_type := (others => (others => '0'));
+		variable next_count : std_logic_vector(6 downto 0);
+		variable slice_count : std_logic_vector(5 downto 0);
+		
+		variable I : integer;
+	   variable vec : std_logic_vector(15 downto 0);
+		variable my_char : character;
+		variable dmemval : std_logic_vector(31 downto 0);
 	begin
-		if clk='1' and clk'Event then
+	   if start = '0' then
+			start <= '1';
+			I := 0;	
+		file_open(my_file, file_name, read_mode);		
+		while not ENDFILE(my_file) loop
+			vec := std_logic_vector(to_unsigned(I,vec'length));
+			read(my_file, my_char);
+			dmemval(7 downto 0) := std_logic_vector(to_unsigned(character'pos(my_char),8));
+			read(my_file, my_char);
+			dmemval(15 downto 8) := std_logic_vector(to_unsigned(character'pos(my_char),8));
+			read(my_file, my_char);
+			dmemval(23 downto 16) := std_logic_vector(to_unsigned(character'pos(my_char),8));
+			read(my_file, my_char);
+			dmemval(31 downto 24) := std_logic_vector(to_unsigned(character'pos(my_char),8));
+--			wait for clk_period;
+			
+			dm(I) := dmemval;
+			I := I + 1;
+		end loop;
+		file_close(my_file);
+
+			
+		elsif clk='1' and clk'Event then
 			if dcpump_state = DCPUMP_WAIT then
-				if dmwr = '1' then
-					dm(index) <= dmin;
-				end if;
 				if cmdwraddr /= cmdrdaddr then
 					dcpump_state <= DCPUMP_TRANSFER;
 					dcfiforden <= '1';
@@ -236,20 +264,14 @@ BEGIN
 					dcpump_state <= DCPUMP_DONE;
 				end if;
 				if pumplen > 0 then
-					dm( to_integer(unsigned(cmdadrout(29 downto 2)) + pumplen - 1)) <= dcfifoout;
+					dm( to_integer(unsigned(cmdadrout(29 downto 2)) + pumplen - 1)) := dcfifoout;
 				end if;
 			else
-				dm( to_integer(unsigned(cmdadrout(29 downto 2)) + pumplen - 1)) <= dcfifoout;
+				dm( to_integer(unsigned(cmdadrout(29 downto 2)) + pumplen - 1)) := dcfifoout;
 				cmdrden <= '0';
 				dcpump_state <= DCPUMP_WAIT;
 			end if;
 		end if;
-	end process;
-		  
-	process(clk)
-		variable next_count : std_logic_vector(6 downto 0);
-		variable slice_count : std_logic_vector(5 downto 0);
-	begin
 		if clk='1' and clk'Event then
 			if state = WAIT_FOR_REQ then
 				mcb_empty <= '1' after 100 ps;
@@ -286,13 +308,6 @@ BEGIN
 				end if;
 			end if;
 		end if;
-	end process;  
-	
-	--D read side
-	process(clk)
-		variable next_count : std_logic_vector(6 downto 0);
-		variable slice_count : std_logic_vector(5 downto 0);
-	begin
 		if clk='1' and clk'Event then
 			if dstate = WAIT_FOR_REQ then
 				dmcb_empty <= '1' after 100 ps;
@@ -366,27 +381,6 @@ BEGIN
 
 		wait for clk_period;
 
-		I := 0;	
-		file_open(my_file, file_name, read_mode);		
-		while not ENDFILE(my_file) loop
-			vec := std_logic_vector(to_unsigned(I,vec'length));
-			read(my_file, my_char);
-			dmemval(7 downto 0) := std_logic_vector(to_unsigned(character'pos(my_char),8));
-			read(my_file, my_char);
-			dmemval(15 downto 8) := std_logic_vector(to_unsigned(character'pos(my_char),8));
-			read(my_file, my_char);
-			dmemval(23 downto 16) := std_logic_vector(to_unsigned(character'pos(my_char),8));
-			read(my_file, my_char);
-			dmemval(31 downto 24) := std_logic_vector(to_unsigned(character'pos(my_char),8));
-			wait for clk_period;
-			
-			dmin <= dmemval;
-			index <= I;
-			dmwr <= '1';
-			I := I + 1;
-		end loop;
-		file_close(my_file);
-		
 		wait for clk_period;
 		
       dmwr <= '0';
