@@ -63,6 +63,12 @@ signal icfifo_cacheop : cacheop_type;
 signal icfifo_ll : std_logic;
 signal icfifo_sv : std_logic;
 
+signal tlb_asid : std_logic_vector(3 downto 0);
+signal tlb_perm : std_logic_vector(2 downto 0);
+signal tlb_phys : std_logic_vector(IM_BITS-1 downto 12);
+signal tlb_hit : std_logic;
+signal tlb_empty : std_logic;
+
 signal nc : std_logic;
 
 signal wcount : unsigned(3 downto 0);
@@ -86,11 +92,16 @@ begin
 
 dcout.restarts <= restarts;
 
+dcout.dreqtlb <= muxout.do_op;
+
 dc_fifo : entity work.dc_fifo port map(clk, icfifo_rd, muxout.do_op, muxout.tid, 
 					muxout.asid, muxout.adr(IM_BITS-1 downto 6), muxout.dmiss, 
 					muxout.dcache_op, muxout.cacheop, muxout.ll, icfifo_sv, icfifo_dout, icfifo_tid, 
 					icfifo_asid, icfifo_miss, icfifo_mntn, icfifo_cacheop, icfifo_ll, icfifo_sv, icfifo_empty);
-
+					
+dc_tlbfifo : entity work.ic_tlbfifo port map(clk, icfifo_rd, dcin.tlback, dcin.tlbasid, dcin.tlbperm, dcin.tlbphys, 
+					dcin.tlbhit, tlb_asid, tlb_perm, tlb_phys, tlb_hit, tlb_empty);
+					
 --State machine for completed requests
 process(clk)
 begin

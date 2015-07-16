@@ -44,7 +44,8 @@ end icontrol;
 architecture Behavioral of icontrol is
 
 type cmd_type is (cmd_boot, cmd_wait, cmd_tagwait, cmd_tagcheck, cmd_restart, 
-						cmd_transfer_data, cmd_update_tag, cmd_delay1, cmd_delay2);
+						cmd_transfer_data, cmd_update_tag, cmd_delay1, cmd_delay2,
+						cmd_tlb_miss, cmd_wait_data);
 
 signal cmd_state : cmd_type := cmd_boot;
 signal prevcmdstate : cmd_type := cmd_wait;
@@ -76,8 +77,7 @@ signal memwe : std_logic;
 signal data : std_logic_vector(31 downto 0);
 signal memadr : std_logic_vector(9 downto 0);
 
-signal tag_found : std_logic := '0';
-
+signal phys_sel : std_logic_vector(2 downto 0);
 
 begin
 
@@ -92,6 +92,10 @@ ic_tlbfifo : entity work.ic_tlbfifo port map(clk, icfifo_rd, iin.tlback, iin.tlb
 					iin.tlbhit, tlb_asid, tlb_perm, tlb_phys, tlb_hit, tlb_empty);
 
 
+phys_sel(0) <= to_std_logic(iin.ownsp(1)='1' or iin.ownsp(3)='1' or iin.ownsp(5)='1' or iin.ownsp(7)='1');
+phys_sel(1) <= to_std_logic(iin.ownsp(2)='1' or iin.ownsp(3)='1' or iin.ownsp(6)='1' or iin.ownsp(7)='1');
+phys_sel(2) <= to_std_logic(iin.ownsp(4)='1' or iin.ownsp(5)='1' or iin.ownsp(6)='1' or iin.ownsp(7)='1');
+
 --State machine for completed requests
 process(clk)
 begin
@@ -99,13 +103,15 @@ begin
 		icfifo_rd <= '0';
 		iout.mcb_rden <= '0';
 		prevcmdstate <= cmd_state;
+		iout.tagphys <= tlb_phys;
+		iout.tagadr <= icfifo_dout(IM_BITS-1+4 downto 6);
+		iout.tagidx <= std_logic_vector(nextidx);
 			
 		if cmd_state = cmd_boot then
 			cmd_state <= cmd_wait;
 		elsif cmd_state = cmd_wait then
 			if icfifo_empty = '0' and tlb_empty = '0' then
 				cmd_state <= cmd_tagwait;
-				iout.tagadr <= icfifo_dout(IM_BITS-1+4 downto 6);
 				iout.sv <= icfifo_sv;
 			end if;
 		elsif cmd_state = cmd_tagwait then
@@ -113,13 +119,24 @@ begin
 		elsif cmd_state = cmd_tagcheck then
 			--TODO: this could easily be a source of timing problem
 			if iin.ownst /= "00000000" then
-				tag_found <= '1';
-				cmd_state <= cmd_transfer_data;
+				cmd_state <= cmd_restart;
 			else
-				tag_found <= '0';
-				if iin.mcb_empty = '0' then
-					cmd_state <= cmd_transfer_data;
+				cmd_state <= cmd_wait_data;
+				if icfifo_tlb = '1' then
+					if tlb_hit = '1' and iin.ownsp /= X"00" then --Synonym detected
+						nextidx <= unsigned(phys_sel);
+						cmd_state <= cmd_update_tag;
+					end if;
+					if tlb_hit = '0' or (tlb_hit = '1' and tlb_perm(0) = '0') then --TLB miss, uh ohs
+						cmd_state <= cmd_tlb_miss;
+					end if;
 				end if;
+			end if;
+		elsif cmd_state = cmd_tlb_miss then
+			--TODO: implement me
+		elsif cmd_state = cmd_wait_data then
+			if iin.mcb_empty = '0' then
+				cmd_state <= cmd_transfer_data;
 			end if;
 		elsif cmd_state = cmd_transfer_data then
 			if wcount = "1111" and iin.mcb_empty = '0' then
@@ -141,19 +158,16 @@ begin
 		end if;
 	
 		iout.tag_wr <= '0';
-		if cmd_state = cmd_transfer_data and prevcmdstate = cmd_tagcheck and tag_found = '0' then
+		if cmd_state = cmd_transfer_data and prevcmdstate = cmd_wait_data then
 			iout.tagadr <= (IM_BITS-1+4 downto 10 => '1') & icfifo_dout(9 downto 6);
-			iout.tagidx <= std_logic_vector(nextidx);
 			iout.tag_wr <= '1';
 		end if;
 		
-		if cmd_state = cmd_update_tag and tag_found = '0' then
-			iout.tagadr <= icfifo_dout;
+		if cmd_state = cmd_update_tag then
 			--This little gem ensures "1000" gets loaded as ASID even if SR says something else
 			if icfifo_tlb='1' then
 				iout.tagadr(IM_BITS-1+4 downto IM_BITS) <= tlb_asid;
 			end if;
-			iout.tagidx <= std_logic_vector(nextidx);
 			iout.tag_wr <= '1';
 			nextidx <= nextidx + 1;	
 		end if;
@@ -173,9 +187,7 @@ begin
 			end if;
 			if iin.mcb_empty = '0' then
 				data <= iin.mcb_data;
-				if tag_found='0' then
-					memwe <= '1';
-				end if;
+				memwe <= '1';
 				if rden_delay = '1' then
 					rden_delay <= '0';
 				else
@@ -209,11 +221,15 @@ process(clk)
 begin
 	if clk='1' and clk'Event then
 		iout.mcb_en <= '0';
-		if icfifo_wr='1' then
+		iout.mcb_cmd <= "001";
+		iout.mcb_bl <= "001111";      --64 bytes = 16 words - 1
+
+		if cmd_state = cmd_wait_data and prevcmdstate = cmd_tagcheck then
 		--Send request to MCB
-			iout.mcb_adr <= muxout.pc(IM_BITS-3 downto 6) & (5 downto 0 => '0');
-			iout.mcb_cmd <= "001";
-			iout.mcb_bl <= "001111";      --64 bytes = 16 words - 1
+			iout.mcb_adr <= icfifo_dout(IM_BITS-3 downto 6) & (5 downto 0 => '0');
+			if icfifo_tlb = '1' then
+				iout.mcb_adr(IM_BITS-3 downto 12) <= tlb_phys(IM_BITS-3 downto 12);
+			end if;
 			iout.mcb_en <= '1';
 		end if;
 	end if;

@@ -38,7 +38,7 @@ entity tag_fetch is
 		icin : in icfetchin_type;
 		idx : in std_logic_vector(2 downto 0);
 		own : out std_logic;
-		ptag : out std_logic_vector(IM_BITS-1 downto 12);
+		ownp : out std_logic;
 		ownt : out std_logic
 	);
 end tag_fetch;
@@ -72,15 +72,19 @@ begin
 --		ptag <= ptagram(to_integer(unsigned(tagadr)));
 		
 		ownt <= '0';
+		ownp <= '0';
 		if icin.tagwe = '1' and icin.tagidx = idx then
 			tagram(to_integer(unsigned(icin.tagadr))) <= icin.tagval;
 			kram(to_integer(unsigned(icin.tagadr))) <= to_std_logic(icin.tagval(IM_BITS-1+4 downto IM_BITS) = "1000");
---			ptagram(to_integer(unsigned(icin.tagadr))) <= icin.ptagval;
+			ptagram(to_integer(unsigned(icin.tagadr))) <= icin.ptagval;
 		else
 			if tagram(to_integer(unsigned(icin.tagadr)))(IM_BITS-1 downto 10) = icin.tagval(IM_BITS-1 downto 10) and
 					((icin.sv = '1' and kram(to_integer(unsigned(icin.tagadr))) = '1') or
 					tagram(to_integer(unsigned(icin.tagadr)))(IM_BITS-1+4 downto IM_BITS) = icin.tagval(IM_BITS-1+4 downto IM_BITS)) then
 				ownt <= '1';
+			end if;
+			if ptagram(to_integer(unsigned(tagadr))) = icin.ptagval then
+				ownp <= '1';
 			end if;
 		end if;
 	end if;

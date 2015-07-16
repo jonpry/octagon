@@ -205,6 +205,7 @@ package octagon_types is
 	type icfetchout_type is record
 		owns				: std_logic_vector(7 downto 0);
 		ownst				: std_logic_vector(7 downto 0);
+		ownsp				: std_logic_vector(7 downto 0);
 		pc					: std_logic_vector(IM_BITS-1 downto 0);
 		tid				: std_logic_vector(2 downto 0);
 		valid				: std_logic;
@@ -214,7 +215,6 @@ package octagon_types is
 		ksu				: std_logic;
 		exc				: std_logic;
 		sv					: std_logic;
-		ptag				: ptago_type;
 	end record;
 	
 	type dcfetchout_type is record
@@ -255,7 +255,6 @@ package octagon_types is
 		tid				: std_logic_vector(2 downto 0);
 		valid				: std_logic;
 		instr				: std_logic_vector(31 downto 0);
-		ptag			   : std_logic_vector(IM_BITS-1 downto 12);
 		asid				: std_logic_vector(3 downto 0);
 		tlb				: std_logic;
 		exc				: std_logic;
@@ -591,6 +590,7 @@ package octagon_types is
 		memadr			: std_logic_vector(9 downto 0);
 		memwe				: std_logic;
 		tagadr			: std_logic_vector(IM_BITS-1+4 downto 6); --ASID
+		tagphys			: std_logic_vector(IM_BITS-1 downto 12); 
 		tag_wr			: std_logic;
 		tagidx			: std_logic_vector(2 downto 0);
 		sv					: std_logic;
@@ -610,6 +610,7 @@ package octagon_types is
 		mcb_cmd_full	: std_logic;
 		restarted		: std_logic_vector(7 downto 0);
 		ownst				: std_logic_vector(7 downto 0);
+		ownsp				: std_logic_vector(7 downto 0);
 		tlback			: std_logic;
 		tlbhit			: std_logic;
 		tlbasid			: std_logic_vector(3 downto 0);
@@ -637,6 +638,7 @@ package octagon_types is
 		clean				: std_logic;
 		mntn_restart	: std_logic;
 		mntn_tid			: std_logic_vector(2 downto 0);
+		dreqtlb			: std_logic;
 	end record;
 	
 	type dctlin_type is record
@@ -646,6 +648,11 @@ package octagon_types is
 		restarted		: std_logic_vector(7 downto 0);
 		tag				: std_logic_vector(DM_BITS-1+4 downto 10); --ASID
 		ownst				: std_logic_vector(7 downto 0);
+		tlback			: std_logic;
+		tlbhit			: std_logic;
+		tlbasid			: std_logic_vector(3 downto 0);
+		tlbperm			: std_logic_vector(2 downto 0);
+		tlbphys			: std_logic_vector(IM_BITS-1 downto 12);
 	end record;
 	
 end package;

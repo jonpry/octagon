@@ -47,14 +47,14 @@ begin
 --Lines are 64bytes, (5 downto 0)
 --16 lines per way
 
-tag_fetch0 : entity work.tag_fetch port map(clk,icin,"000",icout.owns(0),icout.ptag(0),icout.ownst(0));
-tag_fetch1 : entity work.tag_fetch port map(clk,icin,"001",icout.owns(1),icout.ptag(1),icout.ownst(1));
-tag_fetch2 : entity work.tag_fetch port map(clk,icin,"010",icout.owns(2),icout.ptag(2),icout.ownst(2));
-tag_fetch3 : entity work.tag_fetch port map(clk,icin,"011",icout.owns(3),icout.ptag(3),icout.ownst(3));
-tag_fetch4 : entity work.tag_fetch port map(clk,icin,"100",icout.owns(4),icout.ptag(4),icout.ownst(4));
-tag_fetch5 : entity work.tag_fetch port map(clk,icin,"101",icout.owns(5),icout.ptag(5),icout.ownst(5));
-tag_fetch6 : entity work.tag_fetch port map(clk,icin,"110",icout.owns(6),icout.ptag(6),icout.ownst(6));
-tag_fetch7 : entity work.tag_fetch port map(clk,icin,"111",icout.owns(7),icout.ptag(7),icout.ownst(7));
+tag_fetch0 : entity work.tag_fetch port map(clk,icin,"000",icout.owns(0),icout.ownsp(0),icout.ownst(0));
+tag_fetch1 : entity work.tag_fetch port map(clk,icin,"001",icout.owns(1),icout.ownsp(1),icout.ownst(1));
+tag_fetch2 : entity work.tag_fetch port map(clk,icin,"010",icout.owns(2),icout.ownsp(2),icout.ownst(2));
+tag_fetch3 : entity work.tag_fetch port map(clk,icin,"011",icout.owns(3),icout.ownsp(3),icout.ownst(3));
+tag_fetch4 : entity work.tag_fetch port map(clk,icin,"100",icout.owns(4),icout.ownsp(4),icout.ownst(4));
+tag_fetch5 : entity work.tag_fetch port map(clk,icin,"101",icout.owns(5),icout.ownsp(5),icout.ownst(5));
+tag_fetch6 : entity work.tag_fetch port map(clk,icin,"110",icout.owns(6),icout.ownsp(6),icout.ownst(6));
+tag_fetch7 : entity work.tag_fetch port map(clk,icin,"111",icout.owns(7),icout.ownsp(7),icout.ownst(7));
 
 i_fetch0 : entity work.i_fetch port map(clk,icin,icout.instr(0),"000");
 i_fetch1 : entity work.i_fetch port map(clk,icin,icout.instr(1),"001");

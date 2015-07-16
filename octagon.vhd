@@ -144,6 +144,7 @@ pcin.restarts <= ictlout.restarts or dctlout.restarts or wbmout.restarts or wbro
 
 icin.pcout <= pcout;
 icin.tagval <= ictlout.tagadr(IM_BITS-1+4 downto 10); --ASID
+icin.ptagval <= ictlout.tagphys;
 icin.tagadr <= ictlout.tagadr(9 downto 6);
 icin.tagidx <= ictlout.tagidx;
 icin.tagwe <= ictlout.tag_wr;
@@ -163,12 +164,14 @@ ictlin.mcb_empty <= mcb_empty;
 ictlin.mcb_cmd_full <= mcb_cmd_full;
 ictlin.restarted <= pcout.restarted;
 ictlin.ownst <= icout.ownst;
+ictlin.ownsp <= icout.ownsp;
 ictlin.tlback <= tlbout.iack;
 ictlin.tlbhit <= tlbout.hit;
 ictlin.tlbasid <= tlbout.asid;
 ictlin.tlbperm <= tlbout.perm;
 
 tlbin.ireq <= ictlout.ireqtlb;
+tlbin.dreq <= dctlout.dreqtlb;
 tlbin.isv <= imuxout.sv;
 tlbin.iasid <= imuxout.asid;
 tlbin.ivaddr <= imuxout.pc;
@@ -194,6 +197,10 @@ dctlin.mcb_cmd_full <= dmcb_cmd_full;
 dctlin.restarted <= pcout.restarted;
 dctlin.tag <= dcout.tag;
 dctlin.ownst <= dcout.ownst;
+dctlin.tlback <= tlbout.dack;
+dctlin.tlbhit <= tlbout.hit;
+dctlin.tlbasid <= tlbout.asid;
+dctlin.tlbperm <= tlbout.perm;
 
 dcin.adr <= alu1out.memadr;
 dcin.tid <= alu1out.tid;
