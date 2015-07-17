@@ -83,7 +83,7 @@ begin
 		if dcin.tagwe = '1' and dcin.tagidx = idx then
 			tagram(to_integer(unsigned(dcin.tagadr))) <= dcin.tagval;
 			kram(to_integer(unsigned(dcin.tagadr))) <= to_std_logic(dcin.tagval(IM_BITS-1+4 downto IM_BITS) = "1000");
-			ptagram(to_integer(unsigned(dcin.tagadr))) <= dcin.tagphys;
+			ptagram(to_integer(unsigned(dcin.tagadr))) <= dcin.tagphys(IM_BITS-1 downto 12);
 		else
 			this_tag := tagram(to_integer(unsigned(dcin.tagadr)));
 			this_k := kram(to_integer(unsigned(dcin.tagadr)));
@@ -91,7 +91,8 @@ begin
 					or (this_k = '1' and dcin.tagsv = '1')) and this_tag(IM_BITS-1 downto 10) = dcin.tagval(IM_BITS-1 downto 10) then
 				ownt <= '1';
 			end if;
-			if ptagram(to_integer(unsigned(dcin.tagadr))) = dcin.tagphys then
+			if ptagram(to_integer(unsigned(dcin.tagadr))) = dcin.tagphys(IM_BITS-1 downto 12) and
+					tagram(to_integer(unsigned(dcin.tagadr)))(11 downto 10) = dcin.tagphys(11 downto 10) then
 				ownp <= '1';
 			end if;
 		end if;

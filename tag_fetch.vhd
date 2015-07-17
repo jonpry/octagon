@@ -76,14 +76,15 @@ begin
 		if icin.tagwe = '1' and icin.tagidx = idx then
 			tagram(to_integer(unsigned(icin.tagadr))) <= icin.tagval;
 			kram(to_integer(unsigned(icin.tagadr))) <= to_std_logic(icin.tagval(IM_BITS-1+4 downto IM_BITS) = "1000");
-			ptagram(to_integer(unsigned(icin.tagadr))) <= icin.ptagval;
+			ptagram(to_integer(unsigned(icin.tagadr))) <= icin.ptagval(IM_BITS-1 downto 12);
 		else
 			if tagram(to_integer(unsigned(icin.tagadr)))(IM_BITS-1 downto 10) = icin.tagval(IM_BITS-1 downto 10) and
 					((icin.sv = '1' and kram(to_integer(unsigned(icin.tagadr))) = '1') or
 					tagram(to_integer(unsigned(icin.tagadr)))(IM_BITS-1+4 downto IM_BITS) = icin.tagval(IM_BITS-1+4 downto IM_BITS)) then
 				ownt <= '1';
 			end if;
-			if ptagram(to_integer(unsigned(tagadr))) = icin.ptagval then
+			if ptagram(to_integer(unsigned(tagadr))) = icin.ptagval(IM_BITS-1 downto 12) and 
+					tagram(to_integer(unsigned(icin.tagadr)))(11 downto 10) = icin.ptagval(11 downto 10) then
 				ownp <= '1';
 			end if;
 		end if;

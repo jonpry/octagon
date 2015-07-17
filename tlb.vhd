@@ -57,15 +57,7 @@ signal dack, dackq, dackqq : std_logic := '0';
 begin
 
 gen_assoc_array: FOR i IN 0 to 3 generate
-	tlb_tagfetch : entity work.tlb_fetch port map(clk, fetchin(i), fetchout(i), std_logic_vector(to_unsigned(i,2)));
-	fetchin(i).asid <= tlbin.asid;
-	fetchin(i).perm <= tlbin.perm;
-	fetchin(i).phys <= tlbin.phys;
-	fetchin(i).virt <= tlbin.virt;
-	fetchin(i).size <= tlbin.size;
-	fetchin(i).wren <= tlbin.wren;
-	fetchin(i).wradr <= tlbin.wradr;
-	fetchin(i).wridx <= tlbin.wridx;
+	tlb_tagfetch : entity work.tlb_fetch port map(clk, tlbin, fetchin(i), fetchout(i), std_logic_vector(to_unsigned(i,2)));
 end  generate;
 
 process(clk)

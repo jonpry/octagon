@@ -169,6 +169,7 @@ ictlin.tlback <= tlbout.iack;
 ictlin.tlbhit <= tlbout.hit;
 ictlin.tlbasid <= tlbout.asid;
 ictlin.tlbperm <= tlbout.perm;
+ictlin.tlbphys <= tlbout.phys;
 
 tlbin.ireq <= ictlout.ireqtlb;
 tlbin.dreq <= dctlout.dreqtlb;
@@ -205,6 +206,7 @@ dctlin.tlback <= tlbout.dack;
 dctlin.tlbhit <= tlbout.hit;
 dctlin.tlbasid <= tlbout.asid;
 dctlin.tlbperm <= tlbout.perm;
+dctlin.tlbphys <= tlbout.phys;
 dctlin.ireqtlb <= ictlout.ireqtlb;
 
 dcin.adr <= alu1out.memadr;

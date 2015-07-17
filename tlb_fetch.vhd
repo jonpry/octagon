@@ -35,7 +35,8 @@ use work.octagon_funcs.all;
 entity tlb_fetch is
 	Port ( 
 		clk : in  std_logic;
-		tlbin : in tlbfetchin_type;
+		tlbin : tlbin_type;
+		fetchin : in tlbfetchin_type;
 		tlbout : out tlbfetchout_type;
 		idx : in std_logic_vector(1 downto 0)
 	);
@@ -60,6 +61,9 @@ signal vasid : std_logic_vector(3 downto 0);
 signal vsv : std_logic;
 signal msize : std_logic;
 signal masid : std_logic_vector(3 downto 0);
+signal hmasid : std_logic_vector(3 downto 0);
+signal hmsize : std_logic;
+signal hmpage : std_logic_vector(IM_BITS-1 downto 12);
 
 signal wrenq : std_logic := '0';
 
@@ -68,32 +72,47 @@ begin
 process(clk)
 	variable rdptr : integer;
 	variable lrdptr : integer;
+	variable hrdptr : integer;
+	variable hlrdptr : integer;
+
 	variable wrptr : integer;
 	variable owns : std_logic;
+	variable tasid : std_logic_vector(3 downto 0);
 begin
 	if clk='1' and clk'Event then
 	
-		rdptr := to_integer(unsigned(tlbin.vpage(16 downto 12)));
+		rdptr := to_integer(unsigned(fetchin.vpage(16 downto 12)));
 		lrdptr := to_integer(unsigned(vpage(16 downto 12)));
+		hrdptr := to_integer(unsigned(fetchin.vpage(28 downto 24)));
+		hlrdptr := to_integer(unsigned(vpage(28 downto 24)));
 
-		vpage <= tlbin.vpage;
-		vasid <= tlbin.vasid;
-		vsv <= tlbin.vsv;
+		vpage <= fetchin.vpage;
+		vasid <= fetchin.vasid;
+		vsv <= fetchin.vsv;
+		
 		mpage <= vtags(rdptr);
 		msize <= huge_page(rdptr);
 		masid <= asid(rdptr);
 
-		tlbout.perm <= perms(lrdptr);
-		tlbout.phys <= ptags(lrdptr);
-		tlbout.asid <= masid;
+		hmpage <= vtags(hrdptr);
+		hmsize <= huge_page(hrdptr);
+		hmasid <= asid(hrdptr);
 
-		if msize='1' then
-			owns := to_std_logic(mpage(IM_BITS-1 downto 24) = vpage(IM_BITS-1 downto 24));
+		tasid := masid;
+
+		if hmsize='1' then
+			tasid := hmasid;
+			owns := to_std_logic(hmpage(IM_BITS-1 downto 24) = vpage(IM_BITS-1 downto 24));
+			tlbout.perm <= perms(hlrdptr);
+			tlbout.phys <= ptags(hlrdptr)(IM_BITS-1 downto 24) & vpage(23 downto 12);
 		else
 			owns := to_std_logic(mpage = vpage);
+			tlbout.perm <= perms(lrdptr);
+			tlbout.phys <= ptags(lrdptr);
 		end if;
-		
-		owns := to_std_logic(owns = '1' and ((masid = "1000" and vsv='1') or masid = vasid));
+
+		tlbout.asid <= tasid;		
+		owns := to_std_logic(owns = '1' and ((tasid = "1000" and vsv='1') or tasid = vasid));
 		tlbout.owns <= owns;
 
 		wrptr := to_integer(unsigned(tlbin.wradr));		

@@ -87,15 +87,6 @@ package octagon_types is
 		vpage 			: std_logic_vector(IM_BITS-1 downto 12);
 		vasid 			: std_logic_vector(3 downto 0);
 		vsv				: std_logic;
-
-		perm 				: std_logic_vector(2 downto 0);
-		asid 				: std_logic_vector(3 downto 0);
-		phys 				: std_logic_vector(IM_BITS-1 downto 12);
-		virt 				: std_logic_vector(IM_BITS-1 downto 12);
-		size				: std_logic;
-		wren 				: std_logic;
-		wridx 			: std_logic_vector(1 downto 0);
-		wradr 			: std_logic_vector(4 downto 0);
 	end record;
 	
 	type tlbfetchout_type is record
@@ -176,7 +167,7 @@ package octagon_types is
 		tagidx			: std_logic_vector(2 downto 0);
 		tagadr			: std_logic_vector(3 downto 0);
 		tagval			: std_logic_vector(IM_BITS-1+4 downto 10); --ASID
-		ptagval			: std_logic_vector(IM_BITS-1 downto 12);
+		ptagval			: std_logic_vector(IM_BITS-1 downto 10);
 		sv					: std_logic;
 		tagwe				: std_logic;
 		imemidx			: std_logic_vector(2 downto 0);
@@ -195,7 +186,7 @@ package octagon_types is
 		tagadr			: std_logic_vector(3 downto 0);
 		tagval			: std_logic_vector(IM_BITS-1+4 downto 10);
 		tagsv				: std_logic;
-		tagphys			: std_logic_vector(IM_BITS-1 downto 12);
+		tagphys			: std_logic_vector(IM_BITS-1 downto 10);
 		tagwe				: std_logic;
 		cacheop			: cacheop_type;
 		dcache_op		: std_logic;
@@ -599,7 +590,7 @@ package octagon_types is
 		memadr			: std_logic_vector(9 downto 0);
 		memwe				: std_logic;
 		tagadr			: std_logic_vector(IM_BITS-1+4 downto 6); --ASID
-		tagphys			: std_logic_vector(IM_BITS-1 downto 12); 
+		tagphys			: std_logic_vector(IM_BITS-1 downto 10); 
 		tag_wr			: std_logic;
 		tagidx			: std_logic_vector(2 downto 0);
 		sv					: std_logic;
@@ -632,7 +623,7 @@ package octagon_types is
 		memadr			: std_logic_vector(9 downto 0);
 		memwe				: std_logic;
 		tagadr			: std_logic_vector(IM_BITS-1+4 downto 6); --ASID
-		tagphys			: std_logic_vector(IM_BITS-1 downto 12);
+		tagphys			: std_logic_vector(IM_BITS-1 downto 10);
 		tag_wr			: std_logic;
 		tagidx			: std_logic_vector(2 downto 0);
 		sv					: std_logic;

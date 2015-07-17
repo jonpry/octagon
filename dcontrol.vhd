@@ -122,9 +122,9 @@ begin
 		prevcmdstate <= cmd_state;
 
 		dcout.sv <= icfifo_sv;
-		dcout.tagphys <= tlb_phys;
+		dcout.tagphys <= tlb_phys & icfifo_dout(11 downto 10);
 		if icfifo_tlb = '0' then
-			dcout.tagphys <= icfifo_dout(IM_BITS-1 downto 12);
+			dcout.tagphys <= icfifo_dout(IM_BITS-1 downto 10);
 		end if;
 		dcout.tagadr <= icfifo_asid & icfifo_dout(IM_BITS-1 downto 6);
 

@@ -103,9 +103,9 @@ begin
 		icfifo_rd <= '0';
 		iout.mcb_rden <= '0';
 		prevcmdstate <= cmd_state;
-		iout.tagphys <= tlb_phys;
+		iout.tagphys <= tlb_phys & icfifo_dout(11 downto 10);
 		if icfifo_tlb = '0' then
-			iout.tagphys  <= icfifo_dout(IM_BITS-1 downto 12);
+			iout.tagphys  <= icfifo_dout(IM_BITS-1 downto 10);
 		end if;
 		iout.tagadr <= icfifo_dout(IM_BITS-1+4 downto 6);
 		iout.tagidx <= std_logic_vector(nextidx);
