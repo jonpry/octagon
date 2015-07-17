@@ -70,7 +70,7 @@ begin
 			own <= '0';
 		end if;
 --		ptag <= ptagram(to_integer(unsigned(tagadr)));
-		
+				
 		ownt <= '0';
 		ownp <= '0';
 		if icin.tagwe = '1' and icin.tagidx = idx then
@@ -83,7 +83,7 @@ begin
 					tagram(to_integer(unsigned(icin.tagadr)))(IM_BITS-1+4 downto IM_BITS) = icin.tagval(IM_BITS-1+4 downto IM_BITS)) then
 				ownt <= '1';
 			end if;
-			if ptagram(to_integer(unsigned(tagadr))) = icin.ptagval(IM_BITS-1 downto 12) and 
+			if ptagram(to_integer(unsigned(icin.tagadr))) = icin.ptagval(IM_BITS-1 downto 12) and 
 					tagram(to_integer(unsigned(icin.tagadr)))(11 downto 10) = icin.ptagval(11 downto 10) then
 				ownp <= '1';
 			end if;
