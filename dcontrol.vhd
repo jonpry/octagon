@@ -45,7 +45,7 @@ architecture Behavioral of dcontrol is
 
 type cmd_type is (cmd_boot, cmd_wait, cmd_restart, cmd_tagcheck, cmd_tagwait, cmd_waitfordata, cmd_transfer_data, 
 						cmd_update_tag, cmd_delay1, cmd_delay2, cmd_readtag, cmd_invtag, cmd_checkdirty, cmd_invwait, 
-						cmd_checkdirty2, cmd_write, cmd_write_done, cmd_write_done2);
+						cmd_checkdirty2, cmd_write, cmd_write_done, cmd_write_done2, cmd_tlb_miss);
 
 signal cmd_state : cmd_type := cmd_boot;
 signal prevcmdstate : cmd_type := cmd_wait;
@@ -63,6 +63,7 @@ signal icfifo_mntn : std_logic;
 signal icfifo_cacheop : cacheop_type;
 signal icfifo_ll : std_logic;
 signal icfifo_sv : std_logic;
+signal icfifo_tlb : std_logic;
 
 signal tlb_asid : std_logic_vector(3 downto 0);
 signal tlb_perm : std_logic_vector(2 downto 0);
@@ -88,22 +89,27 @@ signal oldtag : std_logic_vector(DM_BITS-1+4 downto 10);
 signal mcb_wren : std_logic;
 
 signal dirtyidx : unsigned(1 downto 0);
+signal phys_sel : std_logic_vector(2 downto 0);
 
 begin
 
 dcout.restarts <= restarts;
 
-dcout.dreqtlb <= muxout.do_op;
-
 icfifo_wr <= to_std_logic(muxout.do_op = '1' and dcin.ireqtlb = '0');
+dcout.dreqtlb <= icfifo_wr;
 
 dc_fifo : entity work.dc_fifo port map(clk, icfifo_rd, icfifo_wr, muxout.tid, 
 					muxout.asid, muxout.adr(IM_BITS-1 downto 6), muxout.dmiss, 
-					muxout.dcache_op, muxout.cacheop, muxout.ll, icfifo_sv, icfifo_dout, icfifo_tid, 
-					icfifo_asid, icfifo_miss, icfifo_mntn, icfifo_cacheop, icfifo_ll, icfifo_sv, icfifo_empty);
+					muxout.dcache_op, muxout.cacheop, muxout.ll, muxout.sv, muxout.tlb, icfifo_dout, icfifo_tid, 
+					icfifo_asid, icfifo_miss, icfifo_mntn, icfifo_cacheop, icfifo_ll, icfifo_sv, icfifo_tlb, icfifo_empty);
 					
 dc_tlbfifo : entity work.ic_tlbfifo port map(clk, icfifo_rd, dcin.tlback, dcin.tlbasid, dcin.tlbperm, dcin.tlbphys, 
 					dcin.tlbhit, tlb_asid, tlb_perm, tlb_phys, tlb_hit, tlb_empty);
+					
+phys_sel(0) <= to_std_logic(dcin.ownsp(1)='1' or dcin.ownsp(3)='1' or dcin.ownsp(5)='1' or dcin.ownsp(7)='1');
+phys_sel(1) <= to_std_logic(dcin.ownsp(2)='1' or dcin.ownsp(3)='1' or dcin.ownsp(6)='1' or dcin.ownsp(7)='1');
+phys_sel(2) <= to_std_logic(dcin.ownsp(4)='1' or dcin.ownsp(5)='1' or dcin.ownsp(6)='1' or dcin.ownsp(7)='1');
+
 					
 --State machine for completed requests
 process(clk)
@@ -114,18 +120,30 @@ begin
 		mcb_wren <= '0';
 		dcout.clean <= '0';
 		prevcmdstate <= cmd_state;
+
+		dcout.sv <= icfifo_sv;
+		dcout.tagphys <= tlb_phys;
+		if icfifo_tlb = '0' then
+			dcout.tagphys <= icfifo_dout(IM_BITS-1 downto 12);
+		end if;
+		dcout.tagadr <= icfifo_asid & icfifo_dout(IM_BITS-1 downto 6);
+
 		
-		--TODO: Cludge until MMU
+		--Calculate non-cached bit
 		nc <= to_std_logic(icfifo_dout(IM_BITS-1) = '1');	
-			
+		if icfifo_tlb = '1' then
+			nc <= to_std_logic(tlb_phys(IM_BITS-1) = '1');			
+		end if;
+		
 		if cmd_state = cmd_boot then	
 			cmd_state <= cmd_wait;
 		elsif cmd_state = cmd_wait then
-			if icfifo_empty = '0' then
+			if icfifo_empty = '0' and tlb_empty = '0' then
 				if icfifo_mntn = '1' and icfifo_miss='1' then --nothing to do
 					cmd_state <= cmd_restart;
 				elsif dcin.mcb_cmd_full = '0' then
-					if icfifo_mntn = '1' then --using physical location in cache so no tagcheck
+					if icfifo_mntn = '1' then --using physical location in cache so no tagcheck 
+														--or tlb lookup
 						cmd_state <= cmd_readtag;
 					else
 						cmd_state <= cmd_tagwait;
@@ -138,10 +156,21 @@ begin
 			if dcin.ownst = "00000000" then
 				--fetch and allocate
 				cmd_state <= cmd_readtag;
+				if icfifo_tlb = '1' then
+					if tlb_hit = '1' and dcin.ownsp /= X"00" then --Synonym detected
+						nextidx <= unsigned(phys_sel);
+						cmd_state <= cmd_update_tag;
+					end if;
+					if tlb_hit = '0' or (tlb_hit = '1' and tlb_perm(2 downto 1) = "00") then --TLB miss, uh ohs
+						cmd_state <= cmd_tlb_miss;
+					end if;
+				end if;				
 			else
 				--Line already
 				cmd_state <= cmd_restart;				
 			end if;
+		elsif cmd_state = cmd_tlb_miss then
+			--TODO: throw exception!!!!
 		elsif cmd_state = cmd_readtag then
 			cmd_state <= cmd_invtag;
 		elsif cmd_state = cmd_invtag then
@@ -213,12 +242,7 @@ begin
 			wcount <= (others => '0');
 			rcount <= (others => '0');
 		end if;
-		
-		if cmd_state = cmd_tagwait then
-			dcout.tagadr <= icfifo_asid & icfifo_dout;
-			dcout.sv <= icfifo_sv;
-		end if;
-	
+			
 		dcout.tag_wr <= '0';
 		if cmd_state = cmd_readtag then
 			dcout.tagadr <= (IM_BITS-1+4 downto 10 => '1') & icfifo_dout(9 downto 6);
@@ -250,7 +274,6 @@ begin
 		dirty <= to_std_logic(muxout.dirty(to_integer(dirtyidx)) = '1' and nc = '0');
 		
 		if cmd_state = cmd_update_tag or cmd_state = cmd_tagcheck then
-			dcout.tagadr <= icfifo_asid & icfifo_dout;
 			if icfifo_mntn = '1' then
 				dcout.tagidx <= icfifo_dout(12 downto 10);
 			else
@@ -259,6 +282,10 @@ begin
 		end if;
 
 		if cmd_state = cmd_update_tag then
+			--This little gem ensures "1000" gets loaded as ASID even if SR says something else
+			if icfifo_tlb='1' then
+				dcout.tagadr(IM_BITS-1+4 downto IM_BITS) <= tlb_asid;
+			end if;
 			dcout.tag_wr <= '1';
 			nextidx <= nextidx + 1;	
 		end if;
@@ -328,6 +355,9 @@ begin
 		if cmd_state = cmd_readtag and icfifo_mntn='0' and nc='0' and mcb_req_done = '0' then
 		--Send request to MCB
 			dcout.mcb_adr <= icfifo_dout(IM_BITS-3 downto 6) & (5 downto 0 => '0');
+			if icfifo_tlb = '1' then
+				dcout.mcb_adr(IM_BITS-3 downto 12) <= tlb_phys(IM_BITS-3 downto 12);
+			end if;
 			dcout.mcb_cmd <= "001";
 			dcout.mcb_en <= '1';
 			mcb_req_done <= '1'; 

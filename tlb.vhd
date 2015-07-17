@@ -97,7 +97,7 @@ begin
 		dackqq <= dackq;
 		
 		tlbout.iack <= iackqq;
-		tlbout.dack <= iackqq;
+		tlbout.dack <= dackqq;
 		
 		for i in 0 to 3 loop
 			if tlbin.ireq = '1' then

@@ -112,6 +112,7 @@ begin
 		aluout.tlb <= aluin.rfetch.tlb;
 		aluout.cop0.exc <= aluin.rfetch.exc;
 		aluout.cop0.ksu <= aluin.rfetch.ksu;
+		aluout.cop0.tlb <= aluin.rfetch.tlb;
 
 		aluout.valid <= aluin.rfetch.valid;
 

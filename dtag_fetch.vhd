@@ -41,6 +41,7 @@ entity dtag_fetch is
 		tag : out std_logic_vector(DM_BITS-1+4 downto 10);
 		ptag : out std_logic_vector(DM_BITS-1 downto 12);
 		ownt : out std_logic;
+		ownp : out std_logic;
 		phys : out std_logic
 	);
 end dtag_fetch;
@@ -67,7 +68,7 @@ process(clk)
 	  variable this_k : std_logic;
 begin
 	if clk='1' and clk'Event then
-		tag <= tagram(to_integer(unsigned(dcin.tagadr)));
+		tag <= tagram(to_integer(unsigned(dcin.tagadr)))(IM_BITS-1+4 downto IM_BITS) & ptagram(to_integer(unsigned(dcin.tagadr))) & tagram(to_integer(unsigned(dcin.tagadr)))(11 downto 10);
 
 		this_tag := tagram(to_integer(unsigned(tagadr)));
 		this_k := kram(to_integer(unsigned(tagadr)));
@@ -78,16 +79,20 @@ begin
 		ptag <= ptagv;
 		phys <= ptagv(IM_BITS-1);
 		ownt <= '0';
+		ownp <= '0';
 		if dcin.tagwe = '1' and dcin.tagidx = idx then
 			tagram(to_integer(unsigned(dcin.tagadr))) <= dcin.tagval;
 			kram(to_integer(unsigned(dcin.tagadr))) <= to_std_logic(dcin.tagval(IM_BITS-1+4 downto IM_BITS) = "1000");
-			ptagram(to_integer(unsigned(dcin.tagadr))) <= dcin.tagval(IM_BITS-1 downto 12); --TODO: ptagval when mmu online
+			ptagram(to_integer(unsigned(dcin.tagadr))) <= dcin.tagphys;
 		else
 			this_tag := tagram(to_integer(unsigned(dcin.tagadr)));
 			this_k := kram(to_integer(unsigned(dcin.tagadr)));
 			if (this_tag(IM_BITS-1+4 downto IM_BITS) = dcin.tagval(IM_BITS-1+4 downto IM_BITS)
 					or (this_k = '1' and dcin.tagsv = '1')) and this_tag(IM_BITS-1 downto 10) = dcin.tagval(IM_BITS-1 downto 10) then
 				ownt <= '1';
+			end if;
+			if ptagram(to_integer(unsigned(dcin.tagadr))) = dcin.tagphys then
+				ownp <= '1';
 			end if;
 		end if;
 	end if;

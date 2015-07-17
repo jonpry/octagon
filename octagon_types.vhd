@@ -189,12 +189,13 @@ package octagon_types is
 		tid				: std_logic_vector(2 downto 0);
 		asid				: std_logic_vector(3 downto 0);
 		sv					: std_logic;
+		tlb				: std_logic;
 		adr				: std_logic_vector(DM_BITS-1 downto 0);
 		tagidx			: std_logic_vector(2 downto 0);
 		tagadr			: std_logic_vector(3 downto 0);
 		tagval			: std_logic_vector(IM_BITS-1+4 downto 10);
 		tagsv				: std_logic;
-		ptagval			: std_logic_vector(IM_BITS-1 downto 12);
+		tagphys			: std_logic_vector(IM_BITS-1 downto 12);
 		tagwe				: std_logic;
 		cacheop			: cacheop_type;
 		dcache_op		: std_logic;
@@ -222,6 +223,7 @@ package octagon_types is
 	type dcfetchout_type is record
 		owns				: std_logic_vector(7 downto 0);
 		ownst				: std_logic_vector(7 downto 0);
+		ownsp				: std_logic_vector(7 downto 0);
 		phys				: std_logic_vector(7 downto 0);
 		sel				: std_logic_vector(2 downto 0);
 --		miss				: std_logic;
@@ -233,6 +235,8 @@ package octagon_types is
 		cacheop			: cacheop_type;
 		dcache_op		: std_logic;
 		cache_p			: std_logic;
+		sv					: std_logic;
+		tlb				: std_logic;
 	end record;
 	
 	type dcmemout_type is record
@@ -250,6 +254,8 @@ package octagon_types is
 		do_op				: std_logic;
 		dcache_op		: std_logic;
 		ll				   : std_logic;
+		sv					: std_logic;
+		tlb				: std_logic;
 	end record;
 	
 	type icmuxout_type is record
@@ -626,6 +632,7 @@ package octagon_types is
 		memadr			: std_logic_vector(9 downto 0);
 		memwe				: std_logic;
 		tagadr			: std_logic_vector(IM_BITS-1+4 downto 6); --ASID
+		tagphys			: std_logic_vector(IM_BITS-1 downto 12);
 		tag_wr			: std_logic;
 		tagidx			: std_logic_vector(2 downto 0);
 		sv					: std_logic;
@@ -651,6 +658,7 @@ package octagon_types is
 		restarted		: std_logic_vector(7 downto 0);
 		tag				: std_logic_vector(DM_BITS-1+4 downto 10); --ASID
 		ownst				: std_logic_vector(7 downto 0);
+		ownsp				: std_logic_vector(7 downto 0);
 		tlback			: std_logic;
 		tlbhit			: std_logic;
 		tlbasid			: std_logic_vector(3 downto 0);

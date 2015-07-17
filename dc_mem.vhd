@@ -75,6 +75,8 @@ begin
 		dcout.adr <= dcin.dcout.adr;
 		dcout.asid <= dcin.alu2out.asid;
 		dcout.ll <= dcin.alu2out.ll;
+		dcout.sv <= dcin.dcout.sv;
+		dcout.tlb <= dcin.dcout.tlb;
 		if dcin.dcout.dcache_op = '1' and dcin.dcout.cache_p = '0' then
 			--create cache address from hit data. upper bits are dnc			
 			dcout.adr(12 downto 10) <= sel;

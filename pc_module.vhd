@@ -131,12 +131,12 @@ process(clk)
 begin
 	if clk='1' and clk'Event then
 		if pcin.rout.int_wr = '1' then
-			tlb(to_integer(unsigned(pcin.rout.tid))) <= pcin.rout.cop0.tlb;
-			asid(to_integer(unsigned(pcin.rout.tid))) <= pcin.rout.cop0.asid;
-			ksu(to_integer(unsigned(pcin.rout.tid))) <= pcin.rout.cop0.ksu;
+			tlb(to_integer(unsigned(pcin.rout.cop0_tid))) <= pcin.rout.cop0.tlb;
+			asid(to_integer(unsigned(pcin.rout.cop0_tid))) <= pcin.rout.cop0.asid;
+			ksu(to_integer(unsigned(pcin.rout.cop0_tid))) <= pcin.rout.cop0.ksu;
 		end if;
 		if pcin.rout.exc_wr = '1' then
-			exc(to_integer(unsigned(pcin.rout.tid))) <= pcin.rout.cop0.exc;
+			exc(to_integer(unsigned(pcin.rout.cop0_tid))) <= pcin.rout.cop0.exc;
 		end if;
 	end if;
 end process;

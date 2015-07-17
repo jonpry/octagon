@@ -104,15 +104,18 @@ begin
 		iout.mcb_rden <= '0';
 		prevcmdstate <= cmd_state;
 		iout.tagphys <= tlb_phys;
+		if icfifo_tlb = '0' then
+			iout.tagphys  <= icfifo_dout(IM_BITS-1 downto 12);
+		end if;
 		iout.tagadr <= icfifo_dout(IM_BITS-1+4 downto 6);
 		iout.tagidx <= std_logic_vector(nextidx);
+		iout.sv <= icfifo_sv;
 			
 		if cmd_state = cmd_boot then
 			cmd_state <= cmd_wait;
 		elsif cmd_state = cmd_wait then
 			if icfifo_empty = '0' and tlb_empty = '0' then
 				cmd_state <= cmd_tagwait;
-				iout.sv <= icfifo_sv;
 			end if;
 		elsif cmd_state = cmd_tagwait then
 			cmd_state <= cmd_tagcheck;

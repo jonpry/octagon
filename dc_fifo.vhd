@@ -45,6 +45,7 @@ entity dc_fifo is
 		opi : in cacheop_type;
 		lli : in std_logic;
 		svi : in std_logic;
+		tlbi : in std_logic;
 		dout : out std_logic_vector(IM_BITS-1 downto 6);
 		tido : out std_logic_vector(2 downto 0);
 		asido : out std_logic_vector(3 downto 0);
@@ -53,6 +54,7 @@ entity dc_fifo is
 		opo : out cacheop_type;
 		llo : out std_logic;
 		svo : out std_logic;
+		tlbo : out std_logic;
 		empty : out std_logic
 	);
 end dc_fifo;
@@ -75,6 +77,7 @@ signal fifo_lldata : std_logic_vector(7 downto 0);
 signal fifo_missdata : std_logic_vector(7 downto 0);
 signal fifo_mntndata : std_logic_vector(7 downto 0);
 signal fifo_svdata : std_logic_vector(7 downto 0);
+signal fifo_tlbdata : std_logic_vector(7 downto 0);
 
 signal rdptr : unsigned(3 downto 0) := "0000";
 signal wrptr : unsigned(3 downto 0) := "0000";
@@ -96,6 +99,7 @@ begin
 		misso <= fifo_missdata(rdI);
 		llo <= fifo_lldata(rdI);
 		svo <= fifo_svdata(rdI);
+		tlbo <= fifo_tlbdata(rdI);
 		
 		if rd='1' then
 			rdptr <= rdptr + 1;
@@ -111,6 +115,7 @@ begin
 			fifo_missdata(wrI) <= missi;
 			fifo_lldata(wrI) <= lli;
 			fifo_svdata(wrI) <= svi;
+			fifo_tlbdata(wrI) <= tlbi;
 			wrptr <= wrptr + 1;
 		end if;
 	end if;
