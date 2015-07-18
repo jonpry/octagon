@@ -332,6 +332,7 @@ package octagon_types is
 		r_s				: std_logic_vector(31 downto 0);
 		r_t				: std_logic_vector(31 downto 0);
 		immediate		: std_logic_vector(31 downto 0);
+		imm26				: std_logic_vector(25 downto 0);
 		r_dest			: std_logic_vector(4 downto 0);
 		use_immediate	: std_logic;
 		shift				: shift_type;
@@ -383,6 +384,7 @@ package octagon_types is
 		r_s				: std_logic_vector(31 downto 0);
 		r_t				: std_logic_vector(31 downto 0);
 		immediate		: std_logic_vector(31 downto 0);
+		imm26				: std_logic_vector(25 downto 0);
 		memadr			: std_logic_vector(DM_BITS-1 downto 0);
 		r_dest			: std_logic_vector(4 downto 0);
 		logicop			: logicop_type;

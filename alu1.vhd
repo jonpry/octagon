@@ -118,6 +118,7 @@ begin
 
 		aluout.logicop <= aluin.rfetch.logicop;
 		aluout.add <= aluin.rfetch.add;
+		aluout.imm26 <= aluin.rfetch.imm26;
 		aluout.arithmux <= aluin.rfetch.arithmux;
 		aluout.comp_unsigned <= aluin.rfetch.comp_unsigned;
 		aluout.r_s <= aluin.rfetch.r_s;

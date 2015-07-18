@@ -110,7 +110,7 @@ END octagon_test;
 	constant file_name : string := "/home/jon/mips/main.bin";
 	
 		-- the data ram
-	constant nwords : integer := 2 ** 18;
+	constant nwords : integer := 2 ** 21;
 	type ram_type is array(0 to nwords-1) of std_logic_vector(31 downto 0);
 	
 	type IMEM_STATE_T is (RESET,WAIT_FOR_REQ,TRANSFER_WRITE,TRANSFER);

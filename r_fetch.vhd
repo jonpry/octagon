@@ -290,6 +290,7 @@ begin
 		
 	--Immediate handling	
 		rout.immediate(15 downto 0) <= instr(15 downto 0);
+		rout.imm26 <= instr(25 downto 0);
 		if opcode(5 downto 2) = "0011" or instr(15)='0' then
 			rout.immediate(31 downto 16) <= X"0000";
 		else
