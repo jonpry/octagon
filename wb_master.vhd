@@ -138,7 +138,9 @@ begin
 				wbout.sigs.data <= datmem(to_integer(rdptr));
 				wren := wrmem(to_integer(rdptr));
 				wbout.sigs.wren <= wren;
-				rdptr <= rdptr + 1;
+				if wren = '1' or wbin.ack = '1' then
+					rdptr <= rdptr + 1;
+				end if;
 				if wbin.ack ='1' and wren = '0' then
 					--read complete
 					wbout.wbrin.dat <= wbin.dat;

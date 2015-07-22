@@ -1,0 +1,59 @@
+Compiler support:
+
+Processor is MIPS-like. We do not have branch delay slot. GCC has support for not using this with some caveats. In particular the code emitted for division check for divide by zero always uses the slot. So divide by zero check must be turned off as well. The assembler seems to try and insert delay slots unless .noreorder is set. Since all instructions are single cycle this has no penalty. 
+
+Division is implemented via undefined instruction trap. 
+
+Memory addressing, tlb and cp0 registers are in general different from other MIPS cpus. An attempt is being made to allow system software such as linux to be run with minimal changes, but some will still be needed. 
+
+Physical address space:
+
+Upper bit of physical address determine the bus access. "0" is cached MCB interface. "1" is uncached wishbone. Only cached MCB access is supported by instruction fetch. In my setup I used the upper 512MB of uncached as a mirror to the MCB allowing uncached access to ram. Buyer beware though as no coherence is supported if you mix cached/uncached access within the same 64 byte line. 
+
+Processor boot:
+
+Upon rising edge of running[7:0] a core will online and jump to the exception handler. Processors boots with TLB off and ASID 0x0. Default exception handler is located at 0x0 physical. 
+
+ASID:
+
+    ASID is implemented as additional virtual tags preventing false sharing amongst threads. ASID 0xf is reserved and used for identifying invalid cache lines. Switching ASID's does not take effect immediately. It's a generally hazardous situation and one should use the automatic ASID switching facility provided by supervisor mode switch to avoid problems. 
+
+
+COP0 Registers:
+
+0:  TLBIDX - Global - Index of entry being written to tlb
+
+	[6:5]	- way
+	[4:0]	- entry
+
+2:  EntryLo - Global - Lo word of TLB entry
+
+	[25:6]	- pfn
+	3	- huge page - Pages are either 4kb or 16MB if huge page is set. 
+	[2:0]	- rwx
+
+10: EntryHi - Global - Hi word of TLB entry
+
+	[31:12]	- vfn
+	[3:0]	- ASID - Use '1111' for invalid entries. '1000' for kernel pages. otherwise typically tid unless cores are sharing usermode pages. 
+
+12: Status - Current processor status
+
+	[18:16]	- tid
+	[15:8] 	- imask
+	7	- ksu
+	[6:3]	- asid
+	2	- tlb
+	1	- exc
+	0 	- int_en
+
+13: Cause - Cause of exception
+
+	[15:8]  - ipend
+	[5:2]   - ecode
+
+14: EPC - Address of code causing fault
+16: EXCV - Global - Virtual address of exception vector.
+
+
+

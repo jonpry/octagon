@@ -35,6 +35,7 @@ use work.octagon_funcs.all;
 entity tag_fetch is
 	Port ( 
 		clk : in  std_logic;
+		reset_n : in std_logic;
 		icin : in icfetchin_type;
 		idx : in std_logic_vector(2 downto 0);
 		own : out std_logic;
@@ -55,7 +56,7 @@ begin
 
 tagadr <= icin.pcout.pc(9 downto 6);
 
-process(clk)
+process(clk,reset_n)
 	variable this_tag : std_logic_vector(IM_BITS-1+4 downto 10);
 	variable this_k : std_logic;
 begin
@@ -88,6 +89,11 @@ begin
 				ownp <= '1';
 			end if;
 		end if;
+	end if;
+	if reset_n = '0' then
+		own <= '0';
+		ownt <= '0';
+		ownp <= '0';
 	end if;
 end process;
 

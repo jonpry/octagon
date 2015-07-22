@@ -34,14 +34,18 @@ use work.octagon_types.all;
 entity octagon is
 	Port ( 
 		clk 				: in  std_logic;
+		reset_n			: in std_logic;
 		running 			: in std_logic_vector(7 downto 0);
 		int 				: in std_logic_vector(7 downto 0);
-		wbmoutsigs		: out wbmoutsig_type;
+		wbadr				: out std_logic_vector(31 downto 0);
+		wbdout			: out std_logic_vector(31 downto 0);
+		wbreq				: out std_logic;
+		wbwe				: out std_logic;
 		wbcyc				: in std_logic;
 		wback				: in std_logic;
 		wbdata			: in std_logic_vector(31 downto 0);
-		mcb_cmd			: out std_logic_vector(2 downto 0);
-		mcb_bl			: out std_logic_vector(5 downto 0);
+--		mcb_cmd			: out std_logic_vector(2 downto 0);
+--		mcb_bl			: out std_logic_vector(5 downto 0);
 		mcb_adr			: out std_logic_vector(29 downto 0);
 		mcb_rden			: out std_logic;
 		mcb_en			: out std_logic;
@@ -49,7 +53,7 @@ entity octagon is
 		mcb_empty		: in std_logic;
 		mcb_cmd_full	: in std_logic;
 		dmcb_cmd			: out std_logic_vector(2 downto 0);
-		dmcb_bl			: out std_logic_vector(5 downto 0);
+--		dmcb_bl			: out std_logic_vector(5 downto 0);
 		dmcb_adr			: out std_logic_vector(29 downto 0);
 		dmcb_rden		: out std_logic;
 		dmcb_en			: out std_logic;
@@ -90,6 +94,7 @@ signal ictlout : ictlout_type;
 signal dctlin : dctlin_type;
 signal dctlout : dctlout_type;
 signal wbmout : wbmout_type;
+signal wbmoutsigs : wbmoutsig_type;
 signal wbmin : wbmin_type;
 signal wbrout : wbrout_type;
 signal wbrin : wbrin_type;
@@ -154,9 +159,9 @@ icin.imemadr <= ictlout.memadr(9 downto 2);
 icin.imemidx <= ictlout.tagidx;
 icin.imemwe <= ictlout.memwe;
 
-mcb_cmd <= ictlout.mcb_cmd;
-mcb_bl <= ictlout.mcb_bl;
-mcb_adr <= ictlout.mcb_adr;
+--mcb_cmd <= ictlout.mcb_cmd;
+--mcb_bl <= ictlout.mcb_bl;
+mcb_adr <= ictlout.mcb_adr(IM_BITS-3 downto 0);
 mcb_rden <= ictlout.mcb_rden;
 mcb_en <= ictlout.mcb_en;
 ictlin.mcb_data <= mcb_data;
@@ -189,8 +194,8 @@ tlbin.wridx <= rstoreout.tlbidx(6 downto 5);
 tlbin.wren <= rout.tlbwi;
 
 dmcb_cmd <= dctlout.mcb_cmd;
-dmcb_bl <= dctlout.mcb_bl;
-dmcb_adr <= dctlout.mcb_adr;
+--dmcb_bl <= dctlout.mcb_bl;
+dmcb_adr <= dctlout.mcb_adr(IM_BITS-3 downto 0);
 dmcb_rden <= dctlout.mcb_rden;
 dmcb_wren <= dctlout.mcb_wren;
 dmcb_en <= dctlout.mcb_en;
@@ -245,6 +250,10 @@ alu1in.rout <= rstoreout;
 alu1in.wbrout <= wbrout;
 
 wbmoutsigs <= wbmout.sigs;
+wbreq <= wbmoutsigs.req;
+wbadr <= wbmoutsigs.adr;
+wbdout <= wbmoutsigs.data;
+wbwe <= wbmoutsigs.wren;
 wbmin.restarted <= pcout.restarted;
 wbmin.cyc <= wbcyc;
 wbmin.ack <= wback;
@@ -255,14 +264,14 @@ wbrin.dat <= wbmout.wbrin.dat;
 wbrin.valid <= wbmout.wbrin.valid;
 wbrin.tid <= wbmout.wbrin.tid;
 
-pc_module: entity work.pc_module port map(clk,pcin,pcout);  --1
+pc_module: entity work.pc_module port map(clk,reset_n,pcin,pcout);  --1
 
-ic_fetch : entity work.ic_fetch port map(clk,icin,icout);	--2
+ic_fetch : entity work.ic_fetch port map(clk,reset_n,icin,icout);	--2
 
 ic_mux : entity work.ic_mux port map(clk,icout,imuxout);		--3
 
 decode : entity work.decode port map(clk,imuxout,decout);	--4
-icontrol : entity work.icontrol port map(clk,imuxout,ictlin,ictlout);
+icontrol : entity work.icontrol port map(clk,reset_n,imuxout,ictlin,ictlout);
 tlb : entity work.tlb port map(clk,tlbin,tlbout);
 
 r_fetch : entity work.r_fetch port map(clk,rin,rout);			--5
@@ -277,7 +286,7 @@ jump : entity work.jump port map(clk,alu2out,int,dcout,wbmout,rstoreout,jumpout)
 dc_mem : entity work.dc_mem port map(clk,dcmemin,dcmemout);
 wb_master : entity work.wb_master port map(clk,dcmemin,wbmin,wbmout);
 
-dcontrol : entity work.dcontrol port map(clk,dcmemout,dctlin,dctlout);
+dcontrol : entity work.dcontrol port map(clk,reset_n,dcmemout,dctlin,dctlout);
 dc_mux : entity work.dc_mux port map(clk,jumpout,dcmemout,dmuxout); --8+1
 
 l_mux : entity work.l_mux port map(clk,dmuxout,lmuxout); --8+2

@@ -35,6 +35,7 @@ use work.octagon_funcs.all;
 entity ic_fifo is
 	Port ( 
 		clk : in  std_logic;
+		reset_n : in std_logic;
 		rd	: in std_logic;
 		wr : in std_logic;
 		tlbi : in std_logic;
@@ -67,7 +68,7 @@ signal wrptr : unsigned(3 downto 0) := "0000";
 
 begin
 
-process(clk)
+process(clk,reset_n)
 	variable rdI : Integer;
 	variable wrI : Integer;
 begin
@@ -93,6 +94,11 @@ begin
 			fifo_tlbdata(wrI) <= tlbi;
 			wrptr <= wrptr + 1;
 		end if;
+	end if;
+	if reset_n = '0' then
+		rdptr <= (others => '0');
+		wrptr <= (others => '0');
+		empty <= '1';
 	end if;
 end process;
 

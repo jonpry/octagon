@@ -33,6 +33,17 @@ use work.octagon_types.all;
 
 package octagon_funcs is
 
+    function to_std_logic(L: BOOLEAN) return std_logic;	 
+	 function shift(constant amt : Integer; 
+						 I: std_logic_vector(31 downto 0); 
+						 shiftopi : shiftop_type;
+						 do : std_logic) 
+						 return std_logic_vector;
+	
+end package;
+
+package body octagon_funcs is
+
     function to_std_logic(L: BOOLEAN) return std_logic is
     begin
         if L then
@@ -63,7 +74,5 @@ package octagon_funcs is
 				when shiftop_right_neg	=> return (amt downto 1 => '1') & I(31 downto amt);
 			end case;
     end function shift; 
-	
-end package;
 
-
+end package body octagon_funcs;

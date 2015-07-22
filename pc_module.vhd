@@ -35,6 +35,7 @@ use work.octagon_funcs.all;
 entity pc_module is
 	port  (
 		clk : in std_logic;
+		reset_n : in std_logic;
 		pcin : in pcin_type;
 		pcout : out pcout_type
 	);
@@ -77,7 +78,7 @@ pcout.tid <= std_logic_vector(countq);
 --toDO: modify jump target for interrupt 
 --Pre stage, operates at T-1 to setup values for main PC code
 count2 <= count + 1;
-process(clk)
+process(clk,reset_n)
 	variable restartV : std_logic;
 begin
 	if clk='1' and clk'Event then
@@ -97,6 +98,14 @@ begin
 		end if;
 		enabled <= pcin.running(to_integer(count2));
 	end if;
+	if reset_n = '0' then
+		restarts <= X"00";
+		restarted <= X"00";
+		enabled <= '0';
+		running_q <= X"00";
+		running_edge <= '0';
+		go_to_reset <= '0';
+	end if;
 end process;
 
 valid <= '1' when ((pcin.cvalid = '1' and pcin.abort='0') or restart='1' or running_edge='1') and enabled = '1' else '0';
@@ -107,7 +116,7 @@ pc_next <= (others => '0') when enabled = '0' or running_edge = '1' else target;
 pcout.pc_next <= pc_next;
 
 --Main Stage, calculate new PC
-process(clk)
+process(clk,reset_n)
 begin
 	if clk='1' and clk'Event then
 		countq <= count;
@@ -124,6 +133,9 @@ begin
 		pcout.sv <= to_std_logic((exc(to_integer(count))='1' and pcin.rfe = '0') or
 							pcin.invalid_op = '1' or pcin.do_int = '1' or ksu(to_integer(count)) = '1');
 
+	end if;
+	if reset_n = '0' then
+		pcout.valid <= '0';
 	end if;
 end process;
 

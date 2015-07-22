@@ -35,6 +35,7 @@ use work.octagon_funcs.all;
 entity icontrol is
 	Port ( 
 		clk : in  std_logic;
+		reset_n : in std_logic;
 		muxout : in icmuxout_type;
 		iin : in ictlin_type;
 		iout : out ictlout_type
@@ -85,10 +86,10 @@ iout.restarts <= restarts;
 icfifo_wr <= to_std_logic(muxout.imiss='1' and iin.mcb_cmd_full = '0' and muxout.ibuf_match = '0');
 iout.ireqtlb <= icfifo_wr;
 
-ic_fifo : entity work.ic_fifo port map(clk, icfifo_rd, icfifo_wr, muxout.tlb, muxout.tid, muxout.asid, muxout.sv,
+ic_fifo : entity work.ic_fifo port map(clk, reset_n, icfifo_rd, icfifo_wr, muxout.tlb, muxout.tid, muxout.asid, muxout.sv,
 					muxout.pc(IM_BITS-1 downto 6), icfifo_tlb, icfifo_dout, icfifo_tid, icfifo_sv, icfifo_empty);
 					
-ic_tlbfifo : entity work.ic_tlbfifo port map(clk, icfifo_rd, iin.tlback, iin.tlbasid, iin.tlbperm, iin.tlbphys, 
+ic_tlbfifo : entity work.ic_tlbfifo port map(clk, reset_n, icfifo_rd, iin.tlback, iin.tlbasid, iin.tlbperm, iin.tlbphys, 
 					iin.tlbhit, tlb_asid, tlb_perm, tlb_phys, tlb_hit, tlb_empty);
 
 
@@ -97,7 +98,7 @@ phys_sel(1) <= to_std_logic(iin.ownsp(2)='1' or iin.ownsp(3)='1' or iin.ownsp(6)
 phys_sel(2) <= to_std_logic(iin.ownsp(4)='1' or iin.ownsp(5)='1' or iin.ownsp(6)='1' or iin.ownsp(7)='1');
 
 --State machine for completed requests
-process(clk)
+process(clk,reset_n)
 begin
 	if clk='1' and clk'Event then
 		icfifo_rd <= '0';
@@ -203,6 +204,12 @@ begin
 		iout.memwe <= memwe;
 		iout.data <= data;
 	end if;
+	if reset_n = '0' then
+		icfifo_rd <= '0';
+		iout.mcb_rden <= '0';
+		iout.tag_wr <= '0';
+		cmd_state <= cmd_boot;
+	end if;
 end process;
 
 --Restart
@@ -220,7 +227,7 @@ begin
 end process;
 
 --Send request
-process(clk)
+process(clk,reset_n)
 begin
 	if clk='1' and clk'Event then
 		iout.mcb_en <= '0';
@@ -235,6 +242,9 @@ begin
 			end if;
 			iout.mcb_en <= '1';
 		end if;
+	end if;
+	if reset_n = '0' then
+		iout.mcb_en <= '0';
 	end if;
 end process;
 

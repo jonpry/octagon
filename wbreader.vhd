@@ -61,16 +61,17 @@ process(clk)
 begin
 	if clk='1' and clk'Event then
 		restarts <= restarts and not wbrin.restarted;
-		if wbrin.valid = '1' then
-			data(to_integer(unsigned(wbrin.tid))) <= wbrin.dat;
-			valid(to_integer(unsigned(wbrin.tid))) <= '1';
-			restarts(to_integer(unsigned(wbrin.tid))) <= '1';	
-		end if;
-		
+
 		if decout.valid = '1' then
 			wbrout.valid <= valid(to_integer(unsigned(decout.tid)));
 			valid(to_integer(unsigned(decout.tid))) <= '0';
 			wbrout.data <= data(to_integer(unsigned(decout.tid)));
+		end if;
+
+		if wbrin.valid = '1' then
+			data(to_integer(unsigned(wbrin.tid))) <= wbrin.dat;
+			valid(to_integer(unsigned(wbrin.tid))) <= '1';
+			restarts(to_integer(unsigned(wbrin.tid))) <= '1';	
 		end if;
 	end if;
 end process;

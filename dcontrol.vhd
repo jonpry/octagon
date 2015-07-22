@@ -35,6 +35,7 @@ use work.octagon_funcs.all;
 entity dcontrol is
 	Port ( 
 		clk : in  std_logic;
+		reset_n : in std_logic;
 		muxout : in dcmemout_type;
 		dcin : in dctlin_type;
 		dcout : out dctlout_type
@@ -98,12 +99,12 @@ dcout.restarts <= restarts;
 icfifo_wr <= to_std_logic(muxout.do_op = '1' and dcin.ireqtlb = '0');
 dcout.dreqtlb <= icfifo_wr;
 
-dc_fifo : entity work.dc_fifo port map(clk, icfifo_rd, icfifo_wr, muxout.tid, 
+dc_fifo : entity work.dc_fifo port map(clk, reset_n, icfifo_rd, icfifo_wr, muxout.tid, 
 					muxout.asid, muxout.adr(IM_BITS-1 downto 6), muxout.dmiss, 
 					muxout.dcache_op, muxout.cacheop, muxout.ll, muxout.sv, muxout.tlb, icfifo_dout, icfifo_tid, 
 					icfifo_asid, icfifo_miss, icfifo_mntn, icfifo_cacheop, icfifo_ll, icfifo_sv, icfifo_tlb, icfifo_empty);
 					
-dc_tlbfifo : entity work.ic_tlbfifo port map(clk, icfifo_rd, dcin.tlback, dcin.tlbasid, dcin.tlbperm, dcin.tlbphys, 
+dc_tlbfifo : entity work.ic_tlbfifo port map(clk, reset_n, icfifo_rd, dcin.tlback, dcin.tlbasid, dcin.tlbperm, dcin.tlbphys, 
 					dcin.tlbhit, tlb_asid, tlb_perm, tlb_phys, tlb_hit, tlb_empty);
 					
 phys_sel(0) <= to_std_logic(dcin.ownsp(1)='1' or dcin.ownsp(3)='1' or dcin.ownsp(5)='1' or dcin.ownsp(7)='1');
@@ -112,7 +113,7 @@ phys_sel(2) <= to_std_logic(dcin.ownsp(4)='1' or dcin.ownsp(5)='1' or dcin.ownsp
 
 					
 --State machine for completed requests
-process(clk)
+process(clk,reset_n)
 begin
 	if clk='1' and clk'Event then
 		icfifo_rd <= '0';
@@ -245,7 +246,6 @@ begin
 			
 		dcout.tag_wr <= '0';
 		if cmd_state = cmd_readtag then
-			dcout.tagadr <= (IM_BITS-1+4 downto 10 => '1') & icfifo_dout(9 downto 6);
 			if icfifo_mntn = '1' then
 				dcout.tagidx <= icfifo_dout(12 downto 10);
 			else
@@ -254,16 +254,15 @@ begin
 		end if;
 		
 		if cmd_state = cmd_invtag then
-			if icfifo_mntn = '0' or icfifo_cacheop /= cacheop_clean then
-				dcout.tag_wr <= '1';
-			end if;
-			dcout.clean <= '1';
-		end if;
-		
-		if cmd_state = cmd_checkdirty then
+			dcout.tagadr <= (IM_BITS-1+4 downto 10 => '1') & icfifo_dout(9 downto 6);
+			dcout.tag_wr <= '1';
 			oldtag <= dcin.tag;
 		end if;
 		
+		if cmd_state = cmd_checkdirty2 then
+			dcout.clean <= dirty;
+		end if;
+			
 		--TODO: probably need one more wait cycle here
 		if icfifo_mntn = '1' then
 			dirtyidx <= unsigned(icfifo_dout(12 downto 11));
@@ -323,6 +322,16 @@ begin
 		dcout.mcb_data <= muxout.ctl_data(to_integer(dirtyidx));
 		dcout.mcb_wren <= mcb_wren;
 	end if;
+	if reset_n='0' then
+		icfifo_rd <= '0';
+		dcout.mcb_rden <= '0';
+		mcb_wren <= '0';
+		dcout.clean <= '0';
+		dcout.memwe <= '0';
+		dcout.tag_wr <= '0';
+		cmd_state <= cmd_boot;
+		wcount <= (others => '0');
+	end if;
 end process;
 
 
@@ -344,7 +353,7 @@ begin
 end process;
 
 --Send request
-process(clk)
+process(clk,reset_n)
 begin
 	if clk='1' and clk'Event then
 		dcout.mcb_en <= '0';
@@ -368,6 +377,9 @@ begin
 			cmd_mcb_req_done <= '1';
 			dcout.mcb_adr <= oldtag(IM_BITS-3 downto 10) & icfifo_dout(9 downto 6) & (5 downto 0 => '0');
 		end if;
+	end if;
+	if reset_n = '0' then
+		dcout.mcb_en <= '0';
 	end if;
 end process;
 
