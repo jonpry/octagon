@@ -89,7 +89,7 @@ begin
 	if clk='1' and clk'Event then
 	
 		if wren = '1' then
-			dirty(aadr) <= '1';
+			dirty(to_integer(unsigned(way & dcin.alu2out.dcwradr(9 downto 6)))) <= '1';
 		end if;
 				
 		if wren = '1' then
@@ -111,10 +111,10 @@ begin
 		end if;
 		
 		if dcin.dclean = '1' and dcin.dmemidx(2 downto 1) = idx then
-			dirty(badr) <= '0';
+			dirty(to_integer(unsigned(dcin.dmemidx(0) & dcin.dmemadr(7 downto 4)))) <= '0';
 		end if;
 		
-		dirt <= dirty(badr);
+		dirt <= dirty(to_integer(unsigned(dcin.dmemidx(0) & dcin.dmemadr(7 downto 4))));
 	end if;
 end process;
 

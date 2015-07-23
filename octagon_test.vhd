@@ -44,9 +44,13 @@ END octagon_test;
     COMPONENT octagon
     PORT(
 		clk 				: in  std_logic;
+		reset_n			: in std_logic;
 		running 			: in std_logic_vector(7 downto 0);
 		int 				: in std_logic_vector(7 downto 0);
-		wbmoutsigs		: out wbmoutsig_type;
+		wbadr				: out std_logic_vector(31 downto 0);
+		wbdout			: out std_logic_vector(31 downto 0);
+		wbreq				: out std_logic;
+		wbwe				: out std_logic;
 		wbcyc				: in std_logic;
 		wback				: in std_logic;
 		wbdata			: in std_logic_vector(31 downto 0);
@@ -74,6 +78,7 @@ END octagon_test;
 
    --Inputs
    signal clk : std_logic := '0';
+	signal reset_n : std_logic := '1';
 	signal running : std_logic_vector(7 downto 0) := (others => '0');
 	signal int	: std_logic_vector(7 downto 0) := (others => '0');
 
@@ -84,12 +89,14 @@ END octagon_test;
 	signal dmcb_empty : std_logic := '0';
 	signal dmcb_cmd_full : std_logic := '0';
 	signal wbcyc : std_logic := '1';
-	signal wback : std_logic := '1';
-	signal wbdata : std_logic_vector(31 downto 0) := X"00AABB00";
+	signal wback : std_logic := '0';
+	signal wbdata : std_logic_vector(31 downto 0) := X"00AABB60";
 	
  	--Outputs
-	signal wbmout : wbmoutsig_type;
-	signal mcb_cmd	: std_logic_vector(2 downto 0);
+	signal wbadr : std_logic_vector(31 downto 0);
+	signal wbdout : std_logic_vector(31 downto 0);
+	signal wbreq : std_logic;
+	signal wbwe	: std_logic;	signal mcb_cmd	: std_logic_vector(2 downto 0);
 	signal mcb_bl : std_logic_vector(5 downto 0);
 	signal mcb_adr	: std_logic_vector(29 downto 0);
 	signal mcb_rden : std_logic;
@@ -157,9 +164,13 @@ BEGIN
 	-- Instantiate the Unit Under Test (UUT)
    uut: octagon PORT MAP (
           clk => clk,
+			 reset_n => reset_n,
 			 running => running,
 			 int => int,
- 			 wbmoutsigs => wbmout,
+			 wbadr => wbadr,
+			 wbdout => wbdout,
+			 wbreq => wbreq,
+			 wbwe => wbwe,
 			 wbcyc => wbcyc,
 			 wback => wback,
 			 wbdata => wbdata,
@@ -196,6 +207,8 @@ BEGIN
 			if dcfiforden = '1' then
 				dcrdaddr <= dcrdaddr + 1;
 			end if;
+			
+			wback <= wbreq;
 		end if;
 	end process;
 	

@@ -166,7 +166,7 @@ begin
 		if aluin.rfetch.ls_left = '1' then
 			unaligned := "100";
 		end if;
-		aluout.memadr <= std_logic_vector(unsigned(aluin.rfetch.r_s(DM_BITS-1 downto 0)) + unsigned(aluin.rfetch.immediate(DM_BITS-1 downto 0)) + unaligned);
+		aluout.memadr <= std_logic_vector(unsigned(aluin.rfetch.r_s(DM_BITS-1 downto 0)) + signed(aluin.rfetch.immediate(15 downto 0)) + unaligned);
 
 	--Short circuit unaligned left if already aligned
 		is_aligned := to_std_logic(std_logic_vector(unsigned(aluin.rfetch.r_s(1 downto 0)) + unsigned(aluin.rfetch.immediate(1 downto 0))) = "00");

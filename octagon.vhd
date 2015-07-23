@@ -44,8 +44,8 @@ entity octagon is
 		wbcyc				: in std_logic;
 		wback				: in std_logic;
 		wbdata			: in std_logic_vector(31 downto 0);
---		mcb_cmd			: out std_logic_vector(2 downto 0);
---		mcb_bl			: out std_logic_vector(5 downto 0);
+		mcb_cmd			: out std_logic_vector(2 downto 0);
+		mcb_bl			: out std_logic_vector(5 downto 0);
 		mcb_adr			: out std_logic_vector(29 downto 0);
 		mcb_rden			: out std_logic;
 		mcb_en			: out std_logic;
@@ -53,7 +53,7 @@ entity octagon is
 		mcb_empty		: in std_logic;
 		mcb_cmd_full	: in std_logic;
 		dmcb_cmd			: out std_logic_vector(2 downto 0);
---		dmcb_bl			: out std_logic_vector(5 downto 0);
+		dmcb_bl			: out std_logic_vector(5 downto 0);
 		dmcb_adr			: out std_logic_vector(29 downto 0);
 		dmcb_rden		: out std_logic;
 		dmcb_en			: out std_logic;
@@ -159,8 +159,8 @@ icin.imemadr <= ictlout.memadr(9 downto 2);
 icin.imemidx <= ictlout.tagidx;
 icin.imemwe <= ictlout.memwe;
 
---mcb_cmd <= ictlout.mcb_cmd;
---mcb_bl <= ictlout.mcb_bl;
+mcb_cmd <= ictlout.mcb_cmd;
+mcb_bl <= ictlout.mcb_bl;
 mcb_adr <= ictlout.mcb_adr(IM_BITS-3 downto 0);
 mcb_rden <= ictlout.mcb_rden;
 mcb_en <= ictlout.mcb_en;
@@ -194,7 +194,7 @@ tlbin.wridx <= rstoreout.tlbidx(6 downto 5);
 tlbin.wren <= rout.tlbwi;
 
 dmcb_cmd <= dctlout.mcb_cmd;
---dmcb_bl <= dctlout.mcb_bl;
+dmcb_bl <= dctlout.mcb_bl;
 dmcb_adr <= dctlout.mcb_adr(IM_BITS-3 downto 0);
 dmcb_rden <= dctlout.mcb_rden;
 dmcb_wren <= dctlout.mcb_wren;

@@ -179,6 +179,7 @@ begin
 		elsif cmd_state = cmd_invwait then
 			if icfifo_mntn = '1' and icfifo_cacheop = cacheop_inv then
 				cmd_state <= cmd_restart;
+				dcout.clean <= '1'; --Don't allow dirty lines that are invalid
 			else
 				cmd_state <= cmd_checkdirty;
 			end if;
@@ -245,13 +246,6 @@ begin
 		end if;
 			
 		dcout.tag_wr <= '0';
-		if cmd_state = cmd_readtag then
-			if icfifo_mntn = '1' then
-				dcout.tagidx <= icfifo_dout(12 downto 10);
-			else
-				dcout.tagidx <= std_logic_vector(nextidx);
-			end if;
-		end if;
 		
 		if cmd_state = cmd_invtag then
 			dcout.tagadr <= (IM_BITS-1+4 downto 10 => '1') & icfifo_dout(9 downto 6);
@@ -272,13 +266,13 @@ begin
 		
 		dirty <= to_std_logic(muxout.dirty(to_integer(dirtyidx)) = '1' and nc = '0');
 		
-		if cmd_state = cmd_update_tag or cmd_state = cmd_tagcheck then
+--		if cmd_state = cmd_update_tag or cmd_state = cmd_tagcheck or cmd_state = cmd_invtag then
 			if icfifo_mntn = '1' then
 				dcout.tagidx <= icfifo_dout(12 downto 10);
 			else
 				dcout.tagidx <= std_logic_vector(nextidx);
 			end if;
-		end if;
+--		end if;
 
 		if cmd_state = cmd_update_tag then
 			--This little gem ensures "1000" gets loaded as ASID even if SR says something else
