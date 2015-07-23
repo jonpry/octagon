@@ -36,7 +36,9 @@ entity alu2 is
 	Port ( 
 		clk : in  std_logic;
 		aluin : in alu1out_type;
-		aluout : out alu2out_type
+		aluout : out alu2out_type;
+		ictlout : in ictlout_type;
+		ifout : in icfetchout_type
 	);
 end alu2;
 
@@ -79,6 +81,17 @@ begin
 		aluout.ls_right <= aluin.ls_right;
 		aluout.invalid_op <= aluin.invalid_op;
 		aluout.ll <= aluin.ll;
+	
+	
+		aluout.itlbmiss <= '0';
+		aluout.tlback <= '0';
+		aluout.lastpc <= ifout.lastpc;
+	
+		if ictlout.tlbmiss = '1' and ictlout.misstid = aluin.tid then
+			aluout.itlbmiss <= '1';
+			aluout.tlback <= '1';
+		end if;
+		
 	end if;
 end process;
 

@@ -387,7 +387,11 @@ begin
 				if copreg = "01101" then
 					rout.specmux <= specmux_cause;
 				else
-					rout.specmux <= specmux_epc;
+					if copreg = "01000" then
+						rout.specmux <= specmux_badva;
+					else
+						rout.specmux <= specmux_epc;
+					end if;
 				end if;
 			end if;
 		end if;

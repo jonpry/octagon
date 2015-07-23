@@ -46,6 +46,8 @@ architecture Behavioral of ic_fetch is
 type pc_type is array(0 to 7) of std_logic_vector(IM_BITS-1 downto 0);
 
 signal pcsave : pc_type := (others => (others => '1'));
+--last pc will be used by execution tlb fault
+signal lastpc : pc_type := (others => (others => '1'));
 
 begin
 
@@ -89,7 +91,12 @@ begin
 		end if;
 		if pcsave(to_integer(unsigned(icin.pcout.tid))) = icin.pcout.pc then
 			icout.ibuf_match <= '1';
+		else
+			if icin.pcout.valid = '1' then
+				lastpc(to_integer(unsigned(icin.pcout.tid))) <= pcsave(to_integer(unsigned(icin.pcout.tid)));
+			end if;
 		end if;
+		icout.lastpc <= lastpc(to_integer(unsigned(icin.misstid)));
 	end if;
 end process;
 

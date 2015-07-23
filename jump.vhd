@@ -100,8 +100,8 @@ begin
 		miss := to_std_logic(dcout.owns = X"00");--dcout.sel = "000" and dcout.owns(0) = '0');
 		nc := to_std_logic((dcout.phys and dcout.owns) /= X"00");
 
-		jumpout.cvalid  <= to_std_logic(aluin.valid = '1' and wbout.stall = '0' 
-									  and dcout.dcache_op = '0' and (aluin.lnc = '0' or nc = '0'));
+		jumpout.cvalid  <= to_std_logic((aluin.valid = '1' and wbout.stall = '0' 
+									  and dcout.dcache_op = '0' and (aluin.lnc = '0' or nc = '0')) or aluin.itlbmiss = '1');
 		jumpout.abort <= to_std_logic((miss = '1' or (aluin.lnc = '1' and nc = '1'))and aluin.memop = '1');		
 		jumpout.lnc <= aluin.lnc;
 --	0 if	1 1 0							 
@@ -116,10 +116,11 @@ begin
 		ipend := ints and (not aluin.imask);
 				
 		--TODO: handle ovf
-		if ipend /= X"00" or aluin.invalid_op = '1' then
+		jumpout.itlbmiss <= aluin.itlbmiss;
+		if ipend /= X"00" or aluin.invalid_op = '1' or aluin.itlbmiss = '1'then
 			--TODO: handle OVF
 			jumpout.invalid_op <= aluin.invalid_op;
-			jumpout.do_int <= not aluin.invalid_op;
+			jumpout.do_int <= to_std_logic(aluin.invalid_op = '0' and aluin.itlbmiss='0');
 			jumpout.jump_target <= rout.excv;
 		else
 			jumpout.invalid_op <= '0';
@@ -128,6 +129,10 @@ begin
 		end if;
 				
 		jumpout.epc <= jump_target;
+		if aluin.itlbmiss = '1' then
+			jumpout.epc <= aluin.lastpc;
+		end if;
+		jumpout.badva <= aluin.pc;
 		jumpout.ipend <= ipend;
 		jumpout.wbr_complete <= aluin.wbr_complete;
 		jumpout.wbr_data <= aluin.wbr_data;

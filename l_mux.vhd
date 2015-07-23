@@ -54,9 +54,11 @@ begin
 		lout.epc <= dmuxout.epc;
 		lout.ipend <= dmuxout.ipend;
 		lout.do_int <= dmuxout.do_int;
+		lout.itlbmiss <= dmuxout.itlbmiss;
 		lout.invalid_op <= dmuxout.invalid_op;
 		lout.rfe <= dmuxout.rfe;
 		lout.mtmul <= dmuxout.mtmul;
+		lout.badva <= dmuxout.badva;
 
 		--Valid here really mean reg write
 		if dmuxout.reg_store = '1' or (dmuxout.store_cond = '1' and dmuxout.met = '1') then

@@ -174,6 +174,7 @@ package octagon_types is
 		imemadr			: std_logic_vector(7 downto 0);
 		imemval			: std_logic_vector(31 downto 0);
 		imemwe			: std_logic;
+		misstid			: std_logic_vector(2 downto 0);
 	end record;
 	
 	type dcfetchin_type is record
@@ -209,6 +210,7 @@ package octagon_types is
 		exc				: std_logic;
 		sv					: std_logic;
 		ibuf_match		: std_logic;
+		lastpc			: std_logic_vector(31 downto 0);
 	end record;
 	
 	type dcfetchout_type is record
@@ -292,6 +294,8 @@ package octagon_types is
 		wbr_complete 	: std_logic;
 		wbr_data			: std_logic_vector(31 downto 0);
 		mtmul				: std_logic;
+		itlbmiss			: std_logic;
+		badva				: std_logic_vector(31 downto 0);
 	end record;
 	
 	type shift_type is record
@@ -479,6 +483,9 @@ package octagon_types is
 		mtmul				: std_logic;
 		invalid_op		: std_logic;
 		ll				   : std_logic;
+		itlbmiss			: std_logic;
+		lastpc			: std_logic_vector(31 downto 0);
+		tlback			: std_logic;
 	end record;
 	
 	type wbmoutsig_type is record
@@ -549,6 +556,8 @@ package octagon_types is
 		wbr_complete 	: std_logic;
 		wbr_data			: std_logic_vector(31 downto 0);
 		mtmul				: std_logic;
+		itlbmiss			: std_logic;
+		badva				: std_logic_vector(31 downto 0);
 	end record;
 	
 	type lmuxout_type is record
@@ -570,6 +579,8 @@ package octagon_types is
 		wbr_data			: std_logic_vector(31 downto 0);
 		mtmul				: std_logic;
 		be					: std_logic_vector(3 downto 0);
+		itlbmiss			: std_logic;
+		badva				: std_logic_vector(31 downto 0);
 	end record;
 	
 	type dcmemin_type is record
@@ -604,6 +615,8 @@ package octagon_types is
 		data				: std_logic_vector(31 downto 0);
 		restarts			: std_logic_vector(7 downto 0);
 		ireqtlb			: std_logic;
+		tlbmiss			: std_logic;
+		misstid			: std_logic_vector(2 downto 0);
 	end record;
 	
 	type ictlin_type is record
@@ -618,6 +631,7 @@ package octagon_types is
 		tlbasid			: std_logic_vector(3 downto 0);
 		tlbperm			: std_logic_vector(2 downto 0);
 		tlbphys			: std_logic_vector(IM_BITS-1 downto 12);
+		missack			: std_logic;
 	end record;
 	
 	

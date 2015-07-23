@@ -46,7 +46,7 @@ architecture Behavioral of icontrol is
 
 type cmd_type is (cmd_boot, cmd_wait, cmd_tagwait, cmd_tagcheck, cmd_restart, 
 						cmd_transfer_data, cmd_update_tag, cmd_delay1, cmd_delay2,
-						cmd_tlb_miss, cmd_wait_data);
+						cmd_tlb_miss, cmd_wait_data, cmd_miss_wait);
 
 signal cmd_state : cmd_type := cmd_boot;
 signal prevcmdstate : cmd_type := cmd_wait;
@@ -111,6 +111,8 @@ begin
 		iout.tagadr <= icfifo_dout(IM_BITS-1+4 downto 6);
 		iout.tagidx <= std_logic_vector(nextidx);
 		iout.sv <= icfifo_sv;
+		iout.tlbmiss <= '0';
+		iout.misstid <= icfifo_tid;
 			
 		if cmd_state = cmd_boot then
 			cmd_state <= cmd_wait;
@@ -137,7 +139,11 @@ begin
 				end if;
 			end if;
 		elsif cmd_state = cmd_tlb_miss then
-			--TODO: implement me
+			iout.tlbmiss <= '1';
+			if iin.missack = '1' then
+				cmd_state <= cmd_delay1;
+				icfifo_rd <= '1';
+			end if;
 		elsif cmd_state = cmd_wait_data then
 			if iin.mcb_empty = '0' then
 				cmd_state <= cmd_transfer_data;
@@ -209,6 +215,7 @@ begin
 		iout.mcb_rden <= '0';
 		iout.tag_wr <= '0';
 		cmd_state <= cmd_boot;
+		iout.tlbmiss <= '0';
 	end if;
 end process;
 
