@@ -128,6 +128,9 @@ begin
 			dcout.tagphys <= icfifo_dout(IM_BITS-1 downto 10);
 		end if;
 		dcout.tagadr <= icfifo_asid & icfifo_dout(IM_BITS-1 downto 6);
+		
+		dcout.tlbmiss <= '0';
+		dcout.misstid <= icfifo_tid;
 
 		
 		--Calculate non-cached bit
@@ -171,7 +174,11 @@ begin
 				cmd_state <= cmd_restart;				
 			end if;
 		elsif cmd_state = cmd_tlb_miss then
-			--TODO: throw exception!!!!
+			dcout.tlbmiss <= '1';
+			if dcin.missack = '1' then
+				cmd_state <= cmd_delay1;
+				icfifo_rd <= '1';
+			end if;
 		elsif cmd_state = cmd_readtag then
 			cmd_state <= cmd_invtag;
 		elsif cmd_state = cmd_invtag then
@@ -323,6 +330,7 @@ begin
 		dcout.clean <= '0';
 		dcout.memwe <= '0';
 		dcout.tag_wr <= '0';
+		dcout.tlbmiss <= '0';
 		cmd_state <= cmd_boot;
 		wcount <= (others => '0');
 	end if;

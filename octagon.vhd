@@ -176,7 +176,7 @@ ictlin.tlbhit <= tlbout.hit;
 ictlin.tlbasid <= tlbout.asid;
 ictlin.tlbperm <= tlbout.perm;
 ictlin.tlbphys <= tlbout.phys;
-ictlin.missack <= alu2out.tlback;
+ictlin.missack <= alu2out.itlback;
 
 tlbin.ireq <= ictlout.ireqtlb;
 tlbin.dreq <= dctlout.dreqtlb;
@@ -215,6 +215,7 @@ dctlin.tlbasid <= tlbout.asid;
 dctlin.tlbperm <= tlbout.perm;
 dctlin.tlbphys <= tlbout.phys;
 dctlin.ireqtlb <= ictlout.ireqtlb;
+dctlin.missack <= alu2out.dtlback;
 
 dcin.adr <= alu1out.memadr;
 dcin.tid <= alu1out.tid;
@@ -281,7 +282,7 @@ wbreader : entity work.wbreader port map(clk,wbrin,decout,wbrout);
 
 alu1 : entity work.alu1 port map(clk,alu1in,alu1out);			--6
 
-alu2 : entity work.alu2 port map(clk,alu1out,alu2out,ictlout,icout);	--7
+alu2 : entity work.alu2 port map(clk,alu1out,alu2out,ictlout,dctlout,icout);	--7
 dc_fetch : entity work.dc_fetch port map(clk,dcin,dcout);
 
 jump : entity work.jump port map(clk,alu2out,int,dcout,wbmout,rstoreout,jumpout);	--8

@@ -295,6 +295,7 @@ package octagon_types is
 		wbr_data			: std_logic_vector(31 downto 0);
 		mtmul				: std_logic;
 		itlbmiss			: std_logic;
+		dtlbmiss			: std_logic;
 		badva				: std_logic_vector(31 downto 0);
 	end record;
 	
@@ -484,8 +485,10 @@ package octagon_types is
 		invalid_op		: std_logic;
 		ll				   : std_logic;
 		itlbmiss			: std_logic;
+		dtlbmiss			: std_logic;
 		lastpc			: std_logic_vector(31 downto 0);
-		tlback			: std_logic;
+		itlback			: std_logic;
+		dtlback			: std_logic;
 	end record;
 	
 	type wbmoutsig_type is record
@@ -556,6 +559,7 @@ package octagon_types is
 		wbr_complete 	: std_logic;
 		wbr_data			: std_logic_vector(31 downto 0);
 		mtmul				: std_logic;
+		dtlbmiss			: std_logic;
 		itlbmiss			: std_logic;
 		badva				: std_logic_vector(31 downto 0);
 	end record;
@@ -580,6 +584,7 @@ package octagon_types is
 		mtmul				: std_logic;
 		be					: std_logic_vector(3 downto 0);
 		itlbmiss			: std_logic;
+		dtlbmiss			: std_logic;
 		badva				: std_logic_vector(31 downto 0);
 	end record;
 	
@@ -656,6 +661,8 @@ package octagon_types is
 		mntn_restart	: std_logic;
 		mntn_tid			: std_logic_vector(2 downto 0);
 		dreqtlb			: std_logic;
+		tlbmiss			: std_logic;
+		misstid			: std_logic_vector(2 downto 0);
 	end record;
 	
 	type dctlin_type is record
@@ -672,6 +679,7 @@ package octagon_types is
 		tlbperm			: std_logic_vector(2 downto 0);
 		tlbphys			: std_logic_vector(IM_BITS-1 downto 12);
 		ireqtlb			: std_logic;
+		missack			: std_logic;
 	end record;
 	
 end package;

@@ -55,6 +55,7 @@ begin
 		lout.ipend <= dmuxout.ipend;
 		lout.do_int <= dmuxout.do_int;
 		lout.itlbmiss <= dmuxout.itlbmiss;
+		lout.dtlbmiss <= dmuxout.dtlbmiss;
 		lout.invalid_op <= dmuxout.invalid_op;
 		lout.rfe <= dmuxout.rfe;
 		lout.mtmul <= dmuxout.mtmul;

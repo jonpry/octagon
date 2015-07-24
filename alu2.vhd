@@ -38,6 +38,7 @@ entity alu2 is
 		aluin : in alu1out_type;
 		aluout : out alu2out_type;
 		ictlout : in ictlout_type;
+		dctlout : in dctlout_type;
 		ifout : in icfetchout_type
 	);
 end alu2;
@@ -84,12 +85,18 @@ begin
 	
 	
 		aluout.itlbmiss <= '0';
-		aluout.tlback <= '0';
+		aluout.itlback <= '0';
+		aluout.dtlback <= '0';
 		aluout.lastpc <= ifout.lastpc;
 	
 		if ictlout.tlbmiss = '1' and ictlout.misstid = aluin.tid then
 			aluout.itlbmiss <= '1';
-			aluout.tlback <= '1';
+			aluout.itlback <= '1';
+		end if;
+		
+		if dctlout.tlbmiss = '1' and dctlout.misstid = aluin.tid then
+			aluout.dtlbmiss <= '1';
+			aluout.dtlback <= '1';
 		end if;
 		
 	end if;

@@ -77,6 +77,7 @@ begin
 		muxout.rfe <= jumpout.rfe;
 		muxout.mtmul <= jumpout.mtmul;
 		muxout.itlbmiss <= jumpout.itlbmiss;
+		muxout.dtlbmiss <= jumpout.dtlbmiss;
 		muxout.badva <= jumpout.badva;
 
 		muxout.data <= memout.data(to_integer(unsigned(memout.sel)));

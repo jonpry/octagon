@@ -69,7 +69,9 @@ begin
 			if lmuxout.do_int = '1' then
 				rout.cop0.ecode <= X"1";
 			elsif lmuxout.itlbmiss = '1' then
-				rout.cop0.ecode <= X"3";
+				rout.cop0.ecode <= X"4";
+			elsif lmuxout.dtlbmiss = '1' then
+				rout.cop0.ecode <= X"5";
 			else
 				--Invalid opcode
 				rout.cop0.ecode <= X"2";

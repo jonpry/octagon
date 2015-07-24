@@ -90,8 +90,8 @@ begin
 	
 		--this is a miss, need to handle it
 		if selin = "00000000" then
-			muxout.valid <= '0';
-			muxout.imiss <= fetchout.valid;
+			muxout.valid <= to_std_logic(fetchout.valid = '1' and fetchout.ibuf_match = '1');
+			muxout.imiss <= to_std_logic(fetchout.valid = '1' and fetchout.ibuf_match = '0');
 		else
 			muxout.imiss <= '0';
 			muxout.valid <= fetchout.valid;
