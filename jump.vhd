@@ -122,7 +122,7 @@ begin
 		if ipend /= X"00" or aluin.invalid_op = '1' or aluin.itlbmiss = '1' or aluin.dtlbmiss = '1' then
 			--TODO: handle OVF
 			jumpout.invalid_op <= aluin.invalid_op;
-			jumpout.do_int <= to_std_logic(aluin.invalid_op = '0' and aluin.itlbmiss='0');
+			jumpout.do_int <= to_std_logic(aluin.invalid_op = '0' and aluin.itlbmiss='0' and aluin.dtlbmiss='0');
 			jumpout.jump_target <= rout.excv;
 		else
 			jumpout.invalid_op <= '0';

@@ -85,6 +85,7 @@ begin
 	
 	
 		aluout.itlbmiss <= '0';
+		aluout.dtlbmiss <= '0';
 		aluout.itlback <= '0';
 		aluout.dtlback <= '0';
 		aluout.lastpc <= ifout.lastpc;
