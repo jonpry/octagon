@@ -105,7 +105,7 @@ begin
 		jumpout.cvalid  <= to_std_logic((aluin.valid = '1' and wbout.stall = '0' 
 									  and dcout.dcache_op = '0' and (aluin.lnc = '0' or nc = '0')) or 
 									aluin.itlbmiss = '1' or aluin.dtlbmiss = '1');
-		jumpout.abort <= to_std_logic((miss = '1' or (aluin.lnc = '1' and nc = '1'))and aluin.memop = '1');		
+		jumpout.abort <= to_std_logic((miss = '1' or (aluin.lnc = '1' and nc = '1')) and aluin.memop = '1' and aluin.dtlbmiss = '0');		
 		jumpout.lnc <= aluin.lnc;
 --	0 if	1 1 0							 
 --	0 if  1 1 1

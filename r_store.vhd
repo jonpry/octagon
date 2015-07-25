@@ -63,7 +63,7 @@ process(clk)
 	variable status_wr : std_logic;
 begin
 	if clk='1' and clk'Event then
-		if lmuxout.do_int = '1' or lmuxout.invalid_op = '1' or lmuxout.itlbmiss = '1' then
+		if lmuxout.do_int = '1' or lmuxout.invalid_op = '1' or lmuxout.itlbmiss = '1' or lmuxout.dtlbmiss = '1' then
 			rout.cop0.epc <= (31 downto IM_BITS => '0') & lmuxout.epc;
 			rout.cop0.ipend <= lmuxout.ipend;
 			if lmuxout.do_int = '1' then
